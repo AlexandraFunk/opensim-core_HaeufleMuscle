@@ -28,3 +28,9 @@ dependencies/*
 # MAC File System files
 .DS_Store
 
+
+# Ignore Visual Studio hidden folders
+/.vs*
+
+# Ignore out folder
+/out*
