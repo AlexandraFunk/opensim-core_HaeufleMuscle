@@ -83,10 +83,10 @@ MuscleRockenfeller::MuscleRockenfeller(const std::string &name, double maxIsomet
 void MuscleRockenfeller::constructProperties()
 {
     setAuthors("Maria Hammer, Mike Spahr");
-    constructProperty_time_constant_hatze(0.1); // TODO realistic values
-    constructProperty_nue(0.1); // TODO realistic values
-    constructProperty_roh_0(0.1); // TODO realistic values
-    constructProperty_gamma_C(0.1); // TODO realistic values
+    constructProperty_time_constant_hatze(11.3); // TODO realistic values
+    constructProperty_nue(3); // TODO realistic values
+    constructProperty_roh_0(5); // TODO realistic values
+    constructProperty_gamma_C(1); // TODO realistic values
     constructProperty_default_normalized_calcium_concentration(0.1); // TODO realistic values
 }
 

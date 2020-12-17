@@ -117,10 +117,11 @@ int main()
         // MUSCLE FORCES
 
         // Create two new muscles
-        double maxIsometricForce = 1000.0, optimalFiberLength = 0.2, 
+        // based on M_elbow_flexor_l from datamuscles_alldetail from calcman
+        double maxIsometricForce = 1420, optimalFiberLength = 0.2127, 
                tendonSlackLength = 0.1,    pennationAngle = 0.0,  
-               time_constant_hatze = 0.30, nue = 0.10, roh_0 = 0.1,
-               gamma_C = 0.1;
+               time_constant_hatze = 11.3, nue = 3, roh_0 = 5.27,
+               gamma_C = 1.37;
 
         // Rockenfeller muscle (Millard2012EquilibriumMuscle with fatigue)
         MuscleRockenfeller* Rockenfeller = new MuscleRockenfeller("Rockenfeller",
