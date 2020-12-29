@@ -23,20 +23,20 @@ excitation = 1; % or 1 ???
 
 % get also the data from the ***states.sto file
 % read sto file:
-path_to_sto_file = "D:\Dokumente\Hiwi_Job\08_OpenSimCode\opensim-core_HaeufleMuscle\OpenSim\Examples\RockenfellerMillardMuscle\builddebug\tugOfWar_fatigue_states.sto";
-
+relative_path_to_sto_file = "..\Examples\TestMillardvsOwnRockenfeller\build\tugOfWar_fatigue_states.sto";
+full_path_to_sto_file = fullfile(pwd, relative_path_to_sto_file);
 
 %% Read .sto file to matlab:
 % open file
-stofile = fopen(path_to_sto_file,'r');
+stofile = fopen(full_path_to_sto_file,'r');
 % skip first 12 lines
 for k=1:9
     fgets(stofile);
 end
 % get the data for time / Rockenfeller / original model 
-data = readmatrix(path_to_sto_file, 'FileType', 'text');
+data = readmatrix(full_path_to_sto_file, 'FileType', 'text');
 time = data(:,1);
-a_rockenfeller_cpp = data(:,14); % TODO check which activation value this is!! seems to be calcium concentration!!
+gamma_rockenfeller_cpp = data(:,14); % TODO check which activation value this is!! seems to be calcium concentration!!
 lce_rockenfeller_cpp = data(:,15);
 % a_millard_cpp = data(:,16);
 % lce_millard_cpp = data(:,17);
