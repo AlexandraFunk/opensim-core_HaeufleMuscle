@@ -51,11 +51,13 @@
 #include "FiberCompressiveForceCosPennationCurve.h"
 #include "MuscleFirstOrderActivationDynamicModel.h"
 #include "MuscleSecondOrderActivationDynamicModel.h"
+#include "RockenfellerFirstOrderActivationDynamicModel.h"
 
 #include "MuscleFixedWidthPennationModel.h"
 
 #include "Millard2012EquilibriumMuscle.h"
 #include "Millard2012AccelerationMuscle.h"
+#include "Millard2012RockenfellerMuscle.h"
 
 // Awaiting new component architecture that supports subcomponents with states.
 //#include "ConstantMuscleActivation.h"
@@ -100,10 +102,12 @@ OSIMACTUATORS_API void RegisterTypes_osimActuators()
     Object::RegisterType( FiberCompressiveForceCosPennationCurve() );
 
     Object::RegisterType(MuscleFirstOrderActivationDynamicModel());
+    Object::RegisterType(RockenfellerFirstOrderActivationDynamicModel());
     Object::RegisterType(MuscleFixedWidthPennationModel());
 
     Object::RegisterType(Millard2012EquilibriumMuscle());
     Object::RegisterType(Millard2012AccelerationMuscle());
+    Object::RegisterType(Millard2012RockenfellerMuscle());
 
     //Object::RegisterType( ConstantMuscleActivation() );
     //Object::RegisterType( ZerothOrderMuscleActivationDynamics() );

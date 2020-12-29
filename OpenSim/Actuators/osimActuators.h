@@ -38,6 +38,7 @@
 #include "RigidTendonMuscle.h"
 #include "Millard2012EquilibriumMuscle.h"
 #include "Millard2012AccelerationMuscle.h"
+#include "Millard2012RockenfellerMuscle.h"
 
 #include "McKibbenActuator.h"
 
