@@ -23,7 +23,7 @@ excitation = 1; % or 1 ???
 
 % get also the data from the ***states.sto file
 % read sto file:
-relative_path_to_sto_file = "..\Examples\TestMillardvsOwnRockenfeller\build\tugOfWar_fatigue_states.sto";
+relative_path_to_sto_file = "..\Examples\TestOwnRockenfellerMuscle\build\RockenfellerActivationDynamics_states.sto";
 full_path_to_sto_file = fullfile(pwd, relative_path_to_sto_file);
 
 %% Read .sto file to matlab:
@@ -70,5 +70,12 @@ end
 
 
 %% output relevant data
-
+figure;
+title("Ca2+ concentration calculated with Matlab and C++");
+plot(time,gamma_rockenfeller_matlab);
+hold on;
+plot(time, gamma_rockenfeller_cpp);
+legend("Ca2+_{Matlab}", "Ca2+_{C++}");
+ylabel("Normalized Ca2+ concentration [-]");
+xlabel("Simulation time [s]");
 
