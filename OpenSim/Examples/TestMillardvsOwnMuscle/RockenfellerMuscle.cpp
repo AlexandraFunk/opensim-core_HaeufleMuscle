@@ -1,31 +1,29 @@
 /* -------------------------------------------------------------------------- *
- *                 OpenSim:  Millard2012RockenfellerMuscle.cpp                 *
+ *                 OpenSim:  RockenfellerMuscle.cpp                 *
  * -------------------------------------------------------------------------- *
 */
-#include "Millard2012RockenfellerMuscle.h"
+#include "RockenfellerMuscle.h"
 #include <OpenSim/Simulation/Model/Model.h>
 
 using namespace std;
 using namespace OpenSim;
 using namespace SimTK;
 
-const string Millard2012RockenfellerMuscle::
+const string RockenfellerMuscle::
     STATE_CALCIUM_CONCENTRATION_NAME = "calcium_concentration";
-const string Millard2012RockenfellerMuscle::
+const string RockenfellerMuscle::
     STATE_FIBER_LENGTH_NAME = "fiber_length";
 const double MIN_NONZERO_DAMPING_COEFFICIENT = 0.001;
 
 //==============================================================================
 // PROPERTIES
 //==============================================================================
-void Millard2012RockenfellerMuscle::setNull()
+void RockenfellerMuscle::setNull()
 {   setAuthors("Maria Hammer, Mike Spahr"); }
 
-void Millard2012RockenfellerMuscle::constructProperties()
+void RockenfellerMuscle::constructProperties()
 {
     constructProperty_fiber_damping(0.1); //damped model used by default
-
-    constructProperty_default_fiber_length(getOptimalFiberLength());
     
     constructProperty_default_gamma(0);
     constructProperty_time_constant_hatze(11.3);
@@ -45,7 +43,7 @@ void Millard2012RockenfellerMuscle::constructProperties()
     setMinControl(get_minimum_gamma());
 }
 
-void Millard2012RockenfellerMuscle::extendFinalizeFromProperties()
+void RockenfellerMuscle::extendFinalizeFromProperties()
 {
     Super::extendFinalizeFromProperties();
 
@@ -159,8 +157,8 @@ void Millard2012RockenfellerMuscle::extendFinalizeFromProperties()
     // Handle invalid properties as above for pennation model.
     if (!get_ignore_activation_dynamics()) {
         auto& actMdl =
-            updMemberSubcomponent<RockenfellerFirstOrderActivationDynamicModel>(actMdlIdx);
-        RockenfellerFirstOrderActivationDynamicModel actMdlCopy(actMdl);
+            updMemberSubcomponent<RockenfellerActivationDynamic>(actMdlIdx);
+        RockenfellerActivationDynamic actMdlCopy(actMdl);
         actMdl.set_time_constant_hatze(get_time_constant_hatze());
         actMdl.set_nue(get_nue());
         actMdl.set_roh_0(get_roh_0());
@@ -191,15 +189,15 @@ void Millard2012RockenfellerMuscle::extendFinalizeFromProperties()
 //==============================================================================
 // CONSTRUCTORS
 //==============================================================================
-Millard2012RockenfellerMuscle::Millard2012RockenfellerMuscle()
+RockenfellerMuscle::RockenfellerMuscle()
 {
     setNull();
     constructProperties();
 }
 
-Millard2012RockenfellerMuscle::Millard2012RockenfellerMuscle(
+RockenfellerMuscle::RockenfellerMuscle(
 const std::string &aName, double aMaxIsometricForce, double aOptimalFiberLength,
-double aTendonSlackLength, double aPennationAngle, 
+double aTendonSlackLength, double aPennationAngle, double aDefaultGamma, 
 double aTimeConstantHatze, double aNue, double aRoh0, double aGammaC, 
 double aMinimumGamma, double aKuh0)
 {
@@ -211,6 +209,7 @@ double aMinimumGamma, double aKuh0)
     setOptimalFiberLength(aOptimalFiberLength);
     setTendonSlackLength(aTendonSlackLength);
     setPennationAngleAtOptimalFiberLength(aPennationAngle);
+    setDefaultGamma(aDefaultGamma);
     setTimeConstantHatze(aTimeConstantHatze);
     setNue(aNue);
     setRoh0(aRoh0);
@@ -222,103 +221,103 @@ double aMinimumGamma, double aKuh0)
 //==============================================================================
 // GET METHODS
 //==============================================================================
-bool Millard2012RockenfellerMuscle::getUseFiberDamping() const
+bool RockenfellerMuscle::getUseFiberDamping() const
 {   return use_fiber_damping; }
-double Millard2012RockenfellerMuscle::getFiberDamping() const
+double RockenfellerMuscle::getFiberDamping() const
 {   return get_fiber_damping(); }
-double Millard2012RockenfellerMuscle::getDefaultGamma() const
+double RockenfellerMuscle::getDefaultGamma() const
 {   return get_default_gamma(); }
-double Millard2012RockenfellerMuscle::getDefaultFiberLength() const
+double RockenfellerMuscle::getDefaultFiberLength() const
 {   return get_default_fiber_length(); }
 
-double Millard2012RockenfellerMuscle::getTimeConstantHatze() const
+double RockenfellerMuscle::getTimeConstantHatze() const
 {   return get_time_constant_hatze(); }
-double Millard2012RockenfellerMuscle::getNue() const
+double RockenfellerMuscle::getNue() const
 {   return get_nue(); }
-double Millard2012RockenfellerMuscle::getRoh0() const
+double RockenfellerMuscle::getRoh0() const
 {   return get_roh_0(); }
-double Millard2012RockenfellerMuscle::getGammaC() const
+double RockenfellerMuscle::getGammaC() const
 {   return get_gamma_C(); }
-double Millard2012RockenfellerMuscle::getMinimumGamma() const
+double RockenfellerMuscle::getMinimumGamma() const
 {   return get_minimum_gamma(); }
-double Millard2012RockenfellerMuscle::getMinimumActivation() const
+double RockenfellerMuscle::getMinimumActivation() const
 {   return get_minimum_activation(); }
 
-const ActiveForceLengthCurve& Millard2012RockenfellerMuscle::
+const ActiveForceLengthCurve& RockenfellerMuscle::
 getActiveForceLengthCurve() const
 {   return get_ActiveForceLengthCurve(); }
 
-const ForceVelocityCurve& Millard2012RockenfellerMuscle::
+const ForceVelocityCurve& RockenfellerMuscle::
 getForceVelocityCurve() const
 {   return get_ForceVelocityCurve(); }
 
-const FiberForceLengthCurve& Millard2012RockenfellerMuscle::
+const FiberForceLengthCurve& RockenfellerMuscle::
 getFiberForceLengthCurve() const
 {   return get_FiberForceLengthCurve(); }
 
-const TendonForceLengthCurve& Millard2012RockenfellerMuscle::
+const TendonForceLengthCurve& RockenfellerMuscle::
 getTendonForceLengthCurve() const
 {   return get_TendonForceLengthCurve(); }
 
-const MuscleFixedWidthPennationModel& Millard2012RockenfellerMuscle::
+const MuscleFixedWidthPennationModel& RockenfellerMuscle::
 getPennationModel() const
 { return getMemberSubcomponent<MuscleFixedWidthPennationModel>(penMdlIdx); }
 
-const RockenfellerFirstOrderActivationDynamicModel& Millard2012RockenfellerMuscle::
+const RockenfellerActivationDynamic& RockenfellerMuscle::
 getActivationModel() const
-{ return getMemberSubcomponent<RockenfellerFirstOrderActivationDynamicModel>(actMdlIdx); }
+{ return getMemberSubcomponent<RockenfellerActivationDynamic>(actMdlIdx); }
 
-double Millard2012RockenfellerMuscle::getMinimumFiberLength() const
+double RockenfellerMuscle::getMinimumFiberLength() const
 {   return m_minimumFiberLength; }
-double Millard2012RockenfellerMuscle::getMinimumFiberLengthAlongTendon() const
+double RockenfellerMuscle::getMinimumFiberLengthAlongTendon() const
 {   return m_minimumFiberLengthAlongTendon; }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 getTendonForceMultiplier(SimTK::State& s) const
 {   return getMuscleDynamicsInfo(s).normTendonForce; }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 getFiberStiffnessAlongTendon(const SimTK::State& s) const
 { return getMuscleDynamicsInfo(s).fiberStiffnessAlongTendon; }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 getFiberVelocity(const SimTK::State& s) const
 {   return getFiberVelocityInfo(s).fiberVelocity; }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 getPassiveFiberElasticForce(const SimTK::State& s) const
 {
     return getMuscleDynamicsInfo(s).userDefinedDynamicsExtras[0];
 }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 getPassiveFiberElasticForceAlongTendon(const SimTK::State& s) const
 {
     return getMuscleDynamicsInfo(s).userDefinedDynamicsExtras[0] *
            getMuscleLengthInfo(s).cosPennationAngle;
 }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 getPassiveFiberDampingForce(const SimTK::State& s) const
 {
     return getMuscleDynamicsInfo(s).userDefinedDynamicsExtras[1];
 }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 getPassiveFiberDampingForceAlongTendon(const SimTK::State& s) const
 {
     return getMuscleDynamicsInfo(s).userDefinedDynamicsExtras[1] *
            getMuscleLengthInfo(s).cosPennationAngle;
 }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 getCalciumDerivative(const SimTK::State& s) const
 {
     if (get_ignore_activation_dynamics())
         return 0.0;
 
-    return getActivationModel().calcDerivative(
-        getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION_NAME),getExcitation(s));
+    return getActivationModel().calcDerivative(getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION_NAME),
+                                               getExcitation(s));
 }
 
 
@@ -326,7 +325,7 @@ getCalciumDerivative(const SimTK::State& s) const
 //==============================================================================
 // SET METHODS
 //==============================================================================
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 setMuscleConfiguration(bool ignoreTendonCompliance,
                        bool ignoreActivationDynamics,
                        double dampingCoefficient)
@@ -337,78 +336,62 @@ setMuscleConfiguration(bool ignoreTendonCompliance,
     finalizeFromProperties();
 }
 
-void Millard2012RockenfellerMuscle::setFiberDamping(double dampingCoefficient)
+void RockenfellerMuscle::setFiberDamping(double dampingCoefficient)
 {   set_fiber_damping(dampingCoefficient); }
 
-void Millard2012RockenfellerMuscle::setDefaultGamma(double gamma)
+void RockenfellerMuscle::setDefaultGamma(double gamma)
 {   set_default_gamma(gamma); }
 
-void Millard2012RockenfellerMuscle::setDefaultFiberLength(double fiberLength)
+void RockenfellerMuscle::setDefaultFiberLength(double fiberLength)
 {   set_default_fiber_length(fiberLength); }
 
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 setTimeConstantHatze(double time_constant_hatze)
 {   set_time_constant_hatze(time_constant_hatze); }
 
-void Millard2012RockenfellerMuscle::setNue(double nue)
+void RockenfellerMuscle::setNue(double nue)
 {   set_nue(nue); }
 
-void Millard2012RockenfellerMuscle::setRoh0(double roh0)
+void RockenfellerMuscle::setRoh0(double roh0)
 {   set_roh_0(roh0); }
 
-void Millard2012RockenfellerMuscle::setGammaC(double gammaC)
+void RockenfellerMuscle::setGammaC(double gammaC)
 {   set_gamma_C(gammaC); }
 
-void Millard2012RockenfellerMuscle::setMinimumGamma(double minimumGamma)
+void RockenfellerMuscle::setMinimumGamma(double minimumGamma)
 {
     set_minimum_gamma(minimumGamma);
 }
 
-void Millard2012RockenfellerMuscle::setMinimumActivation(double minimumActivation)
+void RockenfellerMuscle::setMinimumActivation(double minimumActivation)
 {   set_minimum_activation(minimumActivation); }
 
 
-void Millard2012RockenfellerMuscle::setActivation(
-        SimTK::State& s, double activation) const 
-{
+void RockenfellerMuscle::setActivation(
+        SimTK::State& s, double activation) const {
     std::string msg = "Function should never be called since Activation is "
                       "calculated in a different way!";
     throw OpenSim::Exception(msg);
 }
 
-void Millard2012RockenfellerMuscle::setGamma(
-    SimTK::State& s, double gamma) const 
-{
-    if (get_ignore_activation_dynamics()) {
-        SimTK::Vector& controls(_model->updControls(s));
-        setControls(SimTK::Vector(1, gamma), controls);
-        _model->setControls(s, controls);
-    } else {
-        setStateVariableValue(s, STATE_CALCIUM_CONCENTRATION_NAME,
-                getActivationModel().clampGamma(gamma));
-    }
-    markCacheVariableInvalid(s, "velInfo");
-    markCacheVariableInvalid(s, "dynamicsInfo");
 
-}
-
-void Millard2012RockenfellerMuscle::setActiveForceLengthCurve(
+void RockenfellerMuscle::setActiveForceLengthCurve(
 ActiveForceLengthCurve& aActiveForceLengthCurve)
 {   set_ActiveForceLengthCurve(aActiveForceLengthCurve); }
 
-void Millard2012RockenfellerMuscle::setForceVelocityCurve(
+void RockenfellerMuscle::setForceVelocityCurve(
 ForceVelocityCurve& aForceVelocityCurve)
 {   set_ForceVelocityCurve(aForceVelocityCurve); }
 
-void Millard2012RockenfellerMuscle::setFiberForceLengthCurve(
+void RockenfellerMuscle::setFiberForceLengthCurve(
 FiberForceLengthCurve& aFiberForceLengthCurve)
 {   set_FiberForceLengthCurve(aFiberForceLengthCurve); }
 
-void Millard2012RockenfellerMuscle::setTendonForceLengthCurve(
+void RockenfellerMuscle::setTendonForceLengthCurve(
 TendonForceLengthCurve& aTendonForceLengthCurve)
 {   set_TendonForceLengthCurve(aTendonForceLengthCurve); }
 
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 setFiberLength(SimTK::State& s, double fiberLength) const
 {
     if (!get_ignore_tendon_compliance()) {
@@ -423,7 +406,7 @@ setFiberLength(SimTK::State& s, double fiberLength) const
 //==============================================================================
 // MUSCLE.H INTERFACE
 //==============================================================================
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 computeActuation(const SimTK::State& s) const
 {
     const MuscleDynamicsInfo& mdi = getMuscleDynamicsInfo(s);
@@ -432,7 +415,7 @@ computeActuation(const SimTK::State& s) const
 }
 
 
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 computeFiberEquilibrium(SimTK::State& s, bool solveForVelocity) const
 {
     if(get_ignore_tendon_compliance()) {                    // rigid tendon
@@ -469,7 +452,7 @@ computeFiberEquilibrium(SimTK::State& s, bool solveForVelocity) const
             break;
 
         case StatusFromEstimateMuscleFiberState::Warning_FiberAtLowerBound:
-            printf("\n\nMillard2012RockenfellerMuscle static solution:"
+            printf("\n\nRockenfellerMuscle static solution:"
                    " %s is at its minimum fiber length of %f\n",
                    getName().c_str(), result.second["fiber_length"]);
             setActuation(s, result.second["tendon_force"]);
@@ -497,7 +480,7 @@ computeFiberEquilibrium(SimTK::State& s, bool solveForVelocity) const
 //==============================================================================
 // SCALING
 //==============================================================================
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 extendPostScale(const SimTK::State& s, const ScaleSet& scaleSet)
 {
     Super::extendPostScale(s, scaleSet);
@@ -517,7 +500,7 @@ extendPostScale(const SimTK::State& s, const ScaleSet& scaleSet)
 //==============================================================================
 // MUSCLE INTERFACE REQUIREMENTS -- MUSCLE LENGTH INFO
 //==============================================================================
-void Millard2012RockenfellerMuscle::calcMuscleLengthInfo(const SimTK::State& s,
+void RockenfellerMuscle::calcMuscleLengthInfo(const SimTK::State& s,
     MuscleLengthInfo& mli) const
 {
     // Get musculotendon actuator properties.
@@ -561,7 +544,7 @@ void Millard2012RockenfellerMuscle::calcMuscleLengthInfo(const SimTK::State& s,
             falCurve.calcValue(mli.normFiberLength);
 
     } catch(const std::exception &x) {
-        std::string msg = "Exception caught in Millard2012RockenfellerMuscle::"
+        std::string msg = "Exception caught in RockenfellerMuscle::"
                           "calcMuscleLengthInfo from " + getName() + "\n"
                           + x.what();
         throw OpenSim::Exception(msg);
@@ -572,7 +555,7 @@ void Millard2012RockenfellerMuscle::calcMuscleLengthInfo(const SimTK::State& s,
 //==============================================================================
 // MUSCLE INTERFACE REQUIREMENTS -- MUSCLE POTENTIAL ENERGY INFO
 //==============================================================================
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
     calcMusclePotentialEnergyInfo(const SimTK::State& s,
         MusclePotentialEnergyInfo& mpei) const
 {
@@ -616,7 +599,7 @@ void Millard2012RockenfellerMuscle::
                                      mpei.tendonPotentialEnergy;
 
     } catch(const std::exception &x) {
-        std::string msg = "Exception caught in Millard2012RockenfellerMuscle::"
+        std::string msg = "Exception caught in RockenfellerMuscle::"
                           "calcMusclePotentialEnergyInfo from " + getName() + "\n"
                           + x.what();
         throw OpenSim::Exception(msg);
@@ -627,7 +610,7 @@ void Millard2012RockenfellerMuscle::
 //==============================================================================
 // MUSCLE INTERFACE REQUIREMENTS -- FIBER VELOCITY INFO
 //==============================================================================
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 calcFiberVelocityInfo(const SimTK::State& s, FiberVelocityInfo& fvi) const
 {
     try {
@@ -669,11 +652,9 @@ calcFiberVelocityInfo(const SimTK::State& s, FiberVelocityInfo& fvi) const
             // Elastic tendon, no damping.
             double a = SimTK::NaN;
             if(!get_ignore_activation_dynamics()) {
-                a = getActivationModel().clampActivation(
-                        getActivationModel().calculateActivation(
-                            getActivationModel().clampGamma(
-                                getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION_NAME)),
-                                getStateVariableValue(s, STATE_FIBER_LENGTH_NAME)));
+                a = getActivationModel().calculateActivation(
+                        getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION_NAME),
+                        getStateVariableValue(s, STATE_FIBER_LENGTH_NAME));
             } else {
                 a = getActivationModel().clampActivation(getControl(s));
             }
@@ -704,13 +685,9 @@ calcFiberVelocityInfo(const SimTK::State& s, FiberVelocityInfo& fvi) const
             // Elastic tendon, with damping.
             double a = SimTK::NaN;
             if(!get_ignore_activation_dynamics()) {
-                a = getActivationModel().clampActivation(
-                        getActivationModel().calculateActivation(
-                            getActivationModel().clampGamma(    
-                                getStateVariableValue(
-                                        s, STATE_CALCIUM_CONCENTRATION_NAME)),
-                                getStateVariableValue(
-                                        s, STATE_FIBER_LENGTH_NAME)));
+                a = getActivationModel().calculateActivation(
+                        getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION_NAME),
+                        getStateVariableValue(s, STATE_FIBER_LENGTH_NAME));
             } else {
                 a = getActivationModel().clampActivation(getControl(s));
             }
@@ -790,7 +767,7 @@ calcFiberVelocityInfo(const SimTK::State& s, FiberVelocityInfo& fvi) const
         fvi.userDefinedVelocityExtras[0] = fiberStateClamped;
 
     } catch(const std::exception &x) {
-        std::string msg = "Exception caught in Millard2012RockenfellerMuscle::"
+        std::string msg = "Exception caught in RockenfellerMuscle::"
                           "calcFiberVelocityInfo from " + getName() + "\n"
                            + x.what();
         throw OpenSim::Exception(msg);
@@ -800,7 +777,7 @@ calcFiberVelocityInfo(const SimTK::State& s, FiberVelocityInfo& fvi) const
 //==============================================================================
 // MUSCLE INTERFACE REQUIREMENTS -- MUSCLE DYNAMICS INFO
 //==============================================================================
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 calcMuscleDynamicsInfo(const SimTK::State& s, MuscleDynamicsInfo& mdi) const
 {
     try {
@@ -819,12 +796,9 @@ calcMuscleDynamicsInfo(const SimTK::State& s, MuscleDynamicsInfo& mdi) const
         // Compute dynamic quantities.
         double a = SimTK::NaN;
         if(!get_ignore_activation_dynamics()) {
-            a = getActivationModel().clampActivation(
-                    getActivationModel().calculateActivation(
-                        getActivationModel().clampGamma(
-                            getStateVariableValue(
-                                    s, STATE_CALCIUM_CONCENTRATION_NAME)),
-                            getStateVariableValue(s, STATE_FIBER_LENGTH_NAME)));
+            a = getActivationModel().calculateActivation(
+                getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION_NAME),
+                getStateVariableValue(s, STATE_FIBER_LENGTH_NAME));
         } else {
             a = getActivationModel().clampActivation(getControl(s));
         }
@@ -950,7 +924,7 @@ calcMuscleDynamicsInfo(const SimTK::State& s, MuscleDynamicsInfo& mdi) const
         mdi.userDefinedDynamicsExtras = dynExtras;
 
     } catch(const std::exception &x) {
-        std::string msg = "Exception caught in Millard2012RockenfellerMuscle::"
+        std::string msg = "Exception caught in RockenfellerMuscle::"
                           "calcMuscleDynamicsInfo from " + getName() + "\n"
                           + x.what();
         cerr << msg << endl;
@@ -961,12 +935,12 @@ calcMuscleDynamicsInfo(const SimTK::State& s, MuscleDynamicsInfo& mdi) const
 //==============================================================================
 // MODELCOMPONENT INTERFACE REQUIREMENTS
 //==============================================================================
-void Millard2012RockenfellerMuscle::extendConnectToModel(Model& model)
+void RockenfellerMuscle::extendConnectToModel(Model& model)
 {
     Super::extendConnectToModel(model);
 }
 
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 extendAddToSystem(SimTK::MultibodySystem& system) const
 {
     Super::extendAddToSystem(system);
@@ -979,25 +953,23 @@ extendAddToSystem(SimTK::MultibodySystem& system) const
     }
 }
 
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 extendInitStateFromProperties(SimTK::State& s) const
 {
     Super::extendInitStateFromProperties(s);
 
-    if(!get_ignore_activation_dynamics()) 
-    {
+    if(!get_ignore_activation_dynamics()) {
         setStateVariableValue(s, STATE_CALCIUM_CONCENTRATION_NAME,
                 getActivationModel().clampGamma(getDefaultGamma()));
         markCacheVariableInvalid(s,"velInfo");
         markCacheVariableInvalid(s,"dynamicsInfo");
     }
-    if(!get_ignore_tendon_compliance()) 
-    {
+    if(!get_ignore_tendon_compliance()) {
         setFiberLength(s, getDefaultFiberLength());
     }
 }
 
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
 extendSetPropertiesFromState(const SimTK::State& s)
 {
     Super::extendSetPropertiesFromState(s);
@@ -1010,7 +982,7 @@ extendSetPropertiesFromState(const SimTK::State& s)
     }
 }
 
-void Millard2012RockenfellerMuscle::
+void RockenfellerMuscle::
     computeStateVariableDerivatives(const SimTK::State& s) const
 {
     // Activation dynamics if not ignored
@@ -1037,7 +1009,7 @@ void Millard2012RockenfellerMuscle::
 //==============================================================================
 // PRIVATE METHODS
 //==============================================================================
-SimTK::Vec3 Millard2012RockenfellerMuscle::
+SimTK::Vec3 RockenfellerMuscle::
 calcDampedNormFiberVelocity(double fiso,
                             double a,
                             double fal,
@@ -1116,14 +1088,14 @@ calcDampedNormFiberVelocity(double fiso,
     return result;
 }
 
-double Millard2012RockenfellerMuscle::calcFv(double a,
+double RockenfellerMuscle::calcFv(double a,
                                             double fal,
                                             double fp,
                                             double fse,
                                             double cosphi) const
 {   return ( fse/cosphi - fp ) / (a*fal); }
 
-SimTK::Vec4 Millard2012RockenfellerMuscle::
+SimTK::Vec4 RockenfellerMuscle::
 calcFiberForce(double fiso,
                double a,
                double fal,
@@ -1145,7 +1117,7 @@ calcFiberForce(double fiso,
     return fiberF;
 }
 
-double Millard2012RockenfellerMuscle::calcActivation(double fiso,
+double RockenfellerMuscle::calcActivation(double fiso,
                                                     double ftendon,
                                                     double cosPhi,
                                                     double fal,
@@ -1164,7 +1136,7 @@ double Millard2012RockenfellerMuscle::calcActivation(double fiso,
     return activation;
 }
 
-double Millard2012RockenfellerMuscle::calcFiberStiffness(double fiso,
+double RockenfellerMuscle::calcFiberStiffness(double fiso,
                                                         double a,
                                                         double fv,
                                                         double lceN,
@@ -1180,7 +1152,7 @@ double Millard2012RockenfellerMuscle::calcFiberStiffness(double fiso,
     return  fiso * (a*Dfal_Dlce*fv + Dfpe_Dlce);
 }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 calc_DFiberForce_DNormFiberVelocity(double fiso,
                                     double a,
                                     double fal,
@@ -1192,7 +1164,7 @@ calc_DFiberForce_DNormFiberVelocity(double fiso,
                    + beta);
 }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 calc_DFiberForceAT_DFiberLength(double fiberForce,
                                 double fiberStiffness,
                                 double lce,
@@ -1210,7 +1182,7 @@ calc_DFiberForceAT_DFiberLength(double fiberForce,
     return fiberStiffness*cosPhi + fiberForce*Dcosphi_Dlce;
 }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 calc_DFiberForceAT_DFiberLengthAT(double dFmAT_d_lce,
                                   double sinPhi,
                                   double cosPhi,
@@ -1228,7 +1200,7 @@ calc_DFiberForceAT_DFiberLengthAT(double dFmAT_d_lce,
     return dFmAT_d_lce * (1.0/DlceAT_Dlce);
 }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 calc_DTendonForce_DFiberLength(double dFt_d_tl,
                                double lce,
                                double sinphi,
@@ -1246,7 +1218,7 @@ calc_DTendonForce_DFiberLength(double dFt_d_tl,
 //==============================================================================
 // PRIVATE UTILITY CLASS MEMBERS
 //==============================================================================
-bool Millard2012RockenfellerMuscle::
+bool RockenfellerMuscle::
 isFiberStateClamped(double lce, double dlceN) const
 {
     bool clamped = false;
@@ -1263,14 +1235,14 @@ isFiberStateClamped(double lce, double dlceN) const
     return clamped;
 }
 
-double Millard2012RockenfellerMuscle::clampFiberLength(double lce) const
+double RockenfellerMuscle::clampFiberLength(double lce) const
 {   
     return max(lce, getMinimumFiberLength());
 }
 
-std::pair<Millard2012RockenfellerMuscle::StatusFromEstimateMuscleFiberState,
-          Millard2012RockenfellerMuscle::ValuesFromEstimateMuscleFiberState>
-Millard2012RockenfellerMuscle::estimateMuscleFiberState(
+std::pair<RockenfellerMuscle::StatusFromEstimateMuscleFiberState,
+          RockenfellerMuscle::ValuesFromEstimateMuscleFiberState>
+RockenfellerMuscle::estimateMuscleFiberState(
                                     const double aActivation,
                                     const double pathLength,
                                     const double pathLengtheningSpeed,
@@ -1571,7 +1543,7 @@ Millard2012RockenfellerMuscle::estimateMuscleFiberState(
 //==============================================================================
 //                             START OF DEPRECATED
 //==============================================================================
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 calcActiveFiberForceAlongTendon(double activation,
                                 double fiberLength,
                                 double fiberVelocity) const
@@ -1619,7 +1591,7 @@ calcActiveFiberForceAlongTendon(double activation,
     return activeFiberForce;
 }
 
-SimTK::Vec4 Millard2012RockenfellerMuscle::
+SimTK::Vec4 RockenfellerMuscle::
 calcFiberStateGivenBoundaryCond(double lengthMT,
                                 double velocityMT,
                                 double tendonForce,
@@ -1753,7 +1725,7 @@ calcFiberStateGivenBoundaryCond(double lengthMT,
     return output;
 }
 
-double Millard2012RockenfellerMuscle::
+double RockenfellerMuscle::
 calcInextensibleTendonActiveFiberForce(SimTK::State& s,
                                        double aActivation) const
 {
