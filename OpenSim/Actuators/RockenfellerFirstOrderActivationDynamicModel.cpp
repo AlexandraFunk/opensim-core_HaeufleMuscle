@@ -3,6 +3,9 @@
  * -------------------------------------------------------------------------- *
 */
 #include "RockenfellerFirstOrderActivationDynamicModel.h"
+#include <iostream>
+#include <fstream>
+#include <limits>
 
 using namespace std;
 using namespace OpenSim;
@@ -91,8 +94,64 @@ clampGamma(double gamma) const
 double RockenfellerFirstOrderActivationDynamicModel::
 calcDerivative(double gamma, double excitation) const
 {
+
+    std::fstream gamma_before_clamping_file;
+    gamma_before_clamping_file.open("gamma_before_clamping.txt", std::ios::app);
+    if (!gamma_before_clamping_file) {
+        std::cout << "File not created!";
+    } else {
+        gamma_before_clamping_file
+                << std::setprecision(
+                              std::numeric_limits<double>::digits10 + 1)
+                   << gamma << "\n";
+        gamma_before_clamping_file.close();
+    }
+
     gamma = clamp(get_minimum_gamma(), gamma, 1.0);
     double hatze_constant = get_time_constant_hatze();
+
+    // DEBUG Part to find out, where gamma exceeds more than 1!!!
+    // TODO: delete this part after the error is found to increase simulation speed a lot!!
+    std::fstream hatze_file;
+    hatze_file.open("hatze_constant.txt", std::ios::app);
+    if (!hatze_file) {
+        std::cout << "File not created!";
+    } else {
+        hatze_file << std::setprecision(std::numeric_limits<double>::digits10+1)
+                << hatze_constant << "\n";
+        hatze_file.close();
+    }
+    std::fstream gamma_file;
+    gamma_file.open("gamma.txt", std::ios::app);
+    if (!gamma_file) {
+        std::cout << "File not created!";
+    } else {
+        gamma_file << std::setprecision(std::numeric_limits<double>::digits10 + 1)
+                << gamma << "\n";
+        gamma_file.close();
+    }
+    std::fstream excitation_file;
+    excitation_file.open("excitation.txt", std::ios::app);
+    if (!excitation_file) {
+        std::cout << "File not created!";
+    } else {
+        excitation_file << std::setprecision(std::numeric_limits<double>::digits10 + 1)
+                << excitation << "\n";
+        excitation_file.close();
+    }
+    std::fstream dervative_file;
+    dervative_file.open("derivative.txt", std::ios::app);
+    if (!dervative_file) {
+        std::cout << "File not created!";
+    } else {
+        dervative_file << std::setprecision(
+                                   std::numeric_limits<double>::digits10 + 1)
+                       << hatze_constant * (excitation - gamma) << "\n";
+        dervative_file.close();
+    }
+    //*********************END OF DEBUG PART****************************///////
+    //******************************************************************///////
+
     return hatze_constant * (excitation - gamma);
 }
 
