@@ -38,50 +38,50 @@
 
 namespace OpenSim {
 /** This class serves as a ActiveForceLengthCurve as described by Haeufle et 
-al in Hill-type muscle model with serial damping and eccentric force–velocity 
-relation. Journal of Biomechanics (D.F.B. Haeufle, M. Guenther, A. Bayer, S. 
-Schmitt (2014)) 
-In contrast to the quintic bezier splines, which is used in the 
-ActiveForceLenghtCurve, this implementation uses an exponential function with
-different parameters for the ascending and descending part of the graph.
-The provided fiber length must be normalized with the optimalFiberLength
+    al in Hill-type muscle model with serial damping and eccentric force–velocity 
+    relation. Journal of Biomechanics (D.F.B. Haeufle, M. Guenther, A. Bayer, S. 
+    Schmitt (2014)) 
+    In contrast to the quintic bezier splines, which is used in the 
+    ActiveForceLenghtCurve, this implementation uses an exponential function with
+    different parameters for the ascending and descending part of the graph.
+    The provided fiber length must be normalized with the optimalFiberLength
 
-@param exponentDescendingActiveForceLength
-    The exponent of the normalized bell curve in its descending limb as used in 
-    Haeufle et al (2014).
-@param widthDescendingActiveForceLength
-    The width of the normalized bell curve in its descending limb as used in 
-    Haeufle et al (2014).
-@param exponentAscendingActiveForceLength
-    The exponent of the normalized bell curve in its ascending limb as used in
-    Haeufle et al (2014).
-@param widthAscendingActiveForceLength
-    The width of the normalized bell curve in its ascending limb as used in
-    Haeufle et al (2014).
+    @param exponentDescendingActiveForceLength
+        The exponent of the normalized bell curve in its descending limb as used in 
+        Haeufle et al (2014).
+    @param widthDescendingActiveForceLength
+        The width of the normalized bell curve in its descending limb as used in 
+        Haeufle et al (2014).
+    @param exponentAscendingActiveForceLength
+        The exponent of the normalized bell curve in its ascending limb as used in
+        Haeufle et al (2014).
+    @param widthAscendingActiveForceLength
+        The width of the normalized bell curve in its ascending limb as used in
+        Haeufle et al (2014).
 
-<B>Default Parameter Values</B>
-The default parameter values have been chosen to match the files which are 
-included in the scripts/dataligament files of calcman. All parameters are 
-in SI-Units.
-\verbatim
-exponentDescendingActiveForceLength .... 1.50
-widthDescendingActiveForceLength ....... 0.45
-exponentAscendingActiveForceLength ..... 3.00
-widthAscendingActiveForceLength ........ 0.45
-\endverbatim
+    <B>Default Parameter Values</B>
+    The default parameter values have been chosen to match the files which are 
+    included in the scripts/dataligament files of calcman. All parameters are 
+    in SI-Units.
+    \verbatim
+    exponentDescendingActiveForceLength .... 1.50
+    widthDescendingActiveForceLength ....... 0.45
+    exponentAscendingActiveForceLength ..... 3.00
+    widthAscendingActiveForceLength ........ 0.45
+    \endverbatim
 
-<B>Example</B>
-@code
-HaeufleActiveForceLengthCurve fisomCurve1(1.5, 0.45, 3.00, 0.45);
-double fisomVal  = fisomCurve1.calcValue(1.0);
-@endcode
+    <B>Example</B>
+    @code
+    HaeufleActiveForceLengthCurve fisomCurve1(1.5, 0.45, 3.00, 0.45);
+    double fisomVal  = fisomCurve1.calcValue(1.0);
+    @endcode
 
-<B>References</B>
-\li D.F.B. Haeufle, M. Guenther, A. Bayer, S. Schmitt(2014) Hill-type 
-    muscle model with serial damping and eccentric force–velocity 
-    relation. Journal of Biomechanics
+    <B>References</B>
+    \li D.F.B. Haeufle, M. Guenther, A. Bayer, S. Schmitt(2014) Hill-type 
+        muscle model with serial damping and eccentric force–velocity 
+        relation. Journal of Biomechanics
 
-@author Mike Spahr
+    @author Mike Spahr
 */
 class OSIMACTUATORS_API HaeufleActiveForceLengthCurve : public ModelComponent {
     OpenSim_DECLARE_CONCRETE_OBJECT(
