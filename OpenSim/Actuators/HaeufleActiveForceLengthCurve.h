@@ -133,22 +133,6 @@ public:
     /** @returns The width of the ascending limb of the normalized
     bell curve */
     double getWidthAscendingActiveForceLength() const;
-
-    /** Returns a SimTK::Vec2 containing the lower and upper bounds 
-    on the ascending domain of the curve. */
-    SimTK::Vec2 getAscendingCurveDomain() const;
-
-    /** Returns a SimTK::Vec2 containing the lower and upper bounds
-    on the descending domain of the curve. */
-    SimTK::Vec2 getDescendingCurveDomain() const;
-
-    /** Returns a boolean signalizing if the provided normalized fiber
-    length is inside the ascending domain of the curve*/
-    bool isInsideAscendingDomain(double aNormFiberLength) const;
-
-    /** Returns a boolean signalizing if the provided normalized fiber
-    length is inside the descending domain of the curve*/
-    bool isInsideDescendingDomain(double aNormFiberLength) const;
     
     /**
     @param exponentDescendingActiveForceLength
@@ -179,7 +163,6 @@ public:
 private:
     void setNull();
     void constructProperties();
-
 };
 
 } // namespace OpenSim
