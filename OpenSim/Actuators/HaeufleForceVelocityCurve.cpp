@@ -161,4 +161,3 @@ double HaeufleForceVelocityCurve::calcBrele(double normFiberLength,
             (slopefactor * (1 + Arel / (activation * correspondingForceLengthValue)));
     return Brel;
 }
-
