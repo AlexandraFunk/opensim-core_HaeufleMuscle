@@ -40,12 +40,12 @@
 #include <OpenSim/Actuators/MuscleFirstOrderActivationDynamicModel.h>
 #include <OpenSim/Actuators/MuscleFixedWidthPennationModel.h>
 
-// TODO ersetzen durch F_isom, F_CE,c und F_CE,e, F_PEE, F_SEE, F_SDE
 #include <OpenSim/Actuators/HaeufleActiveForceLengthCurve.h>
 #include <OpenSim/Actuators/HaeufleForceVelocityCurve.h>
 #include <OpenSim/Actuators/HaeufleFiberForceLengthCurve.h>
 #include <OpenSim/Actuators/HaeufleTendonForceLengthCurve.h>
 #include <OpenSim/Actuators/HaeufleTendonDampingCurve.h>
+// #include <OpenSim/Actuators/HaeufleParallelDampingCurve.h> // never used nor modelled in demoa before 
 
 #ifdef SWIG
     #ifdef OSIMACTUATORS_API
