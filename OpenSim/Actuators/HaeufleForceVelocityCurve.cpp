@@ -62,6 +62,33 @@ void HaeufleForceVelocityCurve::constructProperties()
     constructProperty_slopefactor(2.0);
 }
 
+void HaeufleForceVelocityCurve::extendFinalizeFromProperties() {
+    Super::extendFinalizeFromProperties();
+
+    std::string errorLocation =
+            getName() +
+            " HaeufleForceVelocityCurve::extendFinalizeFromProperties";
+
+    // Ensure property values are within appropriate ranges.
+    OPENSIM_THROW_IF_FRMOBJ(get_concentric_contraction_a_rel0() <= 0,
+            InvalidPropertyValue,
+            getProperty_concentric_contraction_a_rel0().getName(),
+            "The relative concentric contraction dynamics of CE parameter "
+            "Arel0 must be greater than zero");
+    OPENSIM_THROW_IF_FRMOBJ(get_concentric_contraction_b_rel0() <= 0,
+            InvalidPropertyValue,
+            getProperty_concentric_contraction_b_rel0().getName(),
+            "The relative concentric contraction dynamics of CE parameter "
+            "Brel0 must be greater than zero");
+    OPENSIM_THROW_IF_FRMOBJ(get_max_force_eccentric_extension() <= 0,
+            InvalidPropertyValue,
+            getProperty_max_force_eccentric_extension().getName(),
+            "The maximum eccentric extension force must be greater than zero");
+    OPENSIM_THROW_IF_FRMOBJ(get_slopefactor() <= 0, InvalidPropertyValue,
+            getProperty_slopefactor().getName(),
+            "The corresponding slopefactor must be greater than zero");
+}
+
 //==============================================================================
 // GET AND SET METHODS
 //==============================================================================

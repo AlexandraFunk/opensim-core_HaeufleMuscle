@@ -145,9 +145,13 @@ public:
     'aSerialElasticLength'. */
     double calcValue(double aSerialElasticLength) const;
 
-    //==============================================================================
-    // PRIVATE
-    //==============================================================================
+protected:
+    // Component interface.
+    void extendFinalizeFromProperties() override;
+
+//==============================================================================
+// PRIVATE
+//==============================================================================
 private:
     void setNull();
     void constructProperties();

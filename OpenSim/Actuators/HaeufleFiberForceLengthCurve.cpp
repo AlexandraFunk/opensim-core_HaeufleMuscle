@@ -58,6 +58,32 @@ void HaeufleFiberForceLengthCurve::constructProperties() {
     constructProperty_parallel_elastic_force_rel_to_fmax(2.0);
 }
 
+void HaeufleFiberForceLengthCurve::extendFinalizeFromProperties() 
+{
+    Super::extendFinalizeFromProperties();
+
+    std::string errorLocation =
+            getName() +
+            " HaeufleFiberForceLengthCurve::extendFinalizeFromProperties";
+
+    // Ensure property values are within appropriate ranges.
+    OPENSIM_THROW_IF_FRMOBJ(get_parallel_elastic_zero_length() <= 0,
+            InvalidPropertyValue,
+            getProperty_parallel_elastic_zero_length().getName(),
+            "The zero length of the parallel elastic element must be greater "
+            "than zero");
+    OPENSIM_THROW_IF_FRMOBJ(get_parallel_elastic_exponent() <= 0,
+            InvalidPropertyValue,
+            getProperty_parallel_elastic_exponent().getName(),
+            "The exponent of the parallel elastic element must be greater than "
+            "zero");
+    OPENSIM_THROW_IF_FRMOBJ(get_parallel_elastic_force_rel_to_fmax() <= 0,
+            InvalidPropertyValue,
+            getProperty_parallel_elastic_force_rel_to_fmax().getName(),
+            "The elastic force relative to the maximum isometric force of the "
+            "parallel elastic element must be greater than zero");
+}
+
 double HaeufleFiberForceLengthCurve::getParallelElasticZeroLength() const {
     return get_parallel_elastic_zero_length();
 }

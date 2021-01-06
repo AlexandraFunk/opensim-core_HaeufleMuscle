@@ -157,6 +157,10 @@ public:
     'normFiberLength'. */
     double calcValue(double normFiberLength) const;
 
+protected:
+    // Component interface.
+    void extendFinalizeFromProperties() override;
+
     //==============================================================================
     // PRIVATE
     //==============================================================================

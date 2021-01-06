@@ -160,7 +160,11 @@ public:
             double correspondingForceLengthValue,
             const HaeufleActiveForceLengthCurve& HaeufleActiveForceLengthCurve)
             const;
-   
+  
+protected:
+    // Component interface.
+    void extendFinalizeFromProperties() override;
+
     //==============================================================================
     // PRIVATE
     //==============================================================================

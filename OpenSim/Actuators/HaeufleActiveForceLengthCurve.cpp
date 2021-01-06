@@ -69,6 +69,39 @@ void HaeufleActiveForceLengthCurve::constructProperties()
 
 }
 
+//==============================================================================
+// COMPONENT INTERFACE
+//==============================================================================
+void HaeufleActiveForceLengthCurve::extendFinalizeFromProperties() {
+    Super::extendFinalizeFromProperties();
+
+    std::string errorLocation =
+            getName() +
+            " HaeufleActiveForceLengthCurve::extendFinalizeFromProperties";
+
+    // Ensure property values are within appropriate ranges.
+    OPENSIM_THROW_IF_FRMOBJ(get_exponent_descending_active_force_length() <= 0,
+            InvalidPropertyValue,
+            getProperty_exponent_descending_active_force_length().getName(),
+            "The exponent of the descending branch of the active force length "
+            "must be greater than zero");
+    OPENSIM_THROW_IF_FRMOBJ(get_width_descending_active_force_length() <= 0,
+            InvalidPropertyValue,
+            getProperty_width_descending_active_force_length().getName(),
+            "The width of the descending branch of the active force length "
+            "curve must be greater than zero.");
+    OPENSIM_THROW_IF_FRMOBJ(get_exponent_ascending_active_force_length() <= 0,
+            InvalidPropertyValue,
+            getProperty_exponent_ascending_active_force_length().getName(),
+            "The exponent of the ascending branch of the active force length "
+            "must be greater than zero.");
+    OPENSIM_THROW_IF_FRMOBJ(get_width_ascending_active_force_length() <= 0,
+            InvalidPropertyValue,
+            getProperty_width_ascending_active_force_length().getName(),
+            "The width of the ascending branch of the active force length must "
+            "be greater than zero.");
+}
+
 
 /** @returns The exponent of the descending limb of the normalized
     bell curve */

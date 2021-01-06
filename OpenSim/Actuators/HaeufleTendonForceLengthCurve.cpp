@@ -76,6 +76,37 @@ void HaeufleTendonForceLengthCurve::constructProperties()
 
 
 
+void HaeufleTendonForceLengthCurve::extendFinalizeFromProperties() {
+    Super::extendFinalizeFromProperties();
+
+    std::string errorLocation =
+            getName() +
+            " HaeufleTendonForceLengthCurve::extendFinalizeFromProperties";
+
+    // Ensure property values are within appropriate ranges.
+    OPENSIM_THROW_IF_FRMOBJ(get_serial_elastic_rest_length() <= 0,
+            InvalidPropertyValue,
+            getProperty_serial_elastic_rest_length().getName(),
+            "The serial elastic rest length must be greater than zero");
+    OPENSIM_THROW_IF_FRMOBJ(
+            get_relative_stretch_at_nonlinear_linear_transition() <= 0,
+            InvalidPropertyValue,
+            getProperty_relative_stretch_at_nonlinear_linear_transition()
+                    .getName(),
+            "The relative stretch at nonlinear/linear transition must be "
+            "greater than zero");
+    OPENSIM_THROW_IF_FRMOBJ(get_relative_stretch_at_linear_part() <= 0,
+            InvalidPropertyValue,
+            getProperty_relative_stretch_at_linear_part().getName(),
+            "The relative stretch in the linear part must be greater than "
+            "zero");
+    OPENSIM_THROW_IF_FRMOBJ(get_force_at_nonlinear_linear_transition() <= 0,
+            InvalidPropertyValue,
+            getProperty_force_at_nonlinear_linear_transition().getName(),
+            "The force at the nonlinear/linear transition must be greater than "
+            "zero");
+}
+
 double HaeufleTendonForceLengthCurve::getSerialElasticRestLength() const {
     return get_serial_elastic_rest_length();
 }

@@ -136,6 +136,10 @@ public:
     double calcValue(double FiberLength, double maxIsometricForce,
             double optimalFiberLength, double widthDescendingLimb) const;
 
+protected:
+    // Component interface.
+    void extendFinalizeFromProperties() override;
+
     //==============================================================================
     // PRIVATE
     //==============================================================================
