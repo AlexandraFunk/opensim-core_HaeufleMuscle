@@ -24,7 +24,7 @@
  * -------------------------------------------------------------------------- */
 
 // INCLUDE
-#include <OpenSim/Actuators/osimActuatorsDLL.h>
+#include "osimPluginDLL.h"
 #include <OpenSim/Simulation/Model/ModelComponent.h>
 
 #ifdef SWIG
@@ -36,7 +36,7 @@
 
 namespace OpenSim {
 /** This class serves as a FiberForceLengthCurve as described by Haeufle et 
-    al in Hill-type muscle model with serial damping and eccentric force–velocity 
+    al in Hill-type muscle model with serial damping and eccentric forceï¿½velocity 
     relation. Journal of Biomechanics (D.F.B. Haeufle, M. Guenther, A. Bayer, S. 
     Schmitt (2014)) 
     In contrast to the quintic bezier splines, which is used in the 
@@ -72,12 +72,12 @@ namespace OpenSim {
 
     <B>References</B>
     \li D.F.B. Haeufle, M. Guenther, A. Bayer, S. Schmitt(2014) Hill-type
-        muscle model with serial damping and eccentric force–velocity
+        muscle model with serial damping and eccentric forceï¿½velocity
         relation. Journal of Biomechanics
 
     @author Mike Spahr
 */
-class OSIMACTUATORS_API HaeufleFiberForceLengthCurve : public ModelComponent {
+class OSIMPLUGIN_API HaeufleFiberForceLengthCurve : public ModelComponent {
     OpenSim_DECLARE_CONCRETE_OBJECT(
             HaeufleFiberForceLengthCurve, ModelComponent);
 
@@ -158,7 +158,7 @@ private:
         neded during the calceValue routine 
     */
     double calculateKPEE(double maxIsometricForce, double optimalFiberLength,
-            double widthDescendingLimb);
+            double widthDescendingLimb) const;
 };
 
 } // namespace OpenSim

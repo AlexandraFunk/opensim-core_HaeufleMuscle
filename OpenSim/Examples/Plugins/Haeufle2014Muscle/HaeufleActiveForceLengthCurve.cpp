@@ -174,5 +174,5 @@ double HaeufleActiveForceLengthCurve::calcValue(double normFiberLength) const {
         width_active_force_length = getWidthAscendingActiveForceLength();
     }
     return exp(-pow(abs((normFiberLength - 1) / width_active_force_length),
-                    exponent_active_force_length));)
+                    exponent_active_force_length));
 }

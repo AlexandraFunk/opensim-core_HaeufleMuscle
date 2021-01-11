@@ -88,7 +88,7 @@ void HaeufleTendonDampingCurve::extendFinalizeFromProperties() {
             InvalidPropertyValue, getProperty_max_isometric_force().getName(),
             "The maximum isometric force must be greater than zero");
     OPENSIM_THROW_IF_FRMOBJ(get_optimal_fiber_length() <= 0,
-            InvalidPropertyValue, getProperty_optimal_fiber_length.getName(),
+            InvalidPropertyValue, getProperty_optimal_fiber_length().getName(),
             "The optimal fiber length must be greater than zero");
     OPENSIM_THROW_IF_FRMOBJ(get_dse_damping_factor() <= 0,
             InvalidPropertyValue,
@@ -134,12 +134,12 @@ double HaeufleTendonDampingCurve::getConcentricContractionBrel0() const {
 }
 
 void HaeufleTendonDampingCurve::setMaxIsometricForce(
-    double aMaxIsometricForce) const {
+    double aMaxIsometricForce) {
     set_max_isometric_force(aMaxIsometricForce);
 }
 
 void HaeufleTendonDampingCurve::setOptimalFiberLength(
-    double aOptimalFiberLength) const {
+    double aOptimalFiberLength) {
     set_optimal_fiber_length(aOptimalFiberLength);
 }
 

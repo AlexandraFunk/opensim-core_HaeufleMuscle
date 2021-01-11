@@ -25,7 +25,7 @@
  * -------------------------------------------------------------------------- */
 
 // INCLUDE
-#include <OpenSim/Actuators/osimActuatorsDLL.h>
+#include "osimPluginDLL.h"
 #include <OpenSim/Simulation/Model/ModelComponent.h>
 
 #ifdef SWIG
@@ -37,7 +37,7 @@
 
 namespace OpenSim {
 /** This class serves as a ForceVelocityCurve as described by Haeufle et 
-    al in Hill-type muscle model with serial damping and eccentric force–velocity 
+    al in Hill-type muscle model with serial damping and eccentric forceï¿½velocity 
     relation. Journal of Biomechanics (D.F.B. Haeufle, M. Guenther, A. Bayer, S. 
     Schmitt (2014)) 
     In contrast to the quintic bezier splines, which is used in the 
@@ -78,12 +78,12 @@ namespace OpenSim {
 
     <B>References</B>
     \li D.F.B. Haeufle, M. Guenther, A. Bayer, S. Schmitt(2014) Hill-type
-        muscle model with serial damping and eccentric force–velocity
+        muscle model with serial damping and eccentric forceï¿½velocity
         relation. Journal of Biomechanics
 
     @author Mike Spahr
 */
-class OSIMACTUATORS_API HaeufleForceVelocityCurve : public ModelComponent {
+class OSIMPLUGIN_API HaeufleForceVelocityCurve : public ModelComponent {
     OpenSim_DECLARE_CONCRETE_OBJECT(HaeufleForceVelocityCurve, ModelComponent);
 
 public:
@@ -130,20 +130,19 @@ public:
 
     void setCurveShape(double aConcentricContractionARel0,
             double aConcentricContractionBRel0,
-            double aMaxForceEccentricExtension, double aSlopeFactor) const;
+            double aMaxForceEccentricExtension, double aSlopeFactor);
 
     /** Evaluates the force-velocity curve at a normalized fiber velocity of
     'normFiberVelocity'. */
     double calcValueWithoutFmax(double normFiberVelocity,
             double normFiberLength, double activation, 
-            double correspondingForceLengthValue,
-            const HaeufleActiveForceLengthCurve& HaeufleActiveForceLengthCurve)
+            double correspondingForceLengthValue)
             const;
 
     /** Calculate the fiber length and activation dependent normalized Hill
     parameter Arel for the conccentric case */
     double calcArel(double normFiberLength, double activation,
-            const HaeufleActiveForceLengthCurve& HaeufleActiveForceLengthCurve)
+            double correspondingForceLengthValue)
             const;
 
     /** Calculate the activation dependent normalized Hill
@@ -157,8 +156,7 @@ public:
     /** Calculate the activation and correspondingForceLengthValue dependent 
     normalized Hill parameter Brele for the eccentric case */
     double calcBrele(double normFiberLength, double activation,
-            double correspondingForceLengthValue,
-            const HaeufleActiveForceLengthCurve& HaeufleActiveForceLengthCurve)
+            double correspondingForceLengthValue)
             const;
   
 protected:

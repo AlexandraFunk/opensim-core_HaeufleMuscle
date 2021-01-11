@@ -21,7 +21,7 @@
  * limitations under the License.                                             *
  * -------------------------------------------------------------------------- */
 #include "HaeufleForceVelocityCurve.h"
-#include <OpenSim/Actuators/HaeufleActiveForceLengthCurve.h>
+#include "HaeufleActiveForceLengthCurve.h"
 
 using namespace OpenSim;
 using namespace SimTK;
@@ -110,34 +110,34 @@ double HaeufleForceVelocityCurve::getSlopeFactor() const {
 
 void HaeufleForceVelocityCurve::setCurveShape(
     double aConcentricContractionARel0, double aConcentricContractionBRel0, 
-    double aMaxForceEccentricExtension, double aSlopeFactor) const 
+    double aMaxForceEccentricExtension, double aSlopeFactor)
 {
     set_concentric_contraction_a_rel0(aConcentricContractionARel0);
     set_concentric_contraction_b_rel0(aConcentricContractionBRel0);
     set_max_force_eccentric_extension(aMaxForceEccentricExtension);
-    set_slopefocator(aSlopeFactor);
+    set_slopefactor(aSlopeFactor);
 }
 
 double HaeufleForceVelocityCurve::calcValueWithoutFmax(double normFiberVelocity,
         double normFiberLength, double activation,
-        double correspondingForceLengthValue,
-        const HaeufleActiveForceLengthCurve& HaeufleActiveForceLengthCurve)
+        double correspondingForceLengthValue)
         const {
     double Fce = 0; // initial Fce to 0
-    double Fisom = HaeufleActiveForceLengthCurve.calcValue(normFiberLength);
     // check if this is a eccentric of concentric lengthening
     if (normFiberVelocity <= 0) { // concentric lengthening 
         double Arel = calcArel(
-            normFiberLength, activation, HaeufleActiveForceLengthCurve);
+            normFiberLength, activation, correspondingForceLengthValue);
         double Brel = calcBrel(activation);
-        Fce = (activation * Fisom + Arel) / (1 - normFiberVelocity / Brel) -
+        Fce = (activation * correspondingForceLengthValue + Arel) /
+                      (1 - normFiberVelocity / Brel) -
               Arel;
     
     } else { // ecentric lengthening
         double Arele = calcArele(activation, correspondingForceLengthValue);
         double Brele = calcBrele(normFiberLength, activation,
-                correspondingForceLengthValue, HaeufleActiveForceLengthCurve);
-        Fce = (activation * Fisom + Arele) / (1 - normFiberVelocity / Brele) -
+                correspondingForceLengthValue);
+        Fce = (activation * correspondingForceLengthValue + Arele) /
+                      (1 - normFiberVelocity / Brele) -
               Arele;
     }
     return Fce;
@@ -145,14 +145,14 @@ double HaeufleForceVelocityCurve::calcValueWithoutFmax(double normFiberVelocity,
 
 double HaeufleForceVelocityCurve::calcArel(double normFiberLength,
         double activation,
-        const HaeufleActiveForceLengthCurve& HaeufleActiveForceLengthCurve) const {
+        double correspondingForceLengthValue) const {
     double Arel0 = getConcentricContractionARel0();
     double Qarel = 1 / 4 * (1 + 3 * activation);
     double Larel = 0; // initialize to set total Arel to zero 
     if (normFiberLength < 1) {
         Larel = 1;
     } else {
-        Larel = HaeufleActiveForceLengthCurve.calcValue(normFiberLength);
+        Larel = correspondingForceLengthValue;
     }
     return Arel0 * Qarel * Larel;
 }
@@ -175,10 +175,9 @@ double HaeufleForceVelocityCurve::calcArele(
 }
 
 double HaeufleForceVelocityCurve::calcBrele(double normFiberLength,
-        double activation, double correspondingForceLengthValue,
-        const HaeufleActiveForceLengthCurve& HaeufleActiveForceLengthCurve) const {
-    double Arel = calcArel(normFiberLength, activation,
-            HaeufleActiveForceLengthCurve& HaeufleActiveForceLengthCurve);
+        double activation, double correspondingForceLengthValue) const {
+    double Arel = calcArel(
+            normFiberLength, activation, correspondingForceLengthValue);
     double Brel = calcBrel(activation);
     double slopefactor = getSlopeFactor();
     double maxEccentricForce = getMaxForceEccentricExtension();

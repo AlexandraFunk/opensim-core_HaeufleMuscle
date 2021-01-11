@@ -24,7 +24,7 @@
  * -------------------------------------------------------------------------- */
 
 // INCLUDE
-#include <OpenSim/Actuators/osimActuatorsDLL.h>
+#include "osimPluginDLL.h"
 #include <OpenSim/Simulation/Model/ModelComponent.h>
 
 #ifdef SWIG
@@ -63,12 +63,12 @@ namespace OpenSim {
 
     <B>References</B>
     \li D.F.B. Haeufle, M. Guenther, A. Bayer, S. Schmitt(2014) Hill-type
-        muscle model with serial damping and eccentric force–velocity
+        muscle model with serial damping and eccentric forceï¿½velocity
         relation. Journal of Biomechanics
 
     @author Mike Spahr
 */
-class OSIMACTUATORS_API HaeufleTendonForceLengthCurve : public ModelComponent {
+class OSIMPLUGIN_API HaeufleTendonForceLengthCurve : public ModelComponent {
     OpenSim_DECLARE_CONCRETE_OBJECT(
             HaeufleTendonForceLengthCurve, ModelComponent);
 
@@ -120,25 +120,25 @@ public:
     @param aSerialElasticRestLength
         The resting length of the serial elastic element
     */
-    void setSerialElasticRestLength(double aSerialElasticRestLength ) const;
+    void setSerialElasticRestLength(double aSerialElasticRestLength );
    
     /**
     @param aForceAtNonlinearLinearTransition
         The force at non-linear/linear transition which is muscle specific
     */
-    void setForceAtNonlinearLinearTransition(double aForceAtNonlinearLinearTransition ) const;
+    void setForceAtNonlinearLinearTransition(double aForceAtNonlinearLinearTransition );
     
     /**
     @param aForceAtNonlinearLinearTransition
         The force at non-linear/linear transition which is muscle specific
     */
-    void setRelativeStretchAtNonlinearLinearTransition(double aRelativeStretchAtNonlinearLinearTransition ) const;
+    void setRelativeStretchAtNonlinearLinearTransition(double aRelativeStretchAtNonlinearLinearTransition );
     
     /**
     @param aForceAtNonlinearLinearTransition
         The force at non-linear/linear transition which is muscle specific
     */
-    void setRelativeStretchAtLinearPart(double aRelativeStretchAtLinearPart ) const;
+    void setRelativeStretchAtLinearPart(double aRelativeStretchAtLinearPart );
 
 
     /** Evaluates the tendon-force-length curve at a tendon length of

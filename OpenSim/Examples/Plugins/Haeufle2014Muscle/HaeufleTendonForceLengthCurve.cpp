@@ -129,25 +129,25 @@ HaeufleTendonForceLengthCurve::getForceAtNonlinearLinearTransition() const {
 }
 
 void HaeufleTendonForceLengthCurve::setSerialElasticRestLength(
-    double aSerialElasticRestLength) const {
+    double aSerialElasticRestLength) {
     set_serial_elastic_rest_length(aSerialElasticRestLength);
 }
 
 
 void HaeufleTendonForceLengthCurve::setForceAtNonlinearLinearTransition(
-    double aForceAtNonlinearLinearTransition) const {
+    double aForceAtNonlinearLinearTransition) {
     set_force_at_nonlinear_linear_transition(aForceAtNonlinearLinearTransition);
 }
 
 void HaeufleTendonForceLengthCurve::setRelativeStretchAtNonlinearLinearTransition(
-    double aRelativeStretchAtNonlinearLinearTransition) const {
+    double aRelativeStretchAtNonlinearLinearTransition) {
     set_relative_stretch_at_nonlinear_linear_transition(
             aRelativeStretchAtNonlinearLinearTransition);
 }
 
 
 void HaeufleTendonForceLengthCurve::setRelativeStretchAtLinearPart(
-    double aRelativeStretchAtLinearPart) const {
+    double aRelativeStretchAtLinearPart) {
     set_relative_stretch_at_linear_part(aRelativeStretchAtLinearPart);
 }
 

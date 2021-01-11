@@ -25,8 +25,8 @@
  * -------------------------------------------------------------------------- */
 
 // INCLUDE
-#    include <OpenSim/Actuators/osimActuatorsDLL.h>
-#    include <OpenSim/Simulation/Model/ModelComponent.h>
+#include "osimPluginDLL.h"
+#include <OpenSim/Simulation/Model/ModelComponent.h>
 
 #ifdef SWIG
 	#ifdef OSIMACTUATORS_API
@@ -37,7 +37,7 @@
 
 namespace OpenSim {
 /** This class serves as a TendonDampingCurve as described by Haeufle et
-    al in Hill-type muscle model with serial damping and eccentric force–velocity
+    al in Hill-type muscle model with serial damping and eccentric forceï¿½velocity
     relation. Journal of Biomechanics (D.F.B. Haeufle, M. Guenther, A. Bayer, S.
     Schmitt (2014))
     This class depends on the following parameters:
@@ -74,12 +74,12 @@ namespace OpenSim {
 
     <B>References</B>
     \li D.F.B. Haeufle, M. Guenther, A. Bayer, S. Schmitt(2014) Hill-type
-        muscle model with serial damping and eccentric force–velocity
+        muscle model with serial damping and eccentric forceï¿½velocity
         relation. Journal of Biomechanics
 
     @author Mike Spahr
 */
-class OSIMACTUATORS_API HaeufleTendonDampingCurve : public ModelComponent {
+class OSIMPLUGIN_API HaeufleTendonDampingCurve : public ModelComponent {
     OpenSim_DECLARE_CONCRETE_OBJECT(
             HaeufleTendonDampingCurve, ModelComponent);
 
@@ -141,13 +141,13 @@ public:
     @param aMaxIsometricForce 
         The maximum isometric force of this muscle        
     */
-    void setMaxIsometricForce(double aMaxIsometricForce) const;
+    void setMaxIsometricForce(double aMaxIsometricForce);
 
     /** 
     @param aOptimalFiberLength
         The optimal fiber length of this muscle
     */
-    void setOptimalFiberLength(double aOptimalFiberLength) const;
+    void setOptimalFiberLength(double aOptimalFiberLength);
 
 
     /**

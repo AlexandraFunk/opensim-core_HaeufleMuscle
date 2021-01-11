@@ -114,19 +114,19 @@ double HaeufleFiberForceLengthCurve::calcValue(
     {
         double Kpee = calculateKPEE(
                 maxIsometricForce, optimalFiberLength, widthDescendingLimb);
-        Fpee = Kpee * exp((FiberLength - Lpee0), getParallelElasticExponent());  
+        Fpee = Kpee * pow((FiberLength - Lpee0), getParallelElasticExponent());  
     } 
     return Fpee;
 }
 
 double HaeufleFiberForceLengthCurve::calculateKPEE(double maxIsometricForce,
-    double optimalFiberLength, double widthDescendingLimb) {
+    double optimalFiberLength, double widthDescendingLimb) const {
     double Fpee = getParallelElasticForceRelToFmax();
     double Lpee0factor = getParallelElasticZeroLength();
     double nuepee = getParallelElasticExponent();
 
     double Kpee = Fpee * maxIsometricForce /
-            (exp(optimalFiberLength * (widthDescendingLimb + 1 - Lpee0factor),
+            (pow(optimalFiberLength * (widthDescendingLimb + 1 - Lpee0factor),
                           nuepee));
     return Kpee;
 }
