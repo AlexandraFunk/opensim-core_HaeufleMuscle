@@ -310,6 +310,19 @@ private:
     // Rebuilds muscle model if any of its properties have changed.
     void extendFinalizeFromProperties() override;
 
+    // Subcomponents owned by the muscle. The properties of these subcomponents
+    // are set in extendFinalizeFromProperties() from the properties of the
+    // muscle.
+    MemberSubcomponentIndex penMdlIdx{
+            constructSubcomponent<MuscleFixedWidthPennationModel>("penMdl")};
+    MemberSubcomponentIndex actMdlIdx{
+            constructSubcomponent<RockenfellerFirstOrderActivationDynamicModel>(
+                    "actMdl")};
+
+    // Returns the maximum of the minimum fiber length and the current fiber
+    // length.
+    double clampFiberLength(double lce) const;
+
 };
 
 } //end of namespace OpenSim
