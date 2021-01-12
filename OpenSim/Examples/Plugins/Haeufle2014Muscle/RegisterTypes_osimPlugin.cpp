@@ -30,6 +30,7 @@
 #include "HaeufleForceVelocityCurve.h"
 #include "HaeufleTendonDampingCurve.h"
 #include "HaeufleTendonForceLengthCurve.h"
+#include "RockenfellerFirstOrderActivationDynamicModel.h"
 #include "Haeufle2014Muscle.h"
 
 
@@ -50,6 +51,7 @@ OSIMPLUGIN_API void RegisterTypes_osimPlugin()
     Object::RegisterType( HaeufleForceVelocityCurve() );
     Object::RegisterType( HaeufleFiberForceLengthCurve() );
     Object::RegisterType( HaeufleActiveForceLengthCurve() );
+    Object::RegisterType( RockenfellerFirstOrderActivationDynamicModel() );
     Object::RegisterType( Haeufle2014Muscle() );
 }
 

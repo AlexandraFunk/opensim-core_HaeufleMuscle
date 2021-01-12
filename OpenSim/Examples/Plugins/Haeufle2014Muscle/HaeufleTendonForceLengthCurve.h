@@ -41,7 +41,7 @@ namespace OpenSim {
     TendonForceLengthCurve, this implementation uses a segmentwise defined
     function with the following parameters.
 
-    @param serialElasticRestLength
+    @param tendonSlackLength
     @param relativeStretchAtNonlinearLinearTransition
     @param relativeStretchAtLinearPart
     @param forceAtNonlinearLinearTransition
@@ -49,7 +49,7 @@ namespace OpenSim {
 
     <B>Default Parameter Values</B>
     \verbatim
-    serialElasticRestLength ...................... 0.15
+    tendonSlackLength ............................ 0.15
     relativeStretchAtNonlinearLinearTransition ... 0.0425
     relativeStretchAtLinearPart .................. 0.0170
     forceAtNonlinearLinearTransition ............. 500
@@ -76,12 +76,12 @@ public:
     //==============================================================================
     // PROPERTIES
     //==============================================================================
-    OpenSim_DECLARE_PROPERTY(serial_elastic_rest_length, double,"");
-    OpenSim_DECLARE_OPTIONAL_PROPERTY(
+    OpenSim_DECLARE_PROPERTY(tendon_slack_length, double, "");
+    OpenSim_DECLARE_PROPERTY(
             relative_stretch_at_nonlinear_linear_transition, double,"");
-    OpenSim_DECLARE_OPTIONAL_PROPERTY(relative_stretch_at_linear_part, double,
+    OpenSim_DECLARE_PROPERTY(relative_stretch_at_linear_part, double,
             "");
-    OpenSim_DECLARE_OPTIONAL_PROPERTY(force_at_nonlinear_linear_transition, double,
+    OpenSim_DECLARE_PROPERTY(force_at_nonlinear_linear_transition, double,
             "");
 
     //==============================================================================
@@ -93,18 +93,18 @@ public:
 
     /** Constructs a tendon-force-length curve using the muscle dependen parameters and
     assigns a default name. */
-    HaeufleTendonForceLengthCurve(double serialElasticRestLength,
+    HaeufleTendonForceLengthCurve(double tendonSlackLength,
             double forceAtNonlinearLinearTransition);
 
     /** Constructs a tendon-force-length curve using the provided parameters and
     assigns a default name. */
-    HaeufleTendonForceLengthCurve(double serialElasticRestLength,
+    HaeufleTendonForceLengthCurve(double tendonSlackLength,
             double relativeStretchAtNonlinearLinearTransition,
             double relativeStretchAtLinearPart,
             double forceAtNonlinearLinearTransition);
 
     /** @returns The serial elastic rest length Lsee,0 */
-    double getSerialElasticRestLength() const;
+    double getTendonSlackLength() const;
     
     /** @returns The relative stretch at nonlinear/linear transition in Fsee */
     double getRelativeStretchAtNonlinearLinearTransition() const;
@@ -117,10 +117,10 @@ public:
     double getForceAtNonlinearLinearTransition() const;
 
     /** 
-    @param aSerialElasticRestLength
+    @param aTendonSlackLength
         The resting length of the serial elastic element
     */
-    void setSerialElasticRestLength(double aSerialElasticRestLength );
+    void setTendonSlackLength(double aTendonSlackLength);
    
     /**
     @param aForceAtNonlinearLinearTransition

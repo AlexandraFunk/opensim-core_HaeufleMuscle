@@ -90,7 +90,7 @@ public:
             "Zero length of the parallel elastic element");
     OpenSim_DECLARE_PROPERTY(parallel_elastic_exponent, double,
             "Exponent of the parallel elastic element");
-    OpenSim_DECLARE_OPTIONAL_PROPERTY(parallel_elastic_force_rel_to_fmax,
+    OpenSim_DECLARE_PROPERTY(parallel_elastic_force_rel_to_fmax,
             double,
             " Parallel elastic element force relative to Fmax at "
             "Lceopt*(1+dWdes)");

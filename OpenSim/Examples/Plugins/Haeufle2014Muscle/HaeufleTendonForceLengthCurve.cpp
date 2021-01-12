@@ -34,20 +34,19 @@ HaeufleTendonForceLengthCurve::HaeufleTendonForceLengthCurve()
 }
 
 HaeufleTendonForceLengthCurve::HaeufleTendonForceLengthCurve(
-    double serialElasticRestLength,
-    double forceAtNonlinearLinearTransition) 
+        double tendonSlackLength, double forceAtNonlinearLinearTransition)
 {
     setNull();
     constructProperties();
     setName(getConcreteClassName());
 
-    set_serial_elastic_rest_length(serialElasticRestLength);
+    set_tendon_slack_length(tendonSlackLength);
     set_force_at_nonlinear_linear_transition(forceAtNonlinearLinearTransition);
 
 }
 
 HaeufleTendonForceLengthCurve::HaeufleTendonForceLengthCurve(
-    double serialElasticRestLength,
+        double tendonSlackLength,
     double relativeStretchAtNonlinearLinearTransition,
     double relativeStretchAtLinearPart,
     double forceAtNonlinearLinearTransition) 
@@ -56,7 +55,7 @@ HaeufleTendonForceLengthCurve::HaeufleTendonForceLengthCurve(
     constructProperties();
     setName(getConcreteClassName());
 
-    set_serial_elastic_rest_length(serialElasticRestLength);
+    set_tendon_slack_length(tendonSlackLength);
     set_relative_stretch_at_linear_part(relativeStretchAtLinearPart);
     set_relative_stretch_at_nonlinear_linear_transition(
             relativeStretchAtNonlinearLinearTransition);
@@ -68,7 +67,7 @@ void HaeufleTendonForceLengthCurve::setNull()
 
 void HaeufleTendonForceLengthCurve::constructProperties() 
 {
-    constructProperty_serial_elastic_rest_length(0.15);
+    constructProperty_tendon_slack_length(0.15);
     constructProperty_relative_stretch_at_nonlinear_linear_transition(0.0425);
     constructProperty_relative_stretch_at_linear_part(0.0170);
     constructProperty_force_at_nonlinear_linear_transition(500);
@@ -84,9 +83,8 @@ void HaeufleTendonForceLengthCurve::extendFinalizeFromProperties() {
             " HaeufleTendonForceLengthCurve::extendFinalizeFromProperties";
 
     // Ensure property values are within appropriate ranges.
-    OPENSIM_THROW_IF_FRMOBJ(get_serial_elastic_rest_length() <= 0,
-            InvalidPropertyValue,
-            getProperty_serial_elastic_rest_length().getName(),
+    OPENSIM_THROW_IF_FRMOBJ(get_tendon_slack_length() <= 0,
+            InvalidPropertyValue, getProperty_tendon_slack_length().getName(),
             "The serial elastic rest length must be greater than zero");
     OPENSIM_THROW_IF_FRMOBJ(
             get_relative_stretch_at_nonlinear_linear_transition() <= 0,
@@ -107,8 +105,8 @@ void HaeufleTendonForceLengthCurve::extendFinalizeFromProperties() {
             "zero");
 }
 
-double HaeufleTendonForceLengthCurve::getSerialElasticRestLength() const {
-    return get_serial_elastic_rest_length();
+double HaeufleTendonForceLengthCurve::getTendonSlackLength() const {
+    return get_tendon_slack_length();
 }
 
 double
@@ -128,9 +126,9 @@ HaeufleTendonForceLengthCurve::getForceAtNonlinearLinearTransition() const {
     return get_force_at_nonlinear_linear_transition();
 }
 
-void HaeufleTendonForceLengthCurve::setSerialElasticRestLength(
-    double aSerialElasticRestLength) {
-    set_serial_elastic_rest_length(aSerialElasticRestLength);
+void HaeufleTendonForceLengthCurve::setTendonSlackLength(
+        double aTendonSlackLength) {
+    set_tendon_slack_length(aTendonSlackLength);
 }
 
 
@@ -153,7 +151,7 @@ void HaeufleTendonForceLengthCurve::setRelativeStretchAtLinearPart(
 
 double HaeufleTendonForceLengthCurve::calcValue(
         double aSerialElasticLength) const {
-    double Lsee0 = getSerialElasticRestLength();
+    double Lsee0 = getTendonSlackLength();
     double Fsee =
             0; // initialize Fsee for first case aSerialElasticLength < Lsee0
     double deltaUseenll = getRelativeStretchAtNonlinearLinearTransition();
