@@ -43,12 +43,23 @@ Haeufle2014Muscle::Haeufle2014Muscle(const std::string& aName,
     double aOptimalFiberLength, double aTendonSlackLength,
     double aPennationAngle)
 {
-
+    setNull();
+    constructProperties();
+    
+    setName(aName);
+    setMaxIsometricForce(aMaxIsometricForce);
+    setOptimalFiberLength(aOptimalFiberLength);
+    setTendonSlackLength(aTendonSlackLength);
+    setPennationAngleAtOptimalFiberLength(aPennationAngle);
 }
 
-void Haeufle2014Muscle::setNull() { setAuthors("Maria Hammer, Mike Spahr"); }
+void Haeufle2014Muscle::setNull() 
+{ 
+    setAuthors("Maria Hammer, Mike Spahr"); 
+}
+
 void Haeufle2014Muscle::constructProperties() {
-    constructProperty_default_activation(0.05);
+    constructProperty_default_calcium_concentration(0.05);
     constructProperty_default_fiber_length(getOptimalFiberLength());
 
     constructProperty_HaeufleActiveForceLengthCurve(
@@ -65,34 +76,174 @@ void Haeufle2014Muscle::constructProperties() {
 
 }
 
-void Haeufle2014Muscle::extendFinalizeFromProperties() {
+void Haeufle2014Muscle::extendFinalizeFromProperties() 
+{
     Super::extendFinalizeFromProperties();
 
-    // TODO add variable dependent properties 
+    // Set the names of the muscle curves.
+    const std::string& namePrefix = getName();
+
+    HaeufleActiveForceLengthCurve& falCurve = upd_HaeufleActiveForceLengthCurve();
+    falCurve.setName(namePrefix + "_HaeufleActiveForceLengthCurve");
+
+    HaeufleForceVelocityCurve& fvCurve = upd_HaeufleForceVelocityCurve();
+    fvCurve.setName(namePrefix + "_HaeufleForceVelocityCurve");
+
+    HaeufleFiberForceLengthCurve& fpeCurve = upd_HaeufleFiberForceLengthCurve();
+    fpeCurve.setName(namePrefix + "_HaeufleFiberForceLengthCurve");
+
+    HaeufleTendonForceLengthCurve& fseCurve = upd_HaeufleTendonForceLengthCurve();
+    fseCurve.setName(namePrefix + "_HaeufleTendonForceLengthCurve");
+
+    HaeufleTendonDampingCurve& fsdCurve = upd_HaeufleTendonDampingCurve();
+    fsdCurve.setName(namePrefix + "_HaeufleTendonDampingCurve");
+
+    // TODO add checks for too small fiber lenghts, etc... and throw errors when
+    // claculations wouldns be possible!
     // throw errors if variables are in the wrong range 
     // check millard2012EquilibriumMuscle function for more info
+
+
+
+
+    // Propagate properties down to pennation model subcomponent. If any of the
+    // new property values are invalid, restore the subcomponent's current
+    // property values (to avoid throwing again when the subcomponent's
+    // extendFinalizeFromProperties() method is called directly) and then
+    // re-throw the exception thrown by the subcomponent.
+    auto& penMdl =
+            updMemberSubcomponent<MuscleFixedWidthPennationModel>(penMdlIdx);
+    MuscleFixedWidthPennationModel penMdlCopy(penMdl);
+    penMdl.set_optimal_fiber_length(getOptimalFiberLength());
+    penMdl.set_pennation_angle_at_optimal(
+            getPennationAngleAtOptimalFiberLength());
+    // this should be set automatically by the pennation model constructor
+    // penMdl.set_maximum_pennation_angle(get_maximum_pennation_angle());
+    try {
+        penMdl.finalizeFromProperties();
+    } catch (const InvalidPropertyValue&) {
+        penMdl = penMdlCopy;
+        throw;
+    }
+
+    // Propagate properties down to activation dynamics model subcomponent.
+    // Handle invalid properties as above for pennation model.
+    if (!get_ignore_activation_dynamics()) {
+        auto& actMdl =
+                updMemberSubcomponent<RockenfellerFirstOrderActivationDynamicModel>(
+                        actMdlIdx);
+        RockenfellerFirstOrderActivationDynamicModel actMdlCopy(actMdl);
+        // set some properties of this model like this:
+        // actMdl.set_
+        try {
+            actMdl.finalizeFromProperties();
+        } catch (const InvalidPropertyValue&) {
+            actMdl = actMdlCopy;
+            throw;
+        }
+    }
+
+
+    // TODO check if we need this for the first implementation of this model
+    /**
+    // Compute and store values that are used for clamping the fiber length.
+    const double minActiveFiberLength =
+            falCurve.getMinActiveFiberLength() * getOptimalFiberLength();
+    const double minPennatedFiberLength = penMdl.getMinimumFiberLength();
+    m_minimumFiberLength = max(SimTK::SignificantReal,
+            max(minActiveFiberLength, minPennatedFiberLength));
+
+    const double phi = penMdl.calcPennationAngle(m_minimumFiberLength);
+    m_minimumFiberLengthAlongTendon =
+            penMdl.calcFiberLengthAlongTendon(m_minimumFiberLength, cos(phi));
+    */
+}
+
+//==============================================================================
+// SCALING
+//==============================================================================
+void Haeufle2014Muscle::extendPostScale(
+        const SimTK::State& s, const ScaleSet& scaleSet) {
+    Super::extendPostScale(s, scaleSet);
+
+    GeometryPath& path = upd_GeometryPath();
+    if (path.getPreScaleLength(s) > 0.0) {
+        double scaleFactor = path.getLength(s) / path.getPreScaleLength(s);
+        upd_optimal_fiber_length() *= scaleFactor;
+        upd_tendon_slack_length() *= scaleFactor;
+
+        // Clear the pre-scale length that was stored in the GeometryPath.
+        path.setPreScaleLength(s, 0.0);
+    }
 }
 
 
-void Haeufle2014Muscle::extendConnectToModel(Model& model) {
-
+void Haeufle2014Muscle::extendConnectToModel(Model& model) 
+{
+    Super::extendConnectToModel(model);
 }
 
 void Haeufle2014Muscle::extendAddToSystem(
-    SimTK::MultibodySystem& system) const {
+    SimTK::MultibodySystem& system) const 
+{
+    Super::extendAddToSystem(system);
 
+    if (!get_ignore_activation_dynamics()) {
+        addStateVariable(STATE_CALCIUM_CONCENTRATION);
+    }
+    if (!get_ignore_tendon_compliance()) {
+        addStateVariable(STATE_FIBER_LENGTH_NAME);
+    }
 }
 
-void Haeufle2014Muscle::extendInitStateFromProperties(SimTK::State& s) const {
+void Haeufle2014Muscle::extendInitStateFromProperties(SimTK::State& s) const 
+{
+    Super::extendInitStateFromProperties(s);
 
+    if (!get_ignore_activation_dynamics()) {
+        // sets the calcium concentration
+        setActivation(s, getDefaultCalciumConcentration());
+    }
+    if (!get_ignore_tendon_compliance()) {
+        setFiberLength(s, getDefaultFiberLength());
+    }
 }
 
-void Haeufle2014Muscle::extendSetPropertiesFromState(const SimTK::State& s) {
-
+void Haeufle2014Muscle::extendSetPropertiesFromState(const SimTK::State& s) 
+{
+    Super::extendSetPropertiesFromState(s);
+    if (!get_ignore_activation_dynamics()) {
+        setDefaultCalciumConcentration(
+                getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION));
+    }
+    if (!get_ignore_tendon_compliance()) {
+        setDefaultFiberLength(
+                getStateVariableValue(s, STATE_FIBER_LENGTH_NAME));
+    }
 }
 
 void Haeufle2014Muscle::computeStateVariableDerivatives(
-    const SimTK::State& s) const {
+    const SimTK::State& s) const 
+{
+    // Activation dynamics if not ignored
+    if (!get_ignore_activation_dynamics()) {
+        double gammadot = 0;
+        // if not disabled or overridden then compute its derivative
+        if (appliesForce(s) && !isActuationOverridden(s)) {
+            gammadot = getCalciumConcentrationDerivative(s);
+        }
+        setStateVariableDerivativeValue(s, STATE_CALCIUM_CONCENTRATION, gammadot);
+    }
+
+    // Fiber length is the next state (if it is a state at all)
+    if (!get_ignore_tendon_compliance()) {
+        double ldot = 0;
+        // if not disabled or overridden then compute its derivative
+        if (appliesForce(s) && !isActuationOverridden(s)) {
+            ldot = getFiberVelocity(s);
+        }
+        setStateVariableDerivativeValue(s, STATE_FIBER_LENGTH_NAME, ldot);
+    }
 
 }
 
@@ -100,8 +251,14 @@ void Haeufle2014Muscle::computeStateVariableDerivatives(
 // GET METHODS
 //==============================================================================
 
-double Haeufle2014Muscle::getDefaultFiberLength() const {
+double Haeufle2014Muscle::getDefaultFiberLength() const 
+{
     return get_default_fiber_length();
+}
+
+double Haeufle2014Muscle::getDefaultCalciumConcentration() const 
+{
+    return get_default_calcium_concentration();
 }
 
 const HaeufleActiveForceLengthCurve&
@@ -140,12 +297,24 @@ Haeufle2014Muscle::getActivationModel() const {
             actMdlIdx);
 }
 
+double Haeufle2014Muscle::getCalciumConcentration(const SimTK::State& s) const {
+    return getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION);
+}
+
+double Haeufle2014Muscle::getCalciumConcentrationDerivative(const SimTK::State& s) const {
+    if (get_ignore_activation_dynamics()) { return 0.0; }
+
+    return getActivationModel().calcDerivative(
+            getCalciumConcentration(s), getExcitation(s));
+}
+
 //==============================================================================
 // SET METHODS
 //==============================================================================
 
-void Haeufle2014Muscle::setDefaultActivation(double activation) {
-    set_default_activation(activation);
+void Haeufle2014Muscle::setDefaultCalciumConcentration(
+        double calciumConcentration) {
+    set_default_calcium_concentration(calciumConcentration);
 }
 
 void Haeufle2014Muscle::setDefaultFiberLength(double fiberLength) {
@@ -182,9 +351,10 @@ void Haeufle2014Muscle::setFiberLength(
     if (!get_ignore_tendon_compliance()) {
         setStateVariableValue(
                 s, STATE_FIBER_LENGTH_NAME, clampFiberLength(fiberLength));
-        markCacheVariableInvalid(s, _lengthInfoCV);
-        markCacheVariableInvalid(s, _velInfoCV);
-        markCacheVariableInvalid(s, _dynamicsInfoCV);
+        // TODO check if the next lines are needed, since they only work with versions beyond 4.1
+        // markCacheVariableInvalid(s, _lengthInfoCV);
+        // markCacheVariableInvalid(s, _velInfoCV);
+        // markCacheVariableInvalid(s, _dynamicsInfoCV);
     }
 }
 
@@ -192,75 +362,70 @@ void Haeufle2014Muscle::setFiberLength(
 // MUSCLE.H INTERFACE
 //==============================================================================
 void Haeufle2014Muscle::setActivation(
-    SimTK::State& s, double activation) const {
+    SimTK::State& s, double activation) const 
+{
+    if (get_ignore_activation_dynamics()) {
+        SimTK::Vector& controls(_model->updControls(s));
+        setControls(SimTK::Vector(1, activation), controls);
+        _model->setControls(s, controls);
+    } else {
+        setStateVariableValue(s, STATE_CALCIUM_CONCENTRATION,
+                getActivationModel().clampGamma(activation));
+    }
+    //markCacheVariableInvalid(s, _velInfoCV);
+    //markCacheVariableInvalid(s, _dynamicsInfoCV);
 
 }
 
 double Haeufle2014Muscle::computeActuation(const SimTK::State& s) const {
-
+    const MuscleDynamicsInfo& mdi = getMuscleDynamicsInfo(s);
+    setActuation(s, mdi.tendonForce);
+    return mdi.tendonForce;
 }
 
 void Haeufle2014Muscle::computeFiberEquilibrium(
-    SimTK::State& s, bool solveForVelocity = false) const {
+    SimTK::State& s, bool solveForVelocity) const 
+{
+    // Initial activation and fiber length from input State, s.
+    _model->getMultibodySystem().realize(s, SimTK::Stage::Velocity);
+    double activation = getActivation(s);
+
+    // Tolerance, in Newtons, of the desired equilibrium
+    const double tol =
+            max(1e-8 * getMaxIsometricForce(), SimTK::SignificantReal * 10);
+
+    int maxIter = 20; // Should this be user settable?
+
+    std::pair<StatusFromInitMuscleState, ValuesFromInitMuscleState> result;
 
 }
 
-double Haeufle2014Muscle::getStateVariableDeriv(
-    const SimTK::State& s, const std::string& aStateName) const {
-
-}
-
-void Haeufle2014Muscle::setStateVariableDeriv(const SimTK::State& s,
-    const std::string& aStateName,
-    double aValue) const
+void Haeufle2014Muscle::calcMuscleLengthInfo(
+        const SimTK::State& s, MuscleLengthInfo& mli) const 
 {
 
 }
 
-const MuscleLengthInfo& Haeufle2014Muscle::getMuscleLengthInfo(
-    const SimTK::State& s) const {
-
-}
-
-MuscleLengthInfo& Haeufle2014Muscle::updMuscleLengthInfo(
-    const SimTK::State& s) const {
-
-}
-
-const FiberVelocityInfo& Haeufle2014Muscle::getFiberVelocityInfo(
-    const SimTK::State& s) const {
-
-}
-
-FiberVelocityInfo& Haeufle2014Muscle::updFiberVelocityInfo(
-    const SimTK::State& s) const
+void Haeufle2014Muscle::calcFiberVelocityInfo(
+        const SimTK::State& s, FiberVelocityInfo& fvi) const 
 {
 
 }
 
-const MuscleDynamicsInfo& Haeufle2014Muscle::getMuscleDynamicsInfo(
-    const SimTK::State& s) const {
-
+void Haeufle2014Muscle::calcMuscleDynamicsInfo(
+        const SimTK::State& s, MuscleDynamicsInfo& mdi) const 
+{
 }
 
-MuscleDynamicsInfo& Haeufle2014Muscle::updMuscleDynamicsInfo(
-    const SimTK::State& s) const {
-
-}
-
-const MusclePotentialEnergyInfo&
-Haeufle2014Muscle::getMusclePotentialEnergyInfo(
-    const SimTK::State& s) const
+void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
+        const SimTK::State& s, MusclePotentialEnergyInfo& mpei) const 
 {
 
 }
 
-MusclePotentialEnergyInfo& Haeufle2014Muscle::updMusclePotentialEnergyInfo(
-    const SimTK::State& s) const {
 
-}
-
-
-double Haeufle2014Muscle::clampFiberLength(double lce) const {
-
+double Haeufle2014Muscle::clampFiberLength(double lce) const 
+{
+    // is this function necessary?
+    return max(lce, 0.0);
 }

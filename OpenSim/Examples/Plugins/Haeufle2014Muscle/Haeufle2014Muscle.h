@@ -38,6 +38,9 @@
 // Sub-models used by this muscle model
 #include <OpenSim/Actuators/MuscleFixedWidthPennationModel.h>
 
+
+// TODO check if the included curve headers need to be transformed to modelcomponents
+// like the activation dynamic of the fixedwidth pennation models are
 #include "RockenfellerFirstOrderActivationDynamicModel.h"
 #include "HaeufleActiveForceLengthCurve.h"
 #include "HaeufleForceVelocityCurve.h"
@@ -81,7 +84,7 @@ public:
 //==============================================================================
     // TODO check which other properties are necessary?
     // which of these properties are essential to describe a muscle and are needed for calculations?
-    OpenSim_DECLARE_PROPERTY(default_activation, double,
+    OpenSim_DECLARE_PROPERTY(default_calcium_concentration, double,
             "Assumed initial activation level if none is assigned.");
     OpenSim_DECLARE_PROPERTY(default_fiber_length, double,
             "Assumed initial fiber length if none is assigned.");
@@ -130,7 +133,7 @@ public:
 
     /** @returns The default activation level that is used as an initial
     condition if none is provided by the user. */
-    double getDefaultActivation() const;
+    double getDefaultCalciumConcentration() const;
 
     /** @returns The default fiber length that is used as an initial condition
     if none is provided by the user. */
@@ -156,7 +159,11 @@ public:
     const RockenfellerFirstOrderActivationDynamicModel&
     getActivationModel() const;
 
+    /** @returns The current calcium concentration derivative value */
+    double getCalciumConcentrationDerivative(const SimTK::State& s) const;
 
+    /** @returns The current calcium concentration */
+    double getCalciumConcentration(const SimTK::State& s) const;
 
     // TODO add more getter methods which are needed during calculation, for example
     // getFiberVelocity, getActivation (see Muscle.h) ....
@@ -168,9 +175,9 @@ public:
 // SET METHODS
 //==============================================================================
 
-    /** @param activation The default activation level that is used to
+    /** @param calciumConcentration The default concentration level that is used to
     initialize the muscle. */
-    void setDefaultActivation(double activation);
+    void setDefaultCalciumConcentration(double calciumConcentration);
 
     /** @param fiberLength The default fiber length that is used to initialize
     the muscle. */
@@ -243,6 +250,11 @@ public:
     void computeFiberEquilibrium(
             SimTK::State& s, bool solveForVelocity = false) const;
 
+    /** Adjust the properties of the muscle after the model has been scaled. The
+    optimal fiber length and tendon slack length are each multiplied by the
+    ratio of the current path length and the path length before scaling. */
+    void extendPostScale(
+            const SimTK::State& s, const ScaleSet& scaleSet) override;
 
 protected:
 
@@ -260,25 +272,34 @@ protected:
     void setStateVariableDeriv(const SimTK::State& s,
             const std::string& aStateName, double aValue) const;
 
-//==============================================================================
-// MUSCLE INTERFACE REQUIREMENTS
-//==============================================================================
-    /**Developer Access to intermediate values calculate by the muscle model*/
-    const MuscleLengthInfo& getMuscleLengthInfo(
-                    const SimTK::State& s) const;
-    MuscleLengthInfo& updMuscleLengthInfo(const SimTK::State& s) const;
+    //--------------------------------------------------------------------------
+    // CALCULATIONS
+    //--------------------------------------------------------------------------
+    /** @name Muscle State Dependent Calculations
+     *  Developers must override these methods to implement the desired behavior
+     *  of their muscle models. Unless you are augmenting the behavior
+     *  of an existing muscle class or writing a new derived class, you do not
+     *  have access to these methods.
+     */
+    //@{
+    /** calculate muscle's position related values such fiber and tendon
+       lengths, normalized lengths, pennation angle, etc... */
+    void calcMuscleLengthInfo(
+            const SimTK::State& s, MuscleLengthInfo& mli) const override;
 
-    const FiberVelocityInfo& getFiberVelocityInfo(const SimTK::State& s) const;
-    FiberVelocityInfo& updFiberVelocityInfo(const SimTK::State& s) const;
+    /** calculate muscle's fiber velocity and pennation angular velocity, etc...
+     */
+    void calcFiberVelocityInfo(
+            const SimTK::State& s, FiberVelocityInfo& fvi) const override;
 
-    const MuscleDynamicsInfo& getMuscleDynamicsInfo(
-            const SimTK::State& s) const;
-    MuscleDynamicsInfo& updMuscleDynamicsInfo(const SimTK::State& s) const;
+    /** calculate muscle's active and passive force-length, force-velocity,
+        tendon force, relationships and their related values */
+    void calcMuscleDynamicsInfo(
+            const SimTK::State& s, MuscleDynamicsInfo& mdi) const override;
 
-    const MusclePotentialEnergyInfo& getMusclePotentialEnergyInfo(
-            const SimTK::State& s) const;
-    MusclePotentialEnergyInfo& updMusclePotentialEnergyInfo(
-            const SimTK::State& s) const;
+    /** calculate muscle's fiber and tendon potential energy */
+    void calcMusclePotentialEnergyInfo(
+            const SimTK::State& s, MusclePotentialEnergyInfo& mpei) const override;
 
 //==============================================================================
 // MODELCOMPONENT INTERFACE REQUIREMENTS
@@ -295,7 +316,7 @@ protected:
     /** Sets the default state for the ModelComponent */
     void extendSetPropertiesFromState(const SimTK::State& s) override;
 
-    /** Computes state variable derivatives */
+    /** Computes and sets state variable derivatives */
     void computeStateVariableDerivatives(const SimTK::State& s) const override;
 
 private:
@@ -318,6 +339,20 @@ private:
     MemberSubcomponentIndex actMdlIdx{
             constructSubcomponent<RockenfellerFirstOrderActivationDynamicModel>(
                     "actMdl")};
+
+    // TODO: fill in:
+    // Status flag returned by ().
+    enum StatusFromInitMuscleState {
+        Success_Converged,
+        Warning_FiberAtLowerBound,
+        Failure_MaxIterationsReached
+    };
+
+    // Associative array of values returned by estimateMuscleFiberState():
+    // solution_error, iterations, fiber_length, fiber_velocity, and
+    // tendon_force.
+    typedef std::map<std::string, double> ValuesFromEstimateMuscleFiberState;
+
 
     // Returns the maximum of the minimum fiber length and the current fiber
     // length.
