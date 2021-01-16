@@ -340,7 +340,6 @@ private:
             constructSubcomponent<RockenfellerFirstOrderActivationDynamicModel>(
                     "actMdl")};
 
-    // TODO: fill in:
     // Status flag returned by ().
     enum StatusFromInitMuscleState {
         Success_Converged,
@@ -348,15 +347,23 @@ private:
         Failure_MaxIterationsReached
     };
 
-    // Associative array of values returned by estimateMuscleFiberState():
+    // Associative array of values returned by initMuscleState():
     // solution_error, iterations, fiber_length, fiber_velocity, and
     // tendon_force.
-    typedef std::map<std::string, double> ValuesFromEstimateMuscleFiberState;
+    typedef std::map<std::string, double> ValuesFromInitMuscleState;
 
 
     // Returns the maximum of the minimum fiber length and the current fiber
     // length.
     double clampFiberLength(double lce) const;
+
+    // The tendon Damping Force which is not included in the Muscle.h MuscleDynamicsInfo struct
+    // but is necessary for the Haeufle2014Muscle modell.
+    double m_tendonDampingForce;
+
+    std::pair<StatusFromInitMuscleState, ValuesFromInitMuscleState>
+    initMuscleState(const double aActivation, const double pathLength,
+            const double aSolTolerance, const int aMaxIterations) const;
 
 };
 

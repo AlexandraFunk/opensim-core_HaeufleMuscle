@@ -351,10 +351,9 @@ void Haeufle2014Muscle::setFiberLength(
     if (!get_ignore_tendon_compliance()) {
         setStateVariableValue(
                 s, STATE_FIBER_LENGTH_NAME, clampFiberLength(fiberLength));
-        // TODO check if the next lines are needed, since they only work with versions beyond 4.1
-        // markCacheVariableInvalid(s, _lengthInfoCV);
-        // markCacheVariableInvalid(s, _velInfoCV);
-        // markCacheVariableInvalid(s, _dynamicsInfoCV);
+        markCacheVariableInvalid(s, _lengthInfoCV);
+        markCacheVariableInvalid(s, _velInfoCV);
+        markCacheVariableInvalid(s, _dynamicsInfoCV);
     }
 }
 
@@ -372,9 +371,8 @@ void Haeufle2014Muscle::setActivation(
         setStateVariableValue(s, STATE_CALCIUM_CONCENTRATION,
                 getActivationModel().clampGamma(activation));
     }
-    //markCacheVariableInvalid(s, _velInfoCV);
-    //markCacheVariableInvalid(s, _dynamicsInfoCV);
-
+    markCacheVariableInvalid(s, _velInfoCV);
+    markCacheVariableInvalid(s, _dynamicsInfoCV);
 }
 
 double Haeufle2014Muscle::computeActuation(const SimTK::State& s) const {
@@ -389,6 +387,7 @@ void Haeufle2014Muscle::computeFiberEquilibrium(
     // Initial activation and fiber length from input State, s.
     _model->getMultibodySystem().realize(s, SimTK::Stage::Velocity);
     double activation = getActivation(s);
+    double pathLength = getLength(s);
 
     // Tolerance, in Newtons, of the desired equilibrium
     const double tol =
@@ -396,31 +395,128 @@ void Haeufle2014Muscle::computeFiberEquilibrium(
 
     int maxIter = 20; // Should this be user settable?
 
-    std::pair<StatusFromInitMuscleState, ValuesFromInitMuscleState> result;
+    try {
+        std::pair<StatusFromInitMuscleState, ValuesFromInitMuscleState> result =
+                initMuscleState(activation, pathLength, tol, maxIter);
+
+        switch (result.first) {
+
+        case StatusFromInitMuscleState::Success_Converged:
+            setActuation(s, result.second["tendon_force"]);
+            setFiberLength(s, result.second["fiber_length"]);
+            break;
+
+        case StatusFromInitMuscleState::Warning_FiberAtLowerBound:
+            log_warn("Haeufle2014Muscle static solution: '{}' is "
+                     "at its minimum fiber length of {}.",
+                    getName(), result.second["fiber_length"]);
+            setActuation(s, result.second["tendon_force"]);
+            setFiberLength(s, result.second["fiber_length"]);
+            break;
+
+        case StatusFromInitMuscleState::Failure_MaxIterationsReached:
+            // Report internal variables and throw exception.
+            std::ostringstream ss;
+            ss << "\n  Solution error " << abs(result.second["solution_error"])
+               << " exceeds tolerance of " << tol << "\n"
+               << "  Newton iterations reached limit of " << maxIter << "\n"
+               << "  Activation is " << activation << "\n"
+               << "  Fiber length is " << result.second["fiber_length"] << "\n";
+            OPENSIM_THROW_FRMOBJ(MuscleCannotEquilibrate, ss.str());
+            break;
+        }
+
+    } catch (const std::exception& x) {
+        OPENSIM_THROW_FRMOBJ(MuscleCannotEquilibrate,
+                "Internal exception encountered.\n" + std::string{x.what()});
+    }
 
 }
 
 void Haeufle2014Muscle::calcMuscleLengthInfo(
         const SimTK::State& s, MuscleLengthInfo& mli) const 
 {
+    try {
+        // Get musculotendon actuator properties.
+        double optFiberLength = getOptimalFiberLength();
+        double tendonSlackLen = getTendonSlackLength();
 
+        if (get_ignore_tendon_compliance()) { // rigid tendon
+            mli.fiberLength =
+                    clampFiberLength(getPennationModel().calcFiberLength(
+                            getLength(s), tendonSlackLen));
+        } else { // elastic tendon
+            mli.fiberLength = clampFiberLength(
+                    getStateVariableValue(s, STATE_FIBER_LENGTH_NAME));
+        }
+
+        mli.normFiberLength = mli.fiberLength / optFiberLength;
+        mli.pennationAngle =
+                getPennationModel().calcPennationAngle(mli.fiberLength);
+        mli.cosPennationAngle = cos(mli.pennationAngle);
+        mli.sinPennationAngle = sin(mli.pennationAngle);
+        mli.fiberLengthAlongTendon = mli.fiberLength * mli.cosPennationAngle;
+
+        // Necessary even for the rigid tendon, as it might have gone slack.
+        mli.tendonLength = getPennationModel().calcTendonLength(
+                mli.cosPennationAngle, mli.fiberLength, getLength(s));
+        mli.normTendonLength = mli.tendonLength / tendonSlackLen;
+        /** Tendon strain is defined using the elongation of the material
+         * divided by its resting length.This is identical to the engineering
+         * definition of strain.Thus a tendonStrain of 0.01 means that the
+         * tendon is currently 1 % longer than its resting length.*/
+        mli.tendonStrain = mli.normTendonLength - 1.0;
+        
+        // This model doesnt use this multipliers
+        mli.fiberPassiveForceLengthMultiplier = SimTK::NaN;
+        mli.fiberActiveForceLengthMultiplier = SimTK::NaN;
+
+    }catch (const std::exception& x) {
+        std::string msg = "Exception caught in Haeufle2014Muscle::"
+                            "calcMuscleLengthInfo from " +
+                            getName() + "\n" + x.what();
+        throw OpenSim::Exception(msg);
+    }
 }
 
 void Haeufle2014Muscle::calcFiberVelocityInfo(
         const SimTK::State& s, FiberVelocityInfo& fvi) const 
 {
+    try {
+
+    } catch (const std::exception& x) {
+        std::string msg = "Exception caught in Haeufle2014Muscle::"
+                          "calcFiberVelocityInfo from " +
+                          getName() + "\n" + x.what();
+        throw OpenSim::Exception(msg);
+    }
 
 }
 
 void Haeufle2014Muscle::calcMuscleDynamicsInfo(
         const SimTK::State& s, MuscleDynamicsInfo& mdi) const 
 {
+    try {
+
+    } catch (const std::exception& x) {
+        std::string msg = "Exception caught in Haeufle2014Muscle::"
+                          "calcMuscleDynamicsInfo from " +
+                          getName() + "\n" + x.what();
+        throw OpenSim::Exception(msg);
+    }
 }
 
 void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
         const SimTK::State& s, MusclePotentialEnergyInfo& mpei) const 
 {
+    try {
 
+    } catch (const std::exception& x) {
+        std::string msg = "Exception caught in Haeufle2014Muscle::"
+                          "calcMusclePotentialEnergyInfo from " +
+                          getName() + "\n" + x.what();
+        throw OpenSim::Exception(msg);
+    }
 }
 
 
@@ -428,4 +524,14 @@ double Haeufle2014Muscle::clampFiberLength(double lce) const
 {
     // is this function necessary?
     return max(lce, 0.0);
+}
+
+
+std::pair<Haeufle2014Muscle::StatusFromInitMuscleState,
+        Haeufle2014Muscle::ValuesFromInitMuscleState>
+    Haeufle2014Muscle::initMuscleState(
+        const double aActivation, const double pathLength, const double aSolTolerance,
+        const int aMaxIterations) const 
+{
+
 }
