@@ -381,8 +381,7 @@ double Haeufle2014Muscle::computeActuation(const SimTK::State& s) const {
     return mdi.tendonForce;
 }
 
-void Haeufle2014Muscle::computeFiberEquilibrium(
-    SimTK::State& s, bool solveForVelocity) const 
+void Haeufle2014Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const 
 {
     // Initial activation and fiber length from input State, s.
     _model->getMultibodySystem().realize(s, SimTK::Stage::Velocity);
@@ -393,7 +392,7 @@ void Haeufle2014Muscle::computeFiberEquilibrium(
     const double tol =
             max(1e-8 * getMaxIsometricForce(), SimTK::SignificantReal * 10);
 
-    int maxIter = 20; // Should this be user settable?
+    int maxIter = 200; // Should this be user settable?
 
     try {
         std::pair<StatusFromInitMuscleState, ValuesFromInitMuscleState> result =
@@ -452,75 +451,79 @@ void Haeufle2014Muscle::calcMuscleLengthInfo(
 
         mli.normFiberLength = mli.fiberLength / optFiberLength;
         mli.pennationAngle =
-                getPennationModel().calcPennationAngle(mli.fiberLength);
+            getPennationModel().calcPennationAngle(mli.fiberLength);
         mli.cosPennationAngle = cos(mli.pennationAngle);
         mli.sinPennationAngle = sin(mli.pennationAngle);
         mli.fiberLengthAlongTendon = mli.fiberLength * mli.cosPennationAngle;
 
         // Necessary even for the rigid tendon, as it might have gone slack.
         mli.tendonLength = getPennationModel().calcTendonLength(
-                mli.cosPennationAngle, mli.fiberLength, getLength(s));
+            mli.cosPennationAngle, mli.fiberLength, getLength(s));
         mli.normTendonLength = mli.tendonLength / tendonSlackLen;
         /** Tendon strain is defined using the elongation of the material
          * divided by its resting length.This is identical to the engineering
          * definition of strain.Thus a tendonStrain of 0.01 means that the
          * tendon is currently 1 % longer than its resting length.*/
         mli.tendonStrain = mli.normTendonLength - 1.0;
-        
+
         // This model doesnt use this multipliers
         mli.fiberPassiveForceLengthMultiplier = SimTK::NaN;
         mli.fiberActiveForceLengthMultiplier = SimTK::NaN;
 
-    }catch (const std::exception& x) {
+    }
+    catch (const std::exception& x) {
         std::string msg = "Exception caught in Haeufle2014Muscle::"
-                            "calcMuscleLengthInfo from " +
-                            getName() + "\n" + x.what();
+            "calcMuscleLengthInfo from " +
+            getName() + "\n" + x.what();
         throw OpenSim::Exception(msg);
     }
 }
 
 void Haeufle2014Muscle::calcFiberVelocityInfo(
-        const SimTK::State& s, FiberVelocityInfo& fvi) const 
+    const SimTK::State& s, FiberVelocityInfo& fvi) const
 {
     try {
 
-    } catch (const std::exception& x) {
+    }
+    catch (const std::exception& x) {
         std::string msg = "Exception caught in Haeufle2014Muscle::"
-                          "calcFiberVelocityInfo from " +
-                          getName() + "\n" + x.what();
+            "calcFiberVelocityInfo from " +
+            getName() + "\n" + x.what();
         throw OpenSim::Exception(msg);
     }
 
 }
 
 void Haeufle2014Muscle::calcMuscleDynamicsInfo(
-        const SimTK::State& s, MuscleDynamicsInfo& mdi) const 
+    const SimTK::State& s, MuscleDynamicsInfo& mdi) const
 {
     try {
 
-    } catch (const std::exception& x) {
+    }
+    catch (const std::exception& x) {
         std::string msg = "Exception caught in Haeufle2014Muscle::"
-                          "calcMuscleDynamicsInfo from " +
-                          getName() + "\n" + x.what();
+            "calcMuscleDynamicsInfo from " +
+            getName() + "\n" + x.what();
         throw OpenSim::Exception(msg);
     }
 }
 
 void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
-        const SimTK::State& s, MusclePotentialEnergyInfo& mpei) const 
+    const SimTK::State& s, MusclePotentialEnergyInfo& mpei) const
 {
     try {
 
-    } catch (const std::exception& x) {
+    }
+    catch (const std::exception& x) {
         std::string msg = "Exception caught in Haeufle2014Muscle::"
-                          "calcMusclePotentialEnergyInfo from " +
-                          getName() + "\n" + x.what();
+            "calcMusclePotentialEnergyInfo from " +
+            getName() + "\n" + x.what();
         throw OpenSim::Exception(msg);
     }
 }
 
 
-double Haeufle2014Muscle::clampFiberLength(double lce) const 
+double Haeufle2014Muscle::clampFiberLength(double lce) const
 {
     // is this function necessary?
     return max(lce, 0.0);
@@ -528,10 +531,35 @@ double Haeufle2014Muscle::clampFiberLength(double lce) const
 
 
 std::pair<Haeufle2014Muscle::StatusFromInitMuscleState,
-        Haeufle2014Muscle::ValuesFromInitMuscleState>
+    Haeufle2014Muscle::ValuesFromInitMuscleState>
     Haeufle2014Muscle::initMuscleState(
         const double aActivation, const double pathLength, const double aSolTolerance,
-        const int aMaxIterations) const 
+        const int aMaxIterations) const
 {
+    /** implementing a simple Bisection method to solve the inital fiber length
+     * problem:
+     * cos(alpha) * ( q * Fisom * Fmax + Fpee) - Fsee = 0
+     * within the interval (0, lMTC)
+     */
+
+     // get interval borders:
+    double lower_border = 0;
+    double upper_border = pathLength;
+
+    // initialize iteration variable
+    int iter = 0;
+    double ferr = SimTK::MostPositiveReal; // Solution error
+
+    while ((abs(ferr) > aSolTolerance) && (iter < aMaxIterations))
+    {
+        double middle_border = (lower_border + upper_border) / 2;
+
+        double Fmax = getMaxIsometricForce();
+        // calculate Fisom with lower and middle_border
+
+        // calculate Fpee with lower and middle_border 
+
+        // calculate Fsee with lower and middle_border
+    }
 
 }

@@ -231,24 +231,11 @@ public:
     /** Computes the fiber length such that the fiber and tendon are developing
     the same force, distributing the velocity of the entire musculotendon
     actuator between the fiber and tendon according to their relative
-    stiffnesses.
+    stiffnesses. Assuming muscle-tendon velocity as zero
     @param[in,out] s The state of the system.
     @throws MuscleCannotEquilibrate
     */
-    void computeInitialFiberEquilibrium(SimTK::State& s) const override {
-        computeFiberEquilibrium(s, false);
-    }
-
-    /** Computes the fiber length such that the fiber and tendon are developing
-        the same force, either assuming muscle-tendon velocity as provided
-        by the state or zero as designated by the useZeroVelocity flag.
-        @param[in,out] s         The state of the system.
-        @param solveForVelocity  Flag indicating to solve for fiber velocity,
-                                 which by default is false (zero fiber-velocity)
-        @throws MuscleCannotEquilibrate
-    */
-    void computeFiberEquilibrium(
-            SimTK::State& s, bool solveForVelocity = false) const;
+    void computeInitialFiberEquilibrium(SimTK::State& s) const override;
 
     /** Adjust the properties of the muscle after the model has been scaled. The
     optimal fiber length and tendon slack length are each multiplied by the
