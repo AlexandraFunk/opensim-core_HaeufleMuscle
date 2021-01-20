@@ -77,6 +77,8 @@ void Haeufle2014Muscle::constructProperties() {
     constructProperty_force_at_nonlinear_linear_transition(getMaxIsometricForce() * 0.4); // dFsee0 = 0.4 * Fmax
     constructProperty_dse_damping_factor(0.3);
     constructProperty_rse_damping_factor(0.01);
+    constructProperty_dpe_damping_factor(0);
+    constructProperty_rpe_damping_factor(1);
 
     //TODO check if this is necessary?
     // setMinControl(get_minimum_activation());
@@ -399,6 +401,16 @@ double Haeufle2014Muscle::getRseDampingFactor() const {
     return get_rse_damping_factor();
 }
 
+    /** @returns The dse damping factor */
+double Haeufle2014Muscle::getDpeDampingFactor() const {
+    return get_dpe_damping_factor();
+}
+
+/** @returns The rse damping factor */
+double Haeufle2014Muscle::getRpeDampingFactor() const {
+    return get_rpe_damping_factor();
+}
+
 const MuscleFixedWidthPennationModel&
 Haeufle2014Muscle::getPennationModel() const {
     return getMemberSubcomponent<MuscleFixedWidthPennationModel>(penMdlIdx);
@@ -487,6 +499,13 @@ void Haeufle2014Muscle::setTendonDampingParams(double aDseDampingFactor,
 {
     set_dse_damping_factor(aDseDampingFactor);
     set_rse_damping_factor(aRseDampingFactor);
+}
+
+void Haeufle2014Muscle::setParallelDampingParams(
+    double aDpeDampingFactor, double aRpeDampingFactor) 
+{
+    set_dpe_damping_factor(aDpeDampingFactor);
+    set_rpe_damping_factor(aRpeDampingFactor);
 }
 
 
@@ -694,7 +713,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
         fvi.tendonVelocity = dtl;
         fvi.normTendonVelocity = dtl / getTendonSlackLength();
         // This one is not implemented in this model
-        // fvi.fiberForceVelocityMultiplier = SimTK::NaN;
+        fvi.fiberForceVelocityMultiplier = SimTK::NaN;
 
     }
     catch (const std::exception& x) {
@@ -731,6 +750,7 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
                      Fmax;
         double FfiberAT = mli.cosPennationAngle * (Fce + Fpee);
         double Fsde = calcFsde(fvi.tendonVelocity, FfiberAT);
+        double Fpde = calcFpde();
         
 
 
@@ -759,6 +779,12 @@ void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
 
         // not implemente, is this necessary for this muscle model?
 
+        // Implement TendonPotentialEnergy
+        // integral über Kraft Längen Kurve bis aktuelle Tendon länge
+        // nur in Pee und See
+
+        // implementierung analog zu Millard
+
     }
     catch (const std::exception& x) {
         std::string msg = "Exception caught in Haeufle2014Muscle::"
@@ -771,7 +797,7 @@ void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
 
 double Haeufle2014Muscle::clampFiberLength(double lce) const
 {
-    // is this function necessary?
+    // Fehlerausgabe weil Muskel schlackert wenn kleiner 0
     return max(lce, 0.0);
 }
 
@@ -925,6 +951,21 @@ double Haeufle2014Muscle::calcFsde(double serialElasticLengthVelocity,
     return Fsde;
 }
 
+double Haeufle2014Muscle::calcFpde(
+    double lengthVelocity, double totalFiberForce) const 
+{
+    double Dpe = getDpeDampingFactor();
+    double Rpe = getRpeDampingFactor();
+    double Fmax = getMaxIsometricForce();
+    double lceopt = getOptimalFiberLength();
+    double Arel0 = getConcentricContractionARel0();
+    double Brel0 = getConcentricContractionBRel0();
+
+    double Fpde = Dpe * Fmax * Arel0 / (lceopt * Brel0) *
+                  ((1 - Rpe) * totalFiberForce / Fmax + Rpe) * lengthVelocity;
+
+    return Fpde;
+}
 
 double Haeufle2014Muscle::calcC2PenMaria(double fiberLength, double cosPenAngle,
         double activation, double Fisom, double Fpee) const {

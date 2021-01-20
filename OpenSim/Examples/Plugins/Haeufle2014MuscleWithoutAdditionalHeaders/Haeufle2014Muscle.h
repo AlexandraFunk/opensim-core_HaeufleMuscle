@@ -119,6 +119,11 @@ public:
             "The dse damping factor as used in Moerl et al (2012)");
     OpenSim_DECLARE_PROPERTY(rse_damping_factor, double,
             "The rse damping factor as used in Moerl et al (2012)");
+    OpenSim_DECLARE_PROPERTY(dpe_damping_factor, double,
+            "The dpe damping factor as used in Moerl et al (2012)");
+    OpenSim_DECLARE_PROPERTY(rpe_damping_factor, double,
+            "The rpe damping factor as used in Moerl et al (2012)");
+    // TODO include DPe und Rpe
 
 //==============================================================================
 // OUTPUTS
@@ -215,6 +220,12 @@ public:
 
     /** @returns The rse damping factor */
     double getRseDampingFactor() const;
+
+    /** @returns The dse damping factor */
+    double getDpeDampingFactor() const;
+
+    /** @returns The rse damping factor */
+    double getRpeDampingFactor() const;
 
     /** @returns The MuscleFixedWidthPennationModel owned by this model. */
     const MuscleFixedWidthPennationModel& getPennationModel() const;
@@ -313,6 +324,14 @@ public:
     void setTendonDampingParams(double aDseDampingFactor,
             double aRseDampingFactor);
 
+    /**
+    @param aDseDampingFactor
+        The Dse damping factor
+    @param aRseDampingFactor
+        The Rse damping factor
+    */
+    void setParallelDampingParams(
+            double aDpeDampingFactor, double aRpeDampingFactor);
 
     /** @param[out] s The state of the system.
         @param fiberLength The desired fiber length (m). */
@@ -412,6 +431,10 @@ protected:
      * elastic length velocity and the totalFiberForceAlongTendon */
     double calcFsde(double serialElasticLengthVelocity,
             double totalFiberForceAlongTendon) const;
+ 
+    /** Calculates the parallel damping force Fpde which depends on the
+     *  length velocity and the totalFiberForce */
+    double calcFpde(double lengthVelocity, double totalFiberForce) const;
 
     double calcC2PenMaria(double fiberLength, double cosPenAngle,
             double activation, double Fisom, double Fpee) const;
