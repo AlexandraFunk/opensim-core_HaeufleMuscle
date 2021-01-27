@@ -35,6 +35,7 @@
 #include "Schutte1993Muscle_Deprecated.h"
 #include "Delp1990Muscle_Deprecated.h"
 #include "Thelen2003Muscle_Deprecated.h"
+#include "Haeufle2014Muscle.h"
 #include "Thelen2003Muscle.h"
 #include "RigidTendonMuscle.h"
 #include "Millard2012EquilibriumMuscle.h"

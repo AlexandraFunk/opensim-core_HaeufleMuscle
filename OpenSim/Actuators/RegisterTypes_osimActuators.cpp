@@ -55,6 +55,9 @@
 
 #include "MuscleFixedWidthPennationModel.h"
 
+#include "RockenfellerFirstOrderActivationDynamicModel.h"
+#include "Haeufle2014Muscle.h"
+
 #include "Millard2012EquilibriumMuscle.h"
 #include "Millard2012AccelerationMuscle.h"
 #include "DeGrooteFregly2016Muscle.h"

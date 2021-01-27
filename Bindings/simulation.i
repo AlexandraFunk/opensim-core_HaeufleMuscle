@@ -316,6 +316,8 @@ OpenSim::ModelComponentSet<OpenSim::Controller>;
 %include <OpenSim/Actuators/TendonForceLengthCurve.h>
 %include <OpenSim/Actuators/MuscleFirstOrderActivationDynamicModel.h>
 %include <OpenSim/Actuators/MuscleFixedWidthPennationModel.h>
+%include <OpenSim/Actuators/RockenfellerFirstOrderActivationDynamicModel.h>
+%include <OpenSim/Actuators/Haeufle2014Muscle.h>
 %include <OpenSim/Actuators/Thelen2003Muscle.h>
 %include <OpenSim/Actuators/Millard2012EquilibriumMuscle.h>
 
