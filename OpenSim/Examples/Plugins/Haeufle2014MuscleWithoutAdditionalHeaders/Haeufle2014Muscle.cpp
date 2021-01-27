@@ -74,7 +74,7 @@ void Haeufle2014Muscle::constructProperties() {
     constructProperty_parallel_elastic_force_rel_to_fmax(2.0);
     constructProperty_relative_stretch_at_nonlinear_linear_transition(0.0425);
     constructProperty_relative_stretch_at_linear_part(0.0170);
-    constructProperty_force_at_nonlinear_linear_transition(getMaxIsometricForce() * 0.4); // dFsee0 = 0.4 * Fmax
+    constructProperty_relative_force_at_nonlinear_linear_transition(0.4); // before: dFsee0 = 0.4 * Fmax
     constructProperty_dse_damping_factor(0.3);
     constructProperty_rse_damping_factor(0.01);
     constructProperty_dpe_damping_factor(0);
@@ -160,9 +160,9 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
             getProperty_relative_stretch_at_linear_part().getName(),
             "The relative stretch in the linear part must be greater than "
             "zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_force_at_nonlinear_linear_transition() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_relative_force_at_nonlinear_linear_transition() <= 0,
             InvalidPropertyValue,
-            getProperty_force_at_nonlinear_linear_transition().getName(),
+            getProperty_relative_force_at_nonlinear_linear_transition().getName(),
             "The force at the nonlinear/linear transition must be greater than "
             "zero");
     OPENSIM_THROW_IF_FRMOBJ(get_dse_damping_factor() <= 0, InvalidPropertyValue,
@@ -176,8 +176,6 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
     // claculations wouldns be possible!
     // throw errors if variables are in the wrong range 
     // check millard2012EquilibriumMuscle function for more info
-
-
 
 
     // Propagate properties down to pennation model subcomponent. If any of the
@@ -389,8 +387,8 @@ double Haeufle2014Muscle::getRelativeStretchAtLinearPart() const {
     return get_relative_stretch_at_linear_part();
 }
 
-double Haeufle2014Muscle::getForceAtNonlinearLinearTransition() const {
-    return get_force_at_nonlinear_linear_transition();
+double Haeufle2014Muscle::getRelativeForceAtNonlinearLinearTransition() const {
+    return get_relative_force_at_nonlinear_linear_transition();
 }
 
 double Haeufle2014Muscle::getDseDampingFactor() const {
@@ -401,12 +399,10 @@ double Haeufle2014Muscle::getRseDampingFactor() const {
     return get_rse_damping_factor();
 }
 
-    /** @returns The dse damping factor */
 double Haeufle2014Muscle::getDpeDampingFactor() const {
     return get_dpe_damping_factor();
 }
 
-/** @returns The rse damping factor */
 double Haeufle2014Muscle::getRpeDampingFactor() const {
     return get_rpe_damping_factor();
 }
@@ -426,7 +422,8 @@ double Haeufle2014Muscle::getCalciumConcentration(const SimTK::State& s) const {
     return getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION);
 }
 
-double Haeufle2014Muscle::getCalciumConcentrationDerivative(const SimTK::State& s) const {
+double Haeufle2014Muscle::getCalciumConcentrationDerivative(const SimTK::State& s) const 
+{
     if (get_ignore_activation_dynamics()) { return 0.0; }
 
     return getActivationModel().calcDerivative(
@@ -476,9 +473,10 @@ void Haeufle2014Muscle::setParallelElasticParameters(
     set_parallel_elastic_force_rel_to_fmax(aParallelElasticForceRelToFmax);
 }
 
-void Haeufle2014Muscle::setForceAtNonlinearLinearTransition(
-        double aForceAtNonlinearLinearTransition) {
-    set_force_at_nonlinear_linear_transition(aForceAtNonlinearLinearTransition);
+void Haeufle2014Muscle::setRelativeForceAtNonlinearLinearTransition(
+        double aRelativeForceAtNonlinearLinearTransition) {
+    set_relative_force_at_nonlinear_linear_transition(
+            aRelativeForceAtNonlinearLinearTransition);
 }
 
 void Haeufle2014Muscle::
@@ -523,6 +521,8 @@ void Haeufle2014Muscle::setFiberLength(
 //==============================================================================
 // MUSCLE.H INTERFACE
 //==============================================================================
+// is necessary since it is implemented in the Muscle.h interface but in this case
+// it doesnt set the activation rather then the calcium concentration stat variable
 void Haeufle2014Muscle::setActivation(
     SimTK::State& s, double activation) const 
 {
@@ -654,8 +654,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
         double Fisom = calcFisom(mli.fiberLength);
         double Fpee = calcFpee(mli.fiberLength);
         double Fsee = calcFsee(mli.fiberLength);
-        double Arel = calcArel(mli.fiberLength, activation, Fisom);
-        double Brel = calcBrel(activation);
+
         /**
          * For calculating the coefficients C2, C1 and C0 use the pennated
          * Haeufle muscle description by Maria Hammer. Here the equation is
@@ -665,56 +664,223 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
          * and finally divide this by the maximum isometric force of this
          * muscle Fmax
          */
-        double C2woFmax = calcC2PenMaria(mli.fiberLength, mli.cosPennationAngle,
-                activation, Fisom, Fpee);
-        double C1woFmax = calcC1PenMaria(mli.fiberLength, ldotMTC,
-                mli.cosPennationAngle, activation, Fisom, Fpee, Fsee);
-        double C0woFmax = calcC0PenMaria(
-                ldotMTC, mli.cosPennationAngle, activation, Fisom, Fpee, Fsee);
 
-        // solve the equation 
-        // TODO how to solve this?
-        if (C2woFmax > 0) {
-            double x1 = -C1woFmax +
-                        sqrt(pow(C1woFmax, 2) - 4 * C2woFmax * C0woFmax) /
-                                (2 * C2woFmax);
-            double x2 = -C1woFmax -
-                        sqrt(pow(C1woFmax, 2) - 4 * C2woFmax * C0woFmax) /
-                                (2 * C2woFmax);
+        bool uniqueSolution = false;
+        bool calcConcCase = false; 
+        bool calcEccCase = false;
+        bool concentricCaseDone = false;
+        bool eccentricCaseDone = false;
+        double lcedot = 0;
+        double Arel = 0;
+        double Brel = 0;
+
+        for (int loopvar = 0; loopvar < 2; loopvar++) {
+            // ldotMTC <= 0 probably concentric movement (start calculating
+            // with Arel)
+            if ( (ldotMTC <= 0 && !concentricCaseDone) || eccentricCaseDone) {
+                Arel = calcArel(mli.fiberLength, activation, Fisom);
+                Brel = calcBrel(activation);
+                calcConcCase = true;
+            }
+            if ( (ldotMTC > 0 && !eccentricCaseDone) || concentricCaseDone) {
+                Arel = calcArele(activation, Fisom);
+                Brel = calcBrele(
+                        mli.fiberLength / lceopt, activation, Fisom);
+                calcEccCase = true;
+            }
+
+            // start calculating C2, C1, C0 and D
+            double C2dashed = calcC2dash(
+                    mli.cosPennationAngle, activation, Fpee, Fsee);
+            double C1dashed = calcC1dash(mli.fiberLength, ldotMTC,
+                    mli.cosPennationAngle, activation, Fisom, Fpee,
+                    Fsee, Arel, Brel);
+            double C0dashed = calcC0dash(ldotMTC, mli.cosPennationAngle,
+                    activation, Fisom, Fpee, Fsee);
+            double Ddashed = pow(C1dashed, 2) - 4 * C0dashed * C2dashed;
+
+            if (abs(C2dashed) > SimTK::SignificantReal) {
+                if (Ddashed >= 0) {
+                    lcedot = lceopt * (-C1dashed - sqrt(Ddashed)) /
+                                (2 * C2dashed);
+                } else {
+                    if (calcEccCase) {
+                        log_warn(
+                                "'{}': Warning D for the {} case is {} "
+                                "than 0, can't calculate with imaginary "
+                                "values. If this is the first time for the "
+                                "calculation, retrying with the {} case...",
+                                getName(), "eccentric", "smaller",
+                                "concentric");
+                        // reset calculation flags
+                        calcEccCase = false;
+                        eccentricCaseDone = true;
+                        continue;
+                    }
+                    if (calcConcCase) {
+                        log_warn(
+                                "'{}': Warning D for the {} case is {} "
+                                "than 0, can't calculate with imaginary "
+                                "values. If this is the first time for the "
+                                "calculation, retrying with the {} case...",
+                                getName(), "concentric", "smaller",
+                                "eccentric");
+                        // reset calculation flags
+                        calcConcCase = false;
+                        concentricCaseDone = true;
+                        continue;
+                    }
+                }
+            } else {
+                if (abs(C1dashed) > SimTK::SignificantReal) {
+                    // this is actually only a linear equation
+                    lcedot = -lceopt * C0dashed / C1dashed;
+                } else {
+                    if (calcEccCase) {
+                        log_warn(
+                                "'{}': Warning no algebraic solution found "
+                                "in {} case. C1 must not be equal to 0. If "
+                                "this is the first time for the "
+                                "calculation, retrying with the {} case...",
+                                getName(), "eccentric", "concentric");
+                        // reset calculation flags
+                        calcEccCase = false;
+                        eccentricCaseDone = true;
+                        continue;
+                    }
+                    if (calcConcCase) {
+                        log_warn(
+                                "'{}': Warning no algebraic solution found "
+                                "in {} case. C1 must not be equal to 0. If "
+                                "this is the first time for the "
+                                "calculation, retrying with the {} case...",
+                                getName(), "concentric", "eccentric");
+                        // reset calculation flags
+                        calcConcCase = false;
+                        concentricCaseDone = true;
+                        continue;
+                    }
+                }
+            }
+
+            if (calcConcCase) {
+                // check if solution matches Arel/Brel (here < 0) otherwise continue
+                if (lcedot <= 0) {
+                    uniqueSolution = true;
+                    continue;
+                } else {
+                    log_warn("'{}': Warning solution doens't match "
+                                "sign of Arel/Brel: Found solution "
+                                "lcedot = {}, but calculated {} case "
+                                "where Arel/Brel and therefore also "
+                                "lcedot should be {} than or equal to 0",
+                            getName(), lcedot, "concentric", "smaller");
+                    calcConcCase = false;
+                    concentricCaseDone = true;
+                    continue;
+                }
+            }
+            if (calcEccCase) {
+                // check if solution matches Arel/Brel (here > 0) otherwise continue
+                if (lcedot >= 0) {
+                    uniqueSolution = true;
+                    continue;
+                } else {
+                    log_warn("'{}': Warning solution doens't match "
+                                "sign of Arel/Brel: Found solution "
+                                "lcedot = {}, but calculated {} case "
+                                "where Arel/Brel and therefore also "
+                                "lcedot should be {} than or equal to 0",
+                            getName(), lcedot, "eccentric", "larger");
+                    calcEccCase = false;
+                    eccentricCaseDone = true;
+                    continue;
+                }
+            }
         }
 
-        // excentric or concentric case? How to decide?
-        double solution_placeholder = 0;
+        // set lcedot to zero if no unique solution was found in the loop above
+        if (!uniqueSolution) { lcedot = 0; }
+
+        /** DELETE FOLLOWING COMMENTS IF ABOVE IS CORRECT
+        
+        
+        
+        // diese funktionen mit Arel/Brel übergeben, dann muss man das nur einmal für Arel/Arele machen
+        double C2dashed = calcC2dash(
+                mli.cosPennationAngle, activation, Fpee, Fsee);
+        double C1dashed = calcC1dash(mli.fiberLength, ldotMTC,
+                mli.cosPennationAngle, activation, Fisom, Fpee, Fsee);
+        double C0dashed = calcC0dash(
+                ldotMTC, mli.cosPennationAngle, activation, Fisom, Fpee, Fsee);
+        // calculate C2 C1 C0 für excentrischen Fall/ konzentrischen fall in for schleife bis 2
+        // fall 1 / 2 schauen wohin lMTU zeigt der zweite ist genau andersherum
+        // falls Fehler (z.b. D < 0 und im ersten Fall) continue für nächsten Schleifen durchlauf
+        // ansonsten lcedot = 0 ("dritter Fall")
+        // 
+
+        // in for schleifen durchlauf 1: Vorzeichen abgleich mit gewählten Arel und Brel, falls nicht dann in fall 2
+        // gesonderte Warning: Lösungen gefunden aber nicht eindeutig 
+        // lcedot = 0 falls in beiden Fällen nicht eindeutig exzentrisch/konzentrisch
+
+
+        double Ddashed = pow(C1dashed, 2) - 4 * C0dashed * C2dashed;
+
+        // solve the equation
+        // check whether C2 is zero or numerically very close to zero
+        if (abs(C2dashed) > SimTK::SignificantReal) {
+            if (Ddashed >= 0) {
+                lcedot = lceopt * (-C1dashed - sqrt(Ddashed)) / (2 * C2dashed);
+            } else {
+                // D < 0 -> immaginäre Zahl
+                // Here recalculate everything for the excentric case??
+                // auch warnung und lcedot = 0
+            }
+        } else {
+         
+            if (abs(C1dashed) > SimTK::SignificantReal) {
+                // this is actually only a linear equation
+                lcedot = -lceopt * C0dashed / C1dashed;
+
+            } else {
+
+                // TODO make error message similar to the one in umuscle
+                // C1 equals 0 -> no algebraic solution found for C2*ldot^2 + C1*ldot + C0 = 0
+                // just Warning
+                // set lcedot = 0!
+             
+            }
+        }
+        
+        
+        */
 
         // select the correct solution and divide it by Fmax to get the normalized Fiber velocity
-        double normFiberVelocity =
-                solution_placeholder / getMaxIsometricForce();
-        double vce = normFiberVelocity * lceopt;
+        double normFiberVelocity = lcedot / getMaxContractionVelocity();
 
         double dphidt = getPennationModel().calcPennationAngularVelocity(
-                tan(mli.pennationAngle), mli.fiberLength, vce);
+                tan(mli.pennationAngle), mli.fiberLength, lcedot);
         double dlceAT = getPennationModel().calcFiberVelocityAlongTendon(
-                mli.fiberLength, vce, mli.sinPennationAngle,
+                mli.fiberLength, lcedot, mli.sinPennationAngle,
                 mli.cosPennationAngle, dphidt);
         double dmcldt = getLengtheningSpeed(s);
         double dtl = 0;
 
         if (!get_ignore_tendon_compliance()) {
             dtl = getPennationModel().calcTendonVelocity(mli.cosPennationAngle,
-                    mli.sinPennationAngle, dphidt, mli.fiberLength, vce,
+                    mli.sinPennationAngle, dphidt, mli.fiberLength, lcedot,
                     dmcldt);
         }
 
         // Populate the struct.
-        fvi.fiberVelocity = vce;
-        fvi.normFiberVelocity = normFiberVelocity;
+        fvi.fiberVelocity = lcedot;
+        fvi.normFiberVelocity = normFiberVelocity; // TODO ask Maria if this is correct
         fvi.fiberVelocityAlongTendon = dlceAT;
         fvi.pennationAngularVelocity = dphidt;
         fvi.tendonVelocity = dtl;
-        fvi.normTendonVelocity = dtl / getTendonSlackLength();
+        fvi.normTendonVelocity = dtl / getTendonSlackLength(); // TODO ask Maria if this is correct
         // This one is not implemented in this model
         fvi.fiberForceVelocityMultiplier = SimTK::NaN;
-
     }
     catch (const std::exception& x) {
         std::string msg = "Exception caught in Haeufle2014Muscle::"
@@ -745,24 +911,31 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
 
         double Fpee = calcFpee(mli.fiberLength);
         double Fsee = calcFsee(mli.fiberLength);
-        double Fce = calcFceWithoutFmax(fvi.normFiberVelocity,
+        double Fce = calcNormFce(fvi.normFiberVelocity,
                              mli.normFiberLength, activation) *
                      Fmax;
-        double FfiberAT = mli.cosPennationAngle * (Fce + Fpee);
-        double Fsde = calcFsde(fvi.tendonVelocity, FfiberAT);
-        double Fpde = calcFpde();
         
-
+        double Fsde = calcFsde(fvi.tendonVelocity, Fsee);
+        double Fpde = calcFpde(fvi.fiberVelocity, Fpee);
 
         mdi.activation = activation;
-        mdi.fiberForce = Fce + Fpee;
-        mdi.fiberForceAlongTendon = FfiberAT;
-        mdi.normFiberForce = (Fce + Fpee) / Fmax;
+        mdi.fiberForce = Fce + Fpee + Fpde;
+        mdi.fiberForceAlongTendon = mli.cosPennationAngle * (Fce + Fpee + Fpde);
+        mdi.normFiberForce = (Fce + Fpee + Fpde) / Fmax;
         mdi.activeFiberForce = Fce;
-        mdi.passiveFiberForce = Fpee;
+        mdi.passiveFiberForce = Fpee + Fpde;
         mdi.tendonForce = Fsee + Fsde;
-        // mdi.normTendonForce = fse;
-
+        
+        // Set values which are not implemented in this model to NaN
+        mdi.normTendonForce = SimTK::NaN;
+        mdi.fiberStiffness = SimTK::NaN;
+        mdi.fiberStiffnessAlongTendon = SimTK::NaN; 
+        mdi.tendonStiffness = SimTK::NaN;
+        mdi.muscleStiffness = SimTK::NaN; 
+        mdi.fiberActivePower = SimTK::NaN;
+        mdi.fiberPassivePower = SimTK::NaN; 
+        mdi.tendonPower = SimTK::NaN;              
+        mdi.musclePower = SimTK::NaN;               
     }
     catch (const std::exception& x) {
         std::string msg = "Exception caught in Haeufle2014Muscle::"
@@ -776,15 +949,17 @@ void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
     const SimTK::State& s, MusclePotentialEnergyInfo& mpei) const
 {
     try {
+        // Get the quantities that we've already computed.
+        const MuscleLengthInfo& mli = getMuscleLengthInfo(s);
 
-        // not implemente, is this necessary for this muscle model?
-
-        // Implement TendonPotentialEnergy
-        // integral über Kraft Längen Kurve bis aktuelle Tendon länge
-        // nur in Pee und See
-
-        // implementierung analog zu Millard
-
+        // calculate integral for Fpee depending on current fiber length
+        mpei.fiberPotentialEnergy = calcIntegralFpee(mli.fiberLength);
+        // calculate integral for Fsee depending on current tendon length
+        mpei.tendonPotentialEnergy = calcIntegralFsee(mli.tendonLength);
+        // muscle potential enery is equal to the sum of the 
+        // potential energy of the fiber and the tendon
+        mpei.musclePotentialEnergy =
+                mpei.fiberPotentialEnergy + mpei.tendonPotentialEnergy;
     }
     catch (const std::exception& x) {
         std::string msg = "Exception caught in Haeufle2014Muscle::"
@@ -798,6 +973,12 @@ void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
 double Haeufle2014Muscle::clampFiberLength(double lce) const
 {
     // Fehlerausgabe weil Muskel schlackert wenn kleiner 0
+    if (lce < 0.0) {
+        log_warn("Exception caught in Haeufle2014Muscle:: clampFiberLength "
+                 "from {} \n Fiber length can't be smaller than 0",
+                getName());
+        // throw OpenSim::Exception(msg); // only show warning dont throw error
+    }
     return max(lce, 0.0);
 }
 
@@ -828,7 +1009,7 @@ double Haeufle2014Muscle::calcFisom(double FiberLength) const {
             exponent_active_force_length));
 }
 
-double Haeufle2014Muscle::calcFceWithoutFmax(double normFiberVelocity,
+double Haeufle2014Muscle::calcNormFce(double normFiberVelocity,
         double normFiberLength, double activation) const {
     double Fce = 0; // initial Fce to 0
     // check if this is a eccentric of concentric lengthening
@@ -866,7 +1047,7 @@ double Haeufle2014Muscle::calcArel(double FiberLength,
 double Haeufle2014Muscle::calcBrel(double activation) const {
     double Brel0 = getConcentricContractionBRel0();
     double Qbrel = 1 / 7 * (3 + 4 * activation);
-    // double Lbrel = 1; // not necessary
+    // double Lbrel = 1; // not necessary due to multiplication
     return Brel0 * Qbrel;
 }
 
@@ -894,7 +1075,6 @@ double Haeufle2014Muscle::calcFpee(double FiberLength) const {
     double Lceopt = getOptimalFiberLength();
     double Lpee0 = getParallelElasticZeroLength() * Lceopt;
     double Fpee = 0; // standard case that FiberLength is smaller than Lpee0
-    // check if Fiberlength is larger than or equal to Lpee0
     if (FiberLength >= Lpee0) {
         double Kpee = calcKPEE();
         Fpee = Kpee * pow((FiberLength - Lpee0), getParallelElasticExponent());
@@ -912,21 +1092,34 @@ double Haeufle2014Muscle::calcKPEE() const {
     return (Fpee * Fmax / (pow(Lceopt * (Wdes + 1 - Lpee0), nuepee)));
 }
 
+double Haeufle2014Muscle::calcIntegralFpee(double FiberLength) const 
+{
+    double Lceopt = getOptimalFiberLength();
+    double Lpee0 = getParallelElasticZeroLength() * Lceopt;
+    double IntegralFpee = 0; // standard case that FiberLength is smaller than Lpee0
+    if (FiberLength >= Lpee0) {
+        double Fpee = calcFpee(FiberLength);
+        double nuepee = getParallelElasticExponent();
+        IntegralFpee = Fpee * (FiberLength - Lpee0) / (nuepee + 1);      
+    }
+    return IntegralFpee;
+}
+
 double Haeufle2014Muscle::calcFsee(double aSerialElasticLength) const 
 {
     double Lsee0 = getTendonSlackLength();
-    double Fsee =
-            0; // initialize Fsee for first case aSerialElasticLength < Lsee0
+    // initialize Fsee for first case aSerialElasticLength < Lsee0
+    double Fsee = 0; 
     double deltaUseenll = getRelativeStretchAtNonlinearLinearTransition();
     if (aSerialElasticLength > Lsee0 &&
             aSerialElasticLength <= (Lsee0 * (1 + deltaUseenll))) {
-        double deltaFsee0 = getForceAtNonlinearLinearTransition();
+        double deltaFsee0 = getRelativeForceAtNonlinearLinearTransition() * getMaxIsometricForce();
         double nuesee = deltaUseenll / getRelativeStretchAtLinearPart();
         Fsee = deltaFsee0 *
                pow((aSerialElasticLength - Lsee0) / (deltaUseenll * Lsee0),
                        nuesee);
     } else if (aSerialElasticLength > (Lsee0 * (1 + deltaUseenll))) {
-        double deltaFsee0 = getForceAtNonlinearLinearTransition();
+        double deltaFsee0 = getRelativeForceAtNonlinearLinearTransition() * getMaxIsometricForce();
         double deltaUseel = getRelativeStretchAtLinearPart();
         Fsee = deltaFsee0 *
                (1 + (aSerialElasticLength - Lsee0 * (1 + deltaUseenll)) /
@@ -935,8 +1128,35 @@ double Haeufle2014Muscle::calcFsee(double aSerialElasticLength) const
     return Fsee;
 }
 
+
+// TODO update this with Marias calculation
+double Haeufle2014Muscle::calcIntegralFsee(double aSerialElasticLength) const 
+{
+    // initialize for case serialElasticLength < lsee,0
+    double IntegralFsee = 0; 
+    double Lsee0 = getTendonSlackLength();
+    double deltaUseenll = getRelativeStretchAtNonlinearLinearTransition();
+    if (aSerialElasticLength > Lsee0 &&
+            aSerialElasticLength <= (Lsee0 * (1 + deltaUseenll))) 
+    {
+        double Fsee = calcFsee(aSerialElasticLength);
+        double nuesee = deltaUseenll / getRelativeStretchAtLinearPart();
+        IntegralFsee = Fsee * (aSerialElasticLength - Lsee0) / (nuesee + 1);
+    } else if (aSerialElasticLength > (Lsee0 * (1 + deltaUseenll))) 
+    {
+        double Fsee = calcFsee(aSerialElasticLength);
+        double nuesee = deltaUseenll / getRelativeStretchAtLinearPart();
+        double deltaFsee0 = getRelativeForceAtNonlinearLinearTransition() * getMaxIsometricForce();
+        double deltaUseel = getRelativeStretchAtLinearPart();
+        IntegralFsee = deltaFsee0 * deltaUseenll * Lsee0 / (nuesee + 1) +
+                       (aSerialElasticLength - Lsee0 * (deltaUseenll + 1) / 2 *
+                                                       (Fsee + deltaFsee0));
+    }
+    return IntegralFsee;
+}
+
 double Haeufle2014Muscle::calcFsde(double serialElasticLengthVelocity,
-        double totalFiberForceAlongTendon) const {
+        double elasticTendonForce) const {
 
     double Dse = getDseDampingFactor();
     double Rse = getRseDampingFactor();
@@ -946,13 +1166,13 @@ double Haeufle2014Muscle::calcFsde(double serialElasticLengthVelocity,
     double Brel0 = getConcentricContractionBRel0();
 
     double Fsde = Dse * Fmax * Arel0 / (lceopt * Brel0) *
-                  ((1 - Rse) * totalFiberForceAlongTendon / Fmax + Rse) *
+                  ((1 - Rse) * elasticTendonForce / Fmax + Rse) *
                   serialElasticLengthVelocity;
     return Fsde;
 }
 
 double Haeufle2014Muscle::calcFpde(
-    double lengthVelocity, double totalFiberForce) const 
+    double lengthVelocity, double parallelElasticForce) const 
 {
     double Dpe = getDpeDampingFactor();
     double Rpe = getRpeDampingFactor();
@@ -962,34 +1182,33 @@ double Haeufle2014Muscle::calcFpde(
     double Brel0 = getConcentricContractionBRel0();
 
     double Fpde = Dpe * Fmax * Arel0 / (lceopt * Brel0) *
-                  ((1 - Rpe) * totalFiberForce / Fmax + Rpe) * lengthVelocity;
+                  ((1 - Rpe) * parallelElasticForce / Fmax + Rpe) * lengthVelocity;
 
     return Fpde;
 }
 
-double Haeufle2014Muscle::calcC2PenMaria(double fiberLength, double cosPenAngle,
-        double activation, double Fisom, double Fpee) const {
+double Haeufle2014Muscle::calcC2dash(
+        double cosPenAngle, double activation, double Fpee, double Fsee) const 
+{
     double Arel0 = getConcentricContractionARel0();
     double Brel0 = getConcentricContractionBRel0();
-    double Arel = calcArel(fiberLength, activation, Fisom);
     double Brel = calcBrel(activation);
     double Dse = getDseDampingFactor();
     double Rse = getRseDampingFactor();
     double Fmax = getMaxIsometricForce();
-    // necessary to implement these factors, since they are not demoa yet (Fpde)
-    // ?
-    double Dpe = 0;
-    double Rpe = 0;
+    double Dpe = getDpeDampingFactor();
+    double Rpe = getRpeDampingFactor();
     double C2woFmax =
             Arel0 / (Brel0 * Brel) *
-            (Dse * Rse / cosPenAngle + Dpe * Rpe -
-                    (Dse - Dse * Rse + Dpe - Dpe * Rpe) * (Arel - Fpee / Fmax));
+            (Dse / cosPenAngle * ((1 - Rse) * Fsee / Fmax + Rse) +
+                    cosPenAngle * Dpe * ((1 - Rpe) * Fpee / Fmax + Rpe));
     return C2woFmax;
 }
 
-double Haeufle2014Muscle::calcC1PenMaria(double fiberLength, double ldotMTC,
+double Haeufle2014Muscle::calcC1dash(double fiberLength,
+        double ldotMTC,
         double cosPenAngle, double activation, double Fisom, double Fpee,
-        double Fsee) const
+        double Fsee, double Arel, double Brel) const
 {
     double Arel0 = getConcentricContractionARel0();
     double Brel0 = getConcentricContractionBRel0();
@@ -997,26 +1216,20 @@ double Haeufle2014Muscle::calcC1PenMaria(double fiberLength, double ldotMTC,
     double Dse = getDseDampingFactor();
     double Rse = getRseDampingFactor();
     double Fmax = getMaxIsometricForce();
-    double Arel = calcArel(fiberLength, activation, Fisom);
-    double Brel = calcBrel(activation);
-    // necessary to implement these factors, since they are not demoa yet (Fpde) ?
-    double Dpe = 0;
-    double Rpe = 0;
-    double C1woFmax =
-            Dse * Arel0 * ldotMTC / (Brel0 * Brel * lceopt) *
-                    (cosPenAngle * (1 - Rse) * Arel - Rse) -
-            Arel0 / Brel0 *
-                    ((Dse - Dse * Rse + cosPenAngle * Dpe -
-                             cosPenAngle * Dpe * Rpe) *
-                                    activation * Fisom +
-                            cosPenAngle * Dpe * Rpe + Rse * Dse / cosPenAngle) -
-            cosPenAngle * Arel / Brel - Fsee / (Brel * Fmax) +
-            cosPenAngle * Fpee / (Brel * Fmax);
+    double Dpe = getDpeDampingFactor();
+    double Rpe = getRpeDampingFactor();
+    double C1woFmax = -Dse * Arel0 / Brel0 * ((1 - Rse) * Fsee / Fmax + Rse) *
+                              (1 / cosPenAngle + ldotMTC / (Brel * lceopt)) -
+                      cosPenAngle * Dpe * Arel0 / Brel0 *
+                              ((1 - Rpe) * Fpee / Fmax + Rpe) -
+                      cosPenAngle * Arel / Brel - Fsee / (Brel * Fmax) +
+                      cosPenAngle * Fpee / (Brel * Fmax);
     return C1woFmax;
 }
 
-double Haeufle2014Muscle::calcC0PenMaria(double ldotMTC, double cosPenAngle,
-        double activation, double Fisom, double Fpee, double Fsee) const {
+double Haeufle2014Muscle::calcC0dash(double ldotMTC,
+        double cosPenAngle, double activation, double Fisom, double Fpee,
+        double Fsee) const {
     double Arel0 = getConcentricContractionARel0();
     double Brel0 = getConcentricContractionBRel0();
     double lceopt = getOptimalFiberLength();
@@ -1024,11 +1237,10 @@ double Haeufle2014Muscle::calcC0PenMaria(double ldotMTC, double cosPenAngle,
     double Rse = getRseDampingFactor();
     double Fmax = getMaxIsometricForce();
     
-    double C0woFmax =
-            Dse * Arel0 * ldotMTC / (lceopt * Brel0) *
-                    ((1 - Rse) * cosPenAngle * activation * Fisom + Rse) -
-            cosPenAngle * activation * Fisom - cosPenAngle * Fpee / Fmax +
-            Fsee / Fmax;
+    double C0woFmax = Dse * Arel0 * ldotMTC / (lceopt * Brel0) *
+                              ((1 - Rse) * Fsee / Fmax + Rse) -
+                      cosPenAngle * activation * Fisom -
+                      cosPenAngle * Fpee / Fmax + Fsee / Fmax;
     return C0woFmax;
 }
 

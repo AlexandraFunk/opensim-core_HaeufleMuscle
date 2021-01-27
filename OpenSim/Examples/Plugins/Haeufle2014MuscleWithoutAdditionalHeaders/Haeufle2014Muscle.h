@@ -114,7 +114,7 @@ public:
     OpenSim_DECLARE_PROPERTY(
             relative_stretch_at_nonlinear_linear_transition, double, "");
     OpenSim_DECLARE_PROPERTY(relative_stretch_at_linear_part, double, "");
-    OpenSim_DECLARE_PROPERTY(force_at_nonlinear_linear_transition, double, "");
+    OpenSim_DECLARE_PROPERTY(relative_force_at_nonlinear_linear_transition, double, "");
     OpenSim_DECLARE_PROPERTY(dse_damping_factor, double,
             "The dse damping factor as used in Moerl et al (2012)");
     OpenSim_DECLARE_PROPERTY(rse_damping_factor, double,
@@ -213,7 +213,7 @@ public:
     double getRelativeStretchAtLinearPart() const;
 
     /** @returns The force at nonlinear/linear transition in Fsee */
-    double getForceAtNonlinearLinearTransition() const;
+    double getRelativeForceAtNonlinearLinearTransition() const;
 
     /** @returns The dse damping factor */
     double getDseDampingFactor() const;
@@ -296,11 +296,11 @@ public:
             double aParallelElasticForceRelToFmax);
 
     /**
-    @param aForceAtNonlinearLinearTransition
+    @param aRelativeForceAtNonlinearLinearTransition
         The force at non-linear/linear transition which is muscle specific
     */
-    void setForceAtNonlinearLinearTransition(
-            double aForceAtNonlinearLinearTransition);
+    void setRelativeForceAtNonlinearLinearTransition(
+            double aRelativeForceAtNonlinearLinearTransition);
 
     /**
     @param aForceAtNonlinearLinearTransition
@@ -342,6 +342,9 @@ public:
 // MUSCLE.H INTERFACE
 //==============================================================================
     /** DEPRECATED: only for backward compatibility */
+    /**  This is neccessary  since it is implemented in the muscle.h interface
+     * as virtual but sets here the normalized calcium concentration and not the
+     * activation */
     virtual void setActivation(SimTK::State& s, double activation) const;
 
     // End of Muscle's State Dependent Accessors.
@@ -393,7 +396,7 @@ protected:
 
     /** Evaluates the force-velocity curve at a normalized fiber velocity of
     'normFiberVelocity'. */
-    double calcFceWithoutFmax(double normFiberVelocity,
+    double calcNormFce(double normFiberVelocity,
             double normFiberLength, double activation) const;
 
     /** Calculate the fiber length and activation dependent normalized Hill
@@ -413,7 +416,7 @@ protected:
     double calcBrele(double normFiberLength, double activation,
             double Fisom) const;
 
-    /** Evaluates the fiber-force-length curve at a fiber length of
+    /** Calculates the parallel elastic force at a fiber length of
      * 'FiberLength'. */
     double calcFpee(double FiberLength) const;
 
@@ -423,26 +426,34 @@ protected:
     */
     double calcKPEE() const;
 
-    /** Evaluates the tendon-force-length curve at a tendon length of
-'   aSerialElasticLength'. */
+    /** Calculates the integral of the parallel elastic force at 
+     * a fiber length of 'FiberLength'. */
+    double calcIntegralFpee(double FiberLength) const;
+
+    /** Calculates the tendon-force-length force at a tendon length of
+    'aSerialElasticLength'. */
     double calcFsee(double aSerialElasticLength) const;
 
+    /** Calculates the integral of the tendon-force-length force at a 
+     * tendon length of 'aSerialElasticLength'. */
+    double calcIntegralFsee(double aSerialElasticLength) const;
+
     /** Calculates the tendon damping force Fsde which depends on the serial
-     * elastic length velocity and the totalFiberForceAlongTendon */
+     * elastic length velocity and the elasticTendonForce (Fsee) */
     double calcFsde(double serialElasticLengthVelocity,
-            double totalFiberForceAlongTendon) const;
+            double elasticTendonForce) const;
  
     /** Calculates the parallel damping force Fpde which depends on the
-     *  length velocity and the totalFiberForce */
-    double calcFpde(double lengthVelocity, double totalFiberForce) const;
+     *  length velocity and the parallelElasticForce (Fpee) */
+    double calcFpde(double lengthVelocity, double parallelElasticForce) const;
 
-    double calcC2PenMaria(double fiberLength, double cosPenAngle,
-            double activation, double Fisom, double Fpee) const;
-    double calcC1PenMaria(double fiberLength, double ldotMTC,
+    double calcC2dash(double cosPenAngle,
+            double activation, double Fpee, double Fsee) const;
+    double calcC1dash(double fiberLength, double ldotMTC,
             double cosPenAngle, double activation, double Fisom, double Fpee,
-            double Fsee) const;
-    double calcC0PenMaria(double ldotMTC, double cosPenAngle, double activation,
-            double Fisom, double Fpee, double Fsee) const;
+            double Fsee, double Arel, double Brel) const;
+    double calcC0dash(double ldotMTC, double cosPenAngle,
+            double activation, double Fisom, double Fpee, double Fsee) const;
 
 
     //--------------------------------------------------------------------------
