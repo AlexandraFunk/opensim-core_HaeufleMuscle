@@ -656,7 +656,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
          */
         double Fisom = calcFisom(mli.fiberLength);
         double Fpee = calcFpee(mli.fiberLength);
-        double Fsee = calcFsee(mli.fiberLength);
+        double Fsee = calcFsee(mli.tendonLength);
 
         /**
          * For calculating the coefficients C2, C1 and C0 use the pennated
@@ -913,7 +913,7 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
                 gamma, mli.fiberLength);
 
         double Fpee = calcFpee(mli.fiberLength);
-        double Fsee = calcFsee(mli.fiberLength);
+        double Fsee = calcFsee(mli.tendonLength);
         double Fce = calcNormFce(fvi.normFiberVelocity,
                              mli.normFiberLength, activation) *
                      Fmax;
