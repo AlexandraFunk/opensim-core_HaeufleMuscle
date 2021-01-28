@@ -770,6 +770,8 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                 // check if solution matches Arel/Brel (here < 0) otherwise continue
                 if (lcedot <= 0) {
                     uniqueSolution = true;
+                    calcConcCase = false;
+                    concentricCaseDone = true;
                     continue;
                 } else {
                     log_warn("'{}': Warning solution doens't match "
@@ -787,6 +789,8 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                 // check if solution matches Arel/Brel (here > 0) otherwise continue
                 if (lcedot >= 0) {
                     uniqueSolution = true;
+                    calcEccCase = false;
+                    eccentricCaseDone = true;
                     continue;
                 } else {
                     log_warn("'{}': Warning solution doens't match "
@@ -914,7 +918,7 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
 
         double Fpee = calcFpee(mli.fiberLength);
         double Fsee = calcFsee(mli.tendonLength);
-        double Fce = calcNormFce(fvi.normFiberVelocity,
+        double Fce = calcNormFce(fvi.fiberVelocity,
                              mli.normFiberLength, activation) *
                      Fmax;
         
@@ -1012,22 +1016,24 @@ double Haeufle2014Muscle::calcFisom(double FiberLength) const {
             exponent_active_force_length));
 }
 
-double Haeufle2014Muscle::calcNormFce(double normFiberVelocity,
+double Haeufle2014Muscle::calcNormFce(double fiberVelocity,
         double normFiberLength, double activation) const {
     double Fce = 0; // initial Fce to 0
+    double lceopt = getOptimalFiberLength();
     // check if this is a eccentric of concentric lengthening
-    if (normFiberVelocity <= 0) { // concentric lengthening
+    if (fiberVelocity <= 0) { // concentric lengthening
         double Fisom = calcFisom(normFiberLength);
         double Arel = calcArel(normFiberLength, activation, Fisom);
         double Brel = calcBrel(activation);
-        Fce = (activation * Fisom + Arel) / (1.0 - normFiberVelocity / Brel) -
+        Fce = (activation * Fisom + Arel) /
+                      (1.0 - fiberVelocity / (Brel * lceopt)) -
               Arel;
     } else { // ecentric lengthening
         double Fisom = calcFisom(normFiberLength);
         double Arele = calcArele(activation, Fisom);
         double Brele = calcBrele(normFiberLength, activation, Fisom);
         Fce = (activation * Fisom + Arele) /
-                      (1.0 - normFiberVelocity / Brele) -
+                      (1.0 - fiberVelocity / (Brele * lceopt)) -
               Arele;
     }
     return Fce;

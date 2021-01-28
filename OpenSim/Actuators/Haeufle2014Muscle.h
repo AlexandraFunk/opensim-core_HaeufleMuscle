@@ -394,9 +394,9 @@ protected:
     length of 'normFiberLength'. */
     double calcFisom(double normFiberLength) const;
 
-    /** Evaluates the force-velocity curve at a normalized fiber velocity of
-    'normFiberVelocity'. */
-    double calcNormFce(double normFiberVelocity,
+    /** Evaluates the force-velocity curve at a fiber velocity of
+    'fiberVelocity'. */
+    double calcNormFce(double fiberVelocity,
             double normFiberLength, double activation) const;
 
     /** Calculate the fiber length and activation dependent normalized Hill
