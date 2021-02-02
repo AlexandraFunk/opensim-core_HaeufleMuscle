@@ -465,11 +465,11 @@ protected:
      *  length velocity and the parallelElasticForce (Fpee) */
     double calcFpde(double lengthVelocity, double parallelElasticForce) const;
 
-    double calcC2dash(double cosPenAngle,
-            double activation, double Fpee, double Fsee) const;
-    double calcC1dash(double fiberLength, double ldotMTC,
-            double cosPenAngle, double activation, double Fisom, double Fpee,
-            double Fsee, double Arel, double Brel) const;
+    double calcC2dash(double cosPenAngle, double activation, double Fpee,
+            double Fsee, double Brel) const;
+    double calcC1dash(double ldotMTC, double cosPenAngle, double activation,
+            double Fisom, double Fpee, double Fsee, double Arel,
+            double Brel) const;
     double calcC0dash(double ldotMTC, double cosPenAngle,
             double activation, double Fisom, double Fpee, double Fsee) const;
 
