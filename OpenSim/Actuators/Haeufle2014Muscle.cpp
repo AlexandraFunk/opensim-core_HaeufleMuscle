@@ -842,61 +842,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     getName(), 0);
         }
 
-        /** DELETE FOLLOWING COMMENTS IF ABOVE IS CORRECT
-        
-        
-        
-        // diese funktionen mit Arel/Brel übergeben, dann muss man das nur einmal für Arel/Arele machen
-        double C2dashed = calcC2dash(
-                mli.cosPennationAngle, activation, Fpee, Fsee);
-        double C1dashed = calcC1dash(mli.fiberLength, ldotMTC,
-                mli.cosPennationAngle, activation, Fisom, Fpee, Fsee);
-        double C0dashed = calcC0dash(
-                ldotMTC, mli.cosPennationAngle, activation, Fisom, Fpee, Fsee);
-        // calculate C2 C1 C0 für excentrischen Fall/ konzentrischen fall in for schleife bis 2
-        // fall 1 / 2 schauen wohin lMTU zeigt der zweite ist genau andersherum
-        // falls Fehler (z.b. D < 0 und im ersten Fall) continue für nächsten Schleifen durchlauf
-        // ansonsten lcedot = 0 ("dritter Fall")
-        // 
-
-        // in for schleifen durchlauf 1: Vorzeichen abgleich mit gewählten Arel und Brel, falls nicht dann in fall 2
-        // gesonderte Warning: Lösungen gefunden aber nicht eindeutig 
-        // lcedot = 0 falls in beiden Fällen nicht eindeutig exzentrisch/konzentrisch
-
-
-        double Ddashed = pow(C1dashed, 2) - 4 * C0dashed * C2dashed;
-
-        // solve the equation
-        // check whether C2 is zero or numerically very close to zero
-        if (abs(C2dashed) > SimTK::SignificantReal) {
-            if (Ddashed >= 0) {
-                lcedot = lceopt * (-C1dashed - sqrt(Ddashed)) / (2 * C2dashed);
-            } else {
-                // D < 0 -> immaginäre Zahl
-                // Here recalculate everything for the excentric case??
-                // auch warnung und lcedot = 0
-            }
-        } else {
-         
-            if (abs(C1dashed) > SimTK::SignificantReal) {
-                // this is actually only a linear equation
-                lcedot = -lceopt * C0dashed / C1dashed;
-
-            } else {
-
-                // TODO make error message similar to the one in umuscle
-                // C1 equals 0 -> no algebraic solution found for C2*ldot^2 + C1*ldot + C0 = 0
-                // just Warning
-                // set lcedot = 0!
-             
-            }
-        }
-        
-        
-        */
-
-        // select the correct solution and divide it by Fmax to get the normalized Fiber velocity
-        double normFiberVelocity = lcedot / getMaxContractionVelocity();
+        double normFiberVelocity = lcedot / getMaxContractionVelocity(); //TODO set MaxContrationVelocity since it is always at 10
 
         double dphidt = getPennationModel().calcPennationAngularVelocity(
                 tan(mli.pennationAngle), mli.fiberLength, lcedot);
@@ -918,7 +864,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
         fvi.fiberVelocityAlongTendon = dlceAT;
         fvi.pennationAngularVelocity = dphidt;
         fvi.tendonVelocity = dtl;
-        fvi.normTendonVelocity = dtl / getTendonSlackLength(); // TODO ask Maria if this is correct
+        // fvi.normTendonVelocity = dtl / getTendonSlackLength(); // TODO ask Maria if this is correct
         // This one is not implemented in this model
         fvi.fiberForceVelocityMultiplier = SimTK::NaN;
     }
@@ -1012,7 +958,6 @@ void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
 
 double Haeufle2014Muscle::clampFiberLength(double lce) const
 {
-    // Fehlerausgabe weil Muskel schlackert wenn kleiner 0
     if (lce < 0.0) {
         log_warn("Exception caught in Haeufle2014Muscle:: clampFiberLength "
                  "from {} \n Fiber length can't be smaller than 0",
