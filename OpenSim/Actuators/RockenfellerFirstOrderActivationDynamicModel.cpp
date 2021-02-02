@@ -54,7 +54,7 @@ void RockenfellerFirstOrderActivationDynamicModel::constructProperties()
     constructProperty_nue(3);
     constructProperty_roh_0(5.27);
     constructProperty_gamma_C(1.37);
-    constructProperty_minimum_gamma(0.01);
+    constructProperty_minimum_gamma(0.001);
     constructProperty_minimum_activation(0.005); // Hatze constant
     constructProperty_optimal_fiber_length(0.2);
 }
@@ -79,7 +79,7 @@ calculateActivation(double gamma, double fiber_length) const
 
     double rho = gamma_C * rho_0 * fiber_length / optimal_fiber_length;
     double rhogam = std::pow(gamma * rho, nue);
-    return ((min_act + rhogam) / (1 + rhogam));
+    return ((min_act + rhogam) / (1.0 + rhogam));
 }
 
 double RockenfellerFirstOrderActivationDynamicModel::

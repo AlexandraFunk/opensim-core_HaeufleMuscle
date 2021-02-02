@@ -123,7 +123,25 @@ public:
             "The dpe damping factor as used in Moerl et al (2012)");
     OpenSim_DECLARE_PROPERTY(rpe_damping_factor, double,
             "The rpe damping factor as used in Moerl et al (2012)");
-    // TODO include DPe und Rpe
+    OpenSim_DECLARE_PROPERTY(maximum_pennation_angle, double,
+            "Maximum pennation angle (in radians).");
+    OpenSim_DECLARE_PROPERTY(time_constant_hatze, double,
+            "Time constant, in 1/seconds. (overridden when this is a "
+            "subcomponent of a Muscle)");
+    OpenSim_DECLARE_PROPERTY(nue, double,
+            "Hatze Coefficient (overridden when this is a subcomponent of a "
+            "Muscle)");
+    OpenSim_DECLARE_PROPERTY(roh_0, double,
+            "Hatze constant [l/mol] from Rockenfeller2018 (overridden when "
+            "this is a subcomponent of a Muscle)");
+    OpenSim_DECLARE_PROPERTY(gamma_C, double,
+            "Hatze Coefficient (overridden when this is a subcomponent of a "
+            "Muscle)");
+    OpenSim_DECLARE_PROPERTY(minimum_gamma, double,
+            "Activation lower bound. (overridden when this is a subcomponent "
+            "of a Muscle)");
+    OpenSim_DECLARE_PROPERTY(minimum_activation, double,
+            "Activation lower bound (Hatze constant 0.005) equal to Kuh0");
 
 //==============================================================================
 // OUTPUTS

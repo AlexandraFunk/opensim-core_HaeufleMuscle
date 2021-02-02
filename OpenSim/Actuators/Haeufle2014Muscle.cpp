@@ -59,7 +59,7 @@ void Haeufle2014Muscle::setNull()
 }
 
 void Haeufle2014Muscle::constructProperties() {
-    constructProperty_default_calcium_concentration(0.05);
+    constructProperty_default_calcium_concentration(0.001);
     constructProperty_default_fiber_length(getOptimalFiberLength());
     constructProperty_exponent_descending_active_force_length(1.50);
     constructProperty_width_descending_active_force_length(0.45);
@@ -79,6 +79,14 @@ void Haeufle2014Muscle::constructProperties() {
     constructProperty_rse_damping_factor(0.01);
     constructProperty_dpe_damping_factor(0.0);
     constructProperty_rpe_damping_factor(1.0);
+
+    constructProperty_maximum_pennation_angle(acos(0.1)); // is this acos 0 or acos 0.1? 
+    constructProperty_time_constant_hatze(11.3);
+    constructProperty_nue(3.0);
+    constructProperty_roh_0(5.27);
+    constructProperty_gamma_C(1.37);
+    constructProperty_minimum_gamma(0.001);
+    constructProperty_minimum_activation(0.005); // Hatze constant
 
     //TODO check if this is necessary?
     // setMinControl(get_minimum_activation());
@@ -189,8 +197,7 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
     penMdl.set_optimal_fiber_length(getOptimalFiberLength());
     penMdl.set_pennation_angle_at_optimal(
             getPennationAngleAtOptimalFiberLength());
-    // this should be set automatically by the pennation model constructor
-    // penMdl.set_maximum_pennation_angle(get_maximum_pennation_angle());
+    penMdl.set_maximum_pennation_angle(get_maximum_pennation_angle());
     try {
         penMdl.finalizeFromProperties();
     } catch (const InvalidPropertyValue&) {
@@ -205,8 +212,13 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
                 updMemberSubcomponent<RockenfellerFirstOrderActivationDynamicModel>(
                         actMdlIdx);
         RockenfellerFirstOrderActivationDynamicModel actMdlCopy(actMdl);
-        // set some properties of this model like this:
-        // actMdl.set_
+        actMdl.set_gamma_C(get_gamma_C());
+        actMdl.set_minimum_gamma(get_minimum_gamma());
+        actMdl.set_optimal_fiber_length(get_optimal_fiber_length());
+        actMdl.set_minimum_activation(get_minimum_activation());
+        actMdl.set_nue(get_nue());
+        actMdl.set_roh_0(get_roh_0());
+        actMdl.set_time_constant_hatze(get_time_constant_hatze());
         try {
             actMdl.finalizeFromProperties();
         } catch (const InvalidPropertyValue&) {

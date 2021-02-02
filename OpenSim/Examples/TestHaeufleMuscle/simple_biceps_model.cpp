@@ -26,7 +26,7 @@ int main() {
     //    Millard2012EquilibriumMuscle("biceps", 200, 0.6, 0.55, 0);
 
     Haeufle2014Muscle* biceps =
-            new Haeufle2014Muscle("biceps", 200, 0.6, 0.55, 0);
+            new Haeufle2014Muscle("biceps", 200, 0.6, 0.55, 0.0);
 
     biceps->addNewPathPoint("origin",    *humerus, Vec3(0, 0.8, 0));
     biceps->addNewPathPoint("insertion", *radius,  Vec3(0, 0.7, 0));
