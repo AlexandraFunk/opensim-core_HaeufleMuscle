@@ -85,7 +85,7 @@ void Haeufle2014Muscle::constructProperties() {
     constructProperty_nue(3.0);
     constructProperty_roh_0(5.27);
     constructProperty_gamma_C(1.37);
-    constructProperty_minimum_gamma(0.001);
+    // constructProperty_minimum_gamma(0.001); // same like default calcium concentration
     constructProperty_minimum_activation(0.005); // Hatze constant
 
     //TODO check if this is necessary?
@@ -173,10 +173,10 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
             getProperty_relative_force_at_nonlinear_linear_transition().getName(),
             "The force at the nonlinear/linear transition must be greater than "
             "zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_dse_damping_factor() <= 0, InvalidPropertyValue,
+    OPENSIM_THROW_IF_FRMOBJ(get_dse_damping_factor() < 0, InvalidPropertyValue,
             getProperty_dse_damping_factor().getName(),
             "The dse damping factor must be greater than zero")
-    OPENSIM_THROW_IF_FRMOBJ(get_rse_damping_factor() <= 0, InvalidPropertyValue,
+    OPENSIM_THROW_IF_FRMOBJ(get_rse_damping_factor() < 0, InvalidPropertyValue,
             getProperty_rse_damping_factor().getName(),
             "The rse damping factor must be greater than zero");
 
@@ -213,7 +213,7 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
                         actMdlIdx);
         RockenfellerFirstOrderActivationDynamicModel actMdlCopy(actMdl);
         actMdl.set_gamma_C(get_gamma_C());
-        actMdl.set_minimum_gamma(get_minimum_gamma());
+        actMdl.set_minimum_gamma(get_default_calcium_concentration());
         actMdl.set_optimal_fiber_length(get_optimal_fiber_length());
         actMdl.set_minimum_activation(get_minimum_activation());
         actMdl.set_nue(get_nue());

@@ -137,9 +137,6 @@ public:
     OpenSim_DECLARE_PROPERTY(gamma_C, double,
             "Hatze Coefficient (overridden when this is a subcomponent of a "
             "Muscle)");
-    OpenSim_DECLARE_PROPERTY(minimum_gamma, double,
-            "Activation lower bound. (overridden when this is a subcomponent "
-            "of a Muscle)");
     OpenSim_DECLARE_PROPERTY(minimum_activation, double,
             "Activation lower bound (Hatze constant 0.005) equal to Kuh0");
 
@@ -438,11 +435,12 @@ protected:
      * 'FiberLength'. */
     double calcFpee(double fiberLength) const;
 
+    // DEPRECATED
     /**
     @returns The constanst K for the parallel elastic element which is
         neded during the calceValue routine
     */
-    double calcKPEE() const;
+    // double calcKPEE() const;
 
     /** Calculates the integral of the parallel elastic force at 
      * a fiber length of 'FiberLength'. */

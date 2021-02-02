@@ -28,6 +28,16 @@ int main() {
     Haeufle2014Muscle* biceps =
             new Haeufle2014Muscle("biceps", 200, 0.6, 0.55, 0.0);
 
+    // set damping params to 0 to be more similar to millard muscle
+    // biceps->setParallelDampingParams(0.0, 0.0);
+    // biceps->setTendonDampingParams(0.0, 0.0);
+    // printf("Dse: %f\n", biceps->get_dse_damping_factor());
+    // printf("Rse: %f\n", biceps->get_rse_damping_factor());
+    // printf("Dpe: %f\n", biceps->get_dpe_damping_factor());
+    // printf("Rpe: %f\n", biceps->get_rpe_damping_factor());
+    biceps->set_default_calcium_concentration(0.05);
+
+
     biceps->addNewPathPoint("origin",    *humerus, Vec3(0, 0.8, 0));
     biceps->addNewPathPoint("insertion", *radius,  Vec3(0, 0.7, 0));
 
@@ -48,6 +58,7 @@ int main() {
     ConsoleReporter* reporter = new ConsoleReporter();
     reporter->set_report_time_interval(1.0);
     reporter->addToReport(biceps->getOutput("fiber_force"));
+    reporter->addToReport(biceps->getOutput("activation"));
     reporter->addToReport(
         elbow->getCoordinate(PinJoint::Coord::RotationZ).getOutput("value"),
         "elbow_angle");
