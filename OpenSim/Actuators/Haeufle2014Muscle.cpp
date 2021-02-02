@@ -720,6 +720,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                                 (2.0 * C2dashed);
                 } else {
                     if (calcEccCase) {
+                        /*
                         log_warn(
                                 "'{}': Warning D for the {} case is {} "
                                 "than 0, can't calculate with imaginary "
@@ -727,12 +728,14 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                                 "calculation, retrying with the {} case...",
                                 getName(), "eccentric", "smaller",
                                 "concentric");
+                        */
                         // reset calculation flags
                         calcEccCase = false;
                         eccentricCaseDone = true;
                         continue;
                     }
                     if (calcConcCase) {
+                        /*
                         log_warn(
                                 "'{}': Warning D for the {} case is {} "
                                 "than 0, can't calculate with imaginary "
@@ -740,6 +743,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                                 "calculation, retrying with the {} case...",
                                 getName(), "concentric", "smaller",
                                 "eccentric");
+                        */
                         // reset calculation flags
                         calcConcCase = false;
                         concentricCaseDone = true;
@@ -752,24 +756,28 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     lcedot = -lceopt * C0dashed / C1dashed;
                 } else {
                     if (calcEccCase) {
+                        /*
                         log_warn(
                                 "'{}': Warning no algebraic solution found "
                                 "in {} case. C1 must not be equal to 0. If "
                                 "this is the first time for the "
                                 "calculation, retrying with the {} case...",
                                 getName(), "eccentric", "concentric");
+                        */
                         // reset calculation flags
                         calcEccCase = false;
                         eccentricCaseDone = true;
                         continue;
                     }
                     if (calcConcCase) {
+                        /* 
                         log_warn(
                                 "'{}': Warning no algebraic solution found "
                                 "in {} case. C1 must not be equal to 0. If "
                                 "this is the first time for the "
                                 "calculation, retrying with the {} case...",
                                 getName(), "concentric", "eccentric");
+                        */
                         // reset calculation flags
                         calcConcCase = false;
                         concentricCaseDone = true;
@@ -786,12 +794,14 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     concentricCaseDone = true;
                     continue;
                 } else {
+                    /*
                     log_warn("'{}': Warning solution doens't match "
                                 "sign of Arel/Brel: Found solution "
                                 "lcedot = {}, but calculated {} case "
                                 "where Arel/Brel and therefore also "
                                 "lcedot should be {} than or equal to 0",
                             getName(), lcedot, "concentric", "smaller");
+                    */
                     calcConcCase = false;
                     concentricCaseDone = true;
                     continue;
@@ -805,12 +815,14 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     eccentricCaseDone = true;
                     continue;
                 } else {
+                    /*
                     log_warn("'{}': Warning solution doens't match "
                                 "sign of Arel/Brel: Found solution "
                                 "lcedot = {}, but calculated {} case "
                                 "where Arel/Brel and therefore also "
                                 "lcedot should be {} than or equal to 0",
                             getName(), lcedot, "eccentric", "larger");
+                    */
                     calcEccCase = false;
                     eccentricCaseDone = true;
                     continue;
@@ -819,7 +831,12 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
         }
 
         // set lcedot to zero if no unique solution was found in the loop above
-        if (!uniqueSolution) { lcedot = 0.0; }
+        if (!uniqueSolution) { 
+            lcedot = 0.0; 
+            log_warn("'{}': Warning no unique solution found: setting lcedot "
+                     "to {}",
+                    getName(), 0);
+        }
 
         /** DELETE FOLLOWING COMMENTS IF ABOVE IS CORRECT
         
@@ -893,7 +910,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
 
         // Populate the struct.
         fvi.fiberVelocity = lcedot;
-        fvi.normFiberVelocity = normFiberVelocity; // TODO ask Maria if this is correct
+        // fvi.normFiberVelocity = normFiberVelocity; // TODO ask Maria if this is correct
         fvi.fiberVelocityAlongTendon = dlceAT;
         fvi.pennationAngularVelocity = dphidt;
         fvi.tendonVelocity = dtl;
@@ -931,7 +948,7 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
         double Fpee = calcFpee(mli.fiberLength);
         double Fsee = calcFsee(mli.tendonLength);
         double Fce = calcNormFce(fvi.fiberVelocity,
-                             mli.normFiberLength, activation) *
+                             mli.fiberLength, activation) *
                      Fmax;
         
         double Fsde = calcFsde(fvi.tendonVelocity, Fsee);
@@ -1006,14 +1023,14 @@ double Haeufle2014Muscle::clampFiberLength(double lce) const
 // HAEUFLE FORCE FUNCTIONS
 //==============================================================================
 
-double Haeufle2014Muscle::calcFisom(double FiberLength) const {
+double Haeufle2014Muscle::calcFisom(double fiberLength) const {
     // define variables and set them to values which will let the simulation
     // fail if they are not overwritten.
     double exponent_active_force_length = 0.0;
     double width_active_force_length = 0.0;
     // the optimal fiber length
     double lceopt = getOptimalFiberLength();
-    double normFiberLength = FiberLength / lceopt;
+    double normFiberLength = fiberLength / lceopt;
     // if normalized fiber length is greater than 1 we are in the descending
     // domain
     if (normFiberLength > 1) {
@@ -1029,21 +1046,21 @@ double Haeufle2014Muscle::calcFisom(double FiberLength) const {
 }
 
 double Haeufle2014Muscle::calcNormFce(double fiberVelocity,
-        double normFiberLength, double activation) const {
+        double fiberLength, double activation) const {
     double Fce = 0; // initial Fce to 0
     double lceopt = getOptimalFiberLength();
     // check if this is a eccentric of concentric lengthening
     if (fiberVelocity <= 0) { // concentric lengthening
-        double Fisom = calcFisom(normFiberLength);
-        double Arel = calcArel(normFiberLength, activation, Fisom);
+        double Fisom = calcFisom(fiberLength);
+        double Arel = calcArel(fiberLength, activation, Fisom);
         double Brel = calcBrel(activation);
         Fce = (activation * Fisom + Arel) /
                       (1.0 - fiberVelocity / (Brel * lceopt)) -
               Arel;
     } else { // ecentric lengthening
-        double Fisom = calcFisom(normFiberLength);
+        double Fisom = calcFisom(fiberLength);
         double Arele = calcArele(activation, Fisom);
-        double Brele = calcBrele(normFiberLength, activation, Fisom);
+        double Brele = calcBrele(fiberLength, activation, Fisom);
         Fce = (activation * Fisom + Arele) /
                       (1.0 - fiberVelocity / (Brele * lceopt)) -
               Arele;
@@ -1051,10 +1068,10 @@ double Haeufle2014Muscle::calcNormFce(double fiberVelocity,
     return Fce;
 }
 
-double Haeufle2014Muscle::calcArel(double FiberLength,
+double Haeufle2014Muscle::calcArel(double fiberLength,
         double activation, double Fisom) const {
     double Arel0 = getConcentricContractionARel0();
-    double normFiberLength = FiberLength / getOptimalFiberLength();
+    double normFiberLength = fiberLength / getOptimalFiberLength();
     double Qarel = 1.0 / 4.0 * (1.0 + 3.0 * activation);
     double Larel = 0; // initialize to set total Arel to zero
     if (normFiberLength < 1) {
@@ -1081,10 +1098,10 @@ double Haeufle2014Muscle::calcArele(
     return Arele;
 }
 
-double Haeufle2014Muscle::calcBrele(double normFiberLength,
+double Haeufle2014Muscle::calcBrele(double fiberLength,
         double activation, double Fisom) const {
     double Arel = calcArel(
-            normFiberLength, activation, Fisom);
+            fiberLength, activation, Fisom);
     double Brel = calcBrel(activation);
     double slopefactor = getSlopeFactor();
     double maxEccentricForce = getMaxForceEccentricExtension();
@@ -1094,13 +1111,13 @@ double Haeufle2014Muscle::calcBrele(double normFiberLength,
     return Brel;
 }
 
-double Haeufle2014Muscle::calcFpee(double FiberLength) const {
+double Haeufle2014Muscle::calcFpee(double fiberLength) const {
     double Lceopt = getOptimalFiberLength();
     double Lpee0 = getParallelElasticZeroLength() * Lceopt;
     double Fpee = 0.0; // standard case that FiberLength is smaller than Lpee0
-    if (FiberLength >= Lpee0) {
+    if (fiberLength >= Lpee0) {
         double Kpee = calcKPEE();
-        Fpee = Kpee * pow((FiberLength - Lpee0), getParallelElasticExponent());
+        Fpee = Kpee * pow((fiberLength - Lpee0), getParallelElasticExponent());
     }
     return Fpee;
 }
@@ -1115,15 +1132,15 @@ double Haeufle2014Muscle::calcKPEE() const {
     return (Fpee * Fmax / (pow(Lceopt * (Wdes + 1.0 - Lpee0), nuepee)));
 }
 
-double Haeufle2014Muscle::calcIntegralFpee(double FiberLength) const 
+double Haeufle2014Muscle::calcIntegralFpee(double fiberLength) const 
 {
     double Lceopt = getOptimalFiberLength();
     double Lpee0 = getParallelElasticZeroLength() * Lceopt;
     double IntegralFpee = 0.0; // standard case that FiberLength is smaller than Lpee0
-    if (FiberLength >= Lpee0) {
-        double Fpee = calcFpee(FiberLength);
+    if (fiberLength >= Lpee0) {
+        double Fpee = calcFpee(fiberLength);
         double nuepee = getParallelElasticExponent();
-        IntegralFpee = Fpee * (FiberLength - Lpee0) / (nuepee + 1.0);      
+        IntegralFpee = Fpee * (fiberLength - Lpee0) / (nuepee + 1.0);      
     }
     return IntegralFpee;
 }

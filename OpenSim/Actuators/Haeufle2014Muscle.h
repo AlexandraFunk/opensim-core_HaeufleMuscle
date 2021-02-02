@@ -408,18 +408,18 @@ protected:
     // HAEUFLE MUSCLE CALCULATION FUNCTIONS FOR ALL NECESSARY FORCES
     //--------------------------------------------------------------------------
 
-    /** Evaluates the active-force-length curve at a normalized fiber
-    length of 'normFiberLength'. */
-    double calcFisom(double normFiberLength) const;
+    /** Evaluates the active-force-length curve at a fiber
+    length of 'fiberLength'. */
+    double calcFisom(double fiberLength) const;
 
     /** Evaluates the force-velocity curve at a fiber velocity of
     'fiberVelocity'. */
     double calcNormFce(double fiberVelocity,
-            double normFiberLength, double activation) const;
+            double fiberLength, double activation) const;
 
     /** Calculate the fiber length and activation dependent normalized Hill
     parameter Arel for the conccentric case */
-    double calcArel(double FiberLength, double activation, double Fisom) const;
+    double calcArel(double fiberLength, double activation, double Fisom) const;
 
     /** Calculate the activation dependent normalized Hill
     parameter Brel for the conccentric case */
@@ -431,12 +431,12 @@ protected:
 
     /** Calculate the activation and correspondingForceLengthValue dependent
     normalized Hill parameter Brele for the eccentric case */
-    double calcBrele(double normFiberLength, double activation,
+    double calcBrele(double fiberLength, double activation,
             double Fisom) const;
 
     /** Calculates the parallel elastic force at a fiber length of
      * 'FiberLength'. */
-    double calcFpee(double FiberLength) const;
+    double calcFpee(double fiberLength) const;
 
     /**
     @returns The constanst K for the parallel elastic element which is
@@ -446,7 +446,7 @@ protected:
 
     /** Calculates the integral of the parallel elastic force at 
      * a fiber length of 'FiberLength'. */
-    double calcIntegralFpee(double FiberLength) const;
+    double calcIntegralFpee(double fiberLength) const;
 
     /** Calculates the tendon-force-length force at a tendon length of
     'aSerialElasticLength'. */
