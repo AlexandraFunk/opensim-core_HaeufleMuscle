@@ -35,7 +35,7 @@ int main() {
     // printf("Rse: %f\n", biceps->get_rse_damping_factor());
     // printf("Dpe: %f\n", biceps->get_dpe_damping_factor());
     // printf("Rpe: %f\n", biceps->get_rpe_damping_factor());
-    biceps->set_default_calcium_concentration(0.05);
+    // biceps->set_default_calcium_concentration(0.05);
 
 
     biceps->addNewPathPoint("origin",    *humerus, Vec3(0, 0.8, 0));

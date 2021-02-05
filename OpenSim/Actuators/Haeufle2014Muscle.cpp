@@ -686,8 +686,8 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
         bool concentricCaseDone = false;
         bool eccentricCaseDone = false;
         double lcedot = 0.0;
-        double Arel = 0.0;
-        double Brel = 0.0;
+        double Arel = getConcentricContractionARel0();
+        double Brel = getConcentricContractionBRel0();
 
         for (int loopvar = 0; loopvar < 2; loopvar++) {
             // ldotMTC <= 0 probably concentric movement (start calculating
@@ -696,8 +696,10 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                 Arel = calcArel(mli.fiberLength, activation, Fisom);
                 Brel = calcBrel(activation);
                 calcConcCase = true;
-            }
-            if ( (ldotMTC > 0 && !eccentricCaseDone) || concentricCaseDone) {
+            } 
+            else {
+            // eccentric case
+            // if ( (ldotMTC > 0 && !eccentricCaseDone) || concentricCaseDone) {
                 Arel = calcArele(activation, Fisom);
                 Brel = calcBrele(mli.fiberLength, activation, Fisom);
                 calcEccCase = true;
@@ -717,27 +719,11 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     if (calcConcCase) {
                         lcedot = lceopt * (-C1dashed - sqrt(Ddashed)) /
                                  (2.0 * C2dashed);
-                    }
-                    if (calcEccCase) {
+                    } else {
                         lcedot = lceopt * (-C1dashed + sqrt(Ddashed)) /
                                  (2.0 * C2dashed);
                     }
                 } else {
-                    if (calcEccCase) {
-                        /*
-                        log_warn(
-                                "'{}': Warning D for the {} case is {} "
-                                "than 0, can't calculate with imaginary "
-                                "values. If this is the first time for the "
-                                "calculation, retrying with the {} case...",
-                                getName(), "eccentric", "smaller",
-                                "concentric");
-                        */
-                        // reset calculation flags
-                        calcEccCase = false;
-                        eccentricCaseDone = true;
-                        continue;
-                    }
                     if (calcConcCase) {
                         /*
                         log_warn(
@@ -752,6 +738,20 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                         calcConcCase = false;
                         concentricCaseDone = true;
                         continue;
+                    } else {
+                        /*
+                        log_warn(
+                                "'{}': Warning D for the {} case is {} "
+                                "than 0, can't calculate with imaginary "
+                                "values. If this is the first time for the "
+                                "calculation, retrying with the {} case...",
+                                getName(), "eccentric", "smaller",
+                                "concentric");
+                        */
+                        // reset calculation flags
+                        calcEccCase = false;
+                        eccentricCaseDone = true;
+                        continue;
                     }
                 }
             } else {
@@ -759,20 +759,6 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     // this is actually only a linear equation
                     lcedot = -lceopt * C0dashed / C1dashed;
                 } else {
-                    if (calcEccCase) {
-                        /*
-                        log_warn(
-                                "'{}': Warning no algebraic solution found "
-                                "in {} case. C1 must not be equal to 0. If "
-                                "this is the first time for the "
-                                "calculation, retrying with the {} case...",
-                                getName(), "eccentric", "concentric");
-                        */
-                        // reset calculation flags
-                        calcEccCase = false;
-                        eccentricCaseDone = true;
-                        continue;
-                    }
                     if (calcConcCase) {
                         /* 
                         log_warn(
@@ -786,9 +772,22 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                         calcConcCase = false;
                         concentricCaseDone = true;
                         continue;
-                    }
-                }
-            }
+                    } else {
+                        /*
+                        log_warn(
+                                "'{}': Warning no algebraic solution found "
+                                "in {} case. C1 must not be equal to 0. If "
+                                "this is the first time for the "
+                                "calculation, retrying with the {} case...",
+                                getName(), "eccentric", "concentric");
+                        */
+                        // reset calculation flags
+                        calcEccCase = false;
+                        eccentricCaseDone = true;
+                        continue;
+                    } // close else if calcConcCase
+                } // close else if C1 > 0
+            } // close else if C2 > 0
 
             if (calcConcCase) {
                 // check if solution matches Arel/Brel (here < 0) otherwise continue
@@ -796,7 +795,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     uniqueSolution = true;
                     calcConcCase = false;
                     concentricCaseDone = true;
-                    continue;
+                    break;
                 } else {
                     /*
                     log_warn("'{}': Warning solution doens't match "
@@ -810,14 +809,13 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     concentricCaseDone = true;
                     continue;
                 }
-            }
-            if (calcEccCase) {
+            } else {
                 // check if solution matches Arel/Brel (here > 0) otherwise continue
                 if (lcedot >= 0) {
                     uniqueSolution = true;
                     calcEccCase = false;
                     eccentricCaseDone = true;
-                    continue;
+                    break;
                 } else {
                     /*
                     log_warn("'{}': Warning solution doens't match "
@@ -830,9 +828,9 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     calcEccCase = false;
                     eccentricCaseDone = true;
                     continue;
-                }
-            }
-        }
+                } // else if lcedot >= 0
+            } // else if calcConCase
+        } // for loop
 
         // set lcedot to zero if no unique solution was found in the loop above
         if (!uniqueSolution) { 
@@ -1022,12 +1020,7 @@ double Haeufle2014Muscle::calcArel(double fiberLength,
     double Arel0 = getConcentricContractionARel0();
     double normFiberLength = fiberLength / getOptimalFiberLength();
     double Qarel = 1.0 / 4.0 * (1.0 + 3.0 * activation);
-    double Larel = 0; // initialize to set total Arel to zero
-    if (normFiberLength < 1) {
-        Larel = 1.0;
-    } else {
-        Larel = Fisom;
-    }
+    double Larel = (normFiberLength < 1) ? 1.0 : Fisom;
     double Arel = Arel0 * Qarel * Larel;
     return Arel;
 }
@@ -1057,7 +1050,7 @@ double Haeufle2014Muscle::calcBrele(double fiberLength,
 
     double Brele = Brel * (1.0 - maxEccentricForce) /
                    (slopefactor * (1.0 + Arel / (activation * Fisom)));
-    return Brel;
+    return Brele;
 }
 
 double Haeufle2014Muscle::calcFpee(double fiberLength) const {
