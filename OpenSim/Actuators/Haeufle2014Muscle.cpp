@@ -227,6 +227,10 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
         }
     }
 
+    // set maximum contraction velocity
+    double vmax = calcVmax();
+    setMaxContractionVelocity(vmax);
+
 
     // TODO check if we need this for the first implementation of this model
     /**
@@ -682,7 +686,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
 
         bool uniqueSolution = false;
         bool calcConcCase = false; 
-        bool calcEccCase = false;
+        // bool calcEccCase = false;
         bool concentricCaseDone = false;
         bool eccentricCaseDone = false;
         double lcedot = 0.0;
@@ -702,7 +706,8 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
             // if ( (ldotMTC > 0 && !eccentricCaseDone) || concentricCaseDone) {
                 Arel = calcArele(activation, Fisom);
                 Brel = calcBrele(mli.fiberLength, activation, Fisom);
-                calcEccCase = true;
+                calcConcCase = false;
+                // calcEccCase = true;
             }
 
             // start calculating C2, C1, C0 and D
@@ -749,7 +754,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                                 "concentric");
                         */
                         // reset calculation flags
-                        calcEccCase = false;
+                        // calcEccCase = false;
                         eccentricCaseDone = true;
                         continue;
                     }
@@ -782,7 +787,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                                 getName(), "eccentric", "concentric");
                         */
                         // reset calculation flags
-                        calcEccCase = false;
+                        // calcEccCase = false;
                         eccentricCaseDone = true;
                         continue;
                     } // close else if calcConcCase
@@ -813,7 +818,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                 // check if solution matches Arel/Brel (here > 0) otherwise continue
                 if (lcedot >= 0) {
                     uniqueSolution = true;
-                    calcEccCase = false;
+                    // calcEccCase = false;
                     eccentricCaseDone = true;
                     break;
                 } else {
@@ -825,7 +830,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                                 "lcedot should be {} than or equal to 0",
                             getName(), lcedot, "eccentric", "larger");
                     */
-                    calcEccCase = false;
+                    // calcEccCase = false;
                     eccentricCaseDone = true;
                     continue;
                 } // else if lcedot >= 0
@@ -953,6 +958,16 @@ void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
     }
 }
 
+double Haeufle2014Muscle::calcVmax() const 
+{
+    double Arel0 = getConcentricContractionARel0();
+    double Brel0 = getConcentricContractionBRel0();
+    double lceopt = getOptimalFiberLength();
+
+    double vmax = Brel0 * lceopt / Arel0;
+
+    return vmax;
+}
 
 double Haeufle2014Muscle::clampFiberLength(double lce) const
 {

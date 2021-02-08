@@ -471,6 +471,8 @@ protected:
     double calcC0dash(double ldotMTC, double cosPenAngle,
             double activation, double Fisom, double Fpee, double Fsee) const;
 
+    /** Calculate the maximum contraction velocity at the beginning of the simulation.*/
+    double calcVmax() const;
 
     //--------------------------------------------------------------------------
     // CALCULATIONS
