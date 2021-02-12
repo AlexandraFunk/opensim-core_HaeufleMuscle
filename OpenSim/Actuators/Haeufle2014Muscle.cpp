@@ -861,10 +861,9 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
         // set lcedot to zero if no unique solution was found in the loop above
         if (!uniqueSolution) { 
             lcedot = 0.0; 
-            /* log_warn("'{}': Warning no unique solution found: setting lcedot "
+            log_warn("'{}': Warning no unique solution found: setting lcedot "
                      "to {}",
                     getName(), 0);
-        */
         }
 
         double normFiberVelocity = lcedot / getMaxContractionVelocity(); //TODO set MaxContrationVelocity since it is always at 10
