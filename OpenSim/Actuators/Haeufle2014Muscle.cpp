@@ -590,8 +590,8 @@ void Haeufle2014Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const
     double excitation = getExcitation(s);
 
     // Tolerance, in Newtons, of the desired equilibrium
-    const double tol =
-            max(1e-8 * getMaxIsometricForce(), SimTK::SignificantReal * 10.0);
+    // const double tol = max(1e-8 * getMaxIsometricForce(), SimTK::SignificantReal * 10.0);
+    const double tol = 1e-9;
 
     int maxIter = 200; // Should this be user settable?
 
@@ -643,7 +643,9 @@ void Haeufle2014Muscle::calcMuscleLengthInfo(
             getPennationModel().calcPennationAngle(mli.fiberLength);
         mli.cosPennationAngle = cos(mli.pennationAngle);
         mli.sinPennationAngle = sin(mli.pennationAngle);
-        mli.fiberLengthAlongTendon = mli.fiberLength * mli.cosPennationAngle;
+        mli.fiberLengthAlongTendon =
+                getPennationModel().calcFiberLengthAlongTendon(
+                        mli.fiberLength, mli.cosPennationAngle);
 
         // Necessary even for the rigid tendon, as it might have gone slack.
         mli.tendonLength = getPennationModel().calcTendonLength(
@@ -681,8 +683,9 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
 
         /** start calculating the activation for this model based on the
          * normalized ca concentration */
-        double activation = getActivationModel().calculateActivation(
-                gamma, mli.fiberLength);
+        double activation = getActivationModel().clampActivation(
+                getActivationModel().calculateActivation(
+                        gamma, mli.fiberLength));
         /** start calculating the values for the Haeufle Modell in the
          * following
          * order:
@@ -858,9 +861,10 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
         // set lcedot to zero if no unique solution was found in the loop above
         if (!uniqueSolution) { 
             lcedot = 0.0; 
-            log_warn("'{}': Warning no unique solution found: setting lcedot "
+            /* log_warn("'{}': Warning no unique solution found: setting lcedot "
                      "to {}",
                     getName(), 0);
+        */
         }
 
         double normFiberVelocity = lcedot / getMaxContractionVelocity(); //TODO set MaxContrationVelocity since it is always at 10
@@ -913,8 +917,9 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
 
         /** start calculating the activation for this model based on the
          * normalized ca concentration */
-        double activation = getActivationModel().calculateActivation(
-                gamma, mli.fiberLength);
+        double activation = getActivationModel().clampActivation(
+                getActivationModel().calculateActivation(
+                        gamma, mli.fiberLength));
 
         double Fpee = calcFpee(mli.fiberLength);
         double Fsee = calcFsee(mli.tendonLength);
@@ -1278,7 +1283,7 @@ Haeufle2014Muscle::initMuscleState(const double pathLength,
 
      // get interval borders:
     double lower_border = 0.0;
-    double upper_border = pathLength;
+    double upper_border = pathLength - getTendonSlackLength();
 
     // initialize iteration variable
     int iter = 0;
@@ -1315,10 +1320,10 @@ Haeufle2014Muscle::initMuscleState(const double pathLength,
                 cosPenAng_middle, middle_border, pathLength);
         double Fsee_middle = calcFsee(lsee_middle);
 
-        double activation_lower = getActivationModel().calculateActivation(
-                excitation, lower_border);
-        double activation_middle = getActivationModel().calculateActivation(
-                excitation, middle_border);
+        double activation_lower = getActivationModel().clampActivation(getActivationModel().calculateActivation(
+                excitation, lower_border));
+        double activation_middle = getActivationModel().clampActivation(getActivationModel().calculateActivation(
+                excitation, middle_border));
 
         // calculate the total lower and middle values:
         double initalEquilibrium_lower =
