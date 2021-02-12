@@ -59,6 +59,7 @@ int main() {
     reporter->set_report_time_interval(1.0);
     reporter->addToReport(biceps->getOutput("fiber_force"));
     reporter->addToReport(biceps->getOutput("activation"));
+    reporter->addToReport(biceps->getOutput("fiber_length"));
     reporter->addToReport(
         elbow->getCoordinate(PinJoint::Coord::RotationZ).getOutput("value"),
         "elbow_angle");
@@ -82,6 +83,7 @@ int main() {
     // Fix the shoulder at its default angle and begin with the elbow flexed.
     shoulder->getCoordinate().setLocked(state, true);
     elbow->getCoordinate().setValue(state, 0.5 * Pi);
+    //elbow->getCoordinate().setValue(state, 0.001 * Pi);
     model.equilibrateMuscles(state);
 
     // Configure the visualizer.

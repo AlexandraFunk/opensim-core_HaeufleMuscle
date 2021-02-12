@@ -937,9 +937,9 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
         mdi.activeFiberForce = Fce;
         mdi.passiveFiberForce = Fpee + Fpde;
         mdi.tendonForce = Fsee + Fsde;
-        
+        mdi.normTendonForce = mdi.tendonForce / Fmax;
+
         // Set values which are not implemented in this model to NaN
-        mdi.normTendonForce = SimTK::NaN;
         mdi.fiberStiffness = SimTK::NaN;
         mdi.fiberStiffnessAlongTendon = SimTK::NaN; 
         mdi.tendonStiffness = SimTK::NaN;
