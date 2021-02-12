@@ -256,6 +256,10 @@ public:
     /** @returns The current calcium concentration */
     double getCalciumConcentration(const SimTK::State& s) const;
 
+    double getMinimumFiberLength() const;
+
+    double getMinimumFiberLengthAlongTendon() const;
+
     // TODO add more getter methods which are needed during calculation, for example
     // getFiberVelocity, getActivation (see Muscle.h) ....
 
@@ -562,8 +566,11 @@ private:
     // but is necessary for the Haeufle2014Muscle modell.
     double m_tendonDampingForce;
 
+    double m_minimumFiberLength;
+    double m_minimumFiberLengthAlongTendon;
+
     std::pair<StatusFromInitMuscleState, ValuesFromInitMuscleState>
-    initMuscleState(const double aActivation, const double pathLength,
+    initMuscleState(const double pathLength, const double excitation,
             const double aSolTolerance, const int aMaxIterations) const;
 
 };

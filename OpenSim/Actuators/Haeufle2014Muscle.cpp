@@ -231,6 +231,13 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
     double vmax = calcVmax();
     setMaxContractionVelocity(vmax);
 
+    // what shall be the minimum fiber length from penMdl??
+    m_minimumFiberLength = 0;
+
+    const double phi = penMdl.calcPennationAngle(m_minimumFiberLength);
+    m_minimumFiberLengthAlongTendon =
+            penMdl.calcFiberLengthAlongTendon(m_minimumFiberLength, cos(phi));
+
 
     // TODO check if we need this for the first implementation of this model
     /**
@@ -438,6 +445,14 @@ double Haeufle2014Muscle::getCalciumConcentration(const SimTK::State& s) const {
     return getStateVariableValue(s, STATE_CALCIUM_CONCENTRATION);
 }
 
+double Haeufle2014Muscle::getMinimumFiberLength() const {
+    return m_minimumFiberLength;
+}
+
+double Haeufle2014Muscle::getMinimumFiberLengthAlongTendon() const {
+    return m_minimumFiberLengthAlongTendon;
+}
+
 double Haeufle2014Muscle::getCalciumConcentrationDerivative(const SimTK::State& s) const 
 {
     if (get_ignore_activation_dynamics()) { return 0.0; }
@@ -567,8 +582,12 @@ void Haeufle2014Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const
 
     // TODO this calls the muscle.h function getActivation -> which calculates muscledynamicsInfo 
     // -> variables might not be available at this time of simulation
-    double activation = getActivation(s); 
+    // double activation = getActivation(s); 
+
     double pathLength = getLength(s);
+
+    // get initial excitation
+    double excitation = getExcitation(s);
 
     // Tolerance, in Newtons, of the desired equilibrium
     const double tol =
@@ -578,7 +597,7 @@ void Haeufle2014Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const
 
     try {
         std::pair<StatusFromInitMuscleState, ValuesFromInitMuscleState> result =
-                initMuscleState(activation, pathLength, tol, maxIter);
+                initMuscleState(pathLength, excitation, tol, maxIter);
         switch (result.first) {
 
         case StatusFromInitMuscleState::Success_Converged:
@@ -591,7 +610,6 @@ void Haeufle2014Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const
             ss << "\n  Solution error " << abs(result.second["solution_error"])
                << " exceeds tolerance of " << tol << "\n"
                << "  Newton iterations reached limit of " << maxIter << "\n"
-               << "  Activation is " << activation << "\n"
                << "  Fiber length is " << result.second["fiber_length"] << "\n";
             OPENSIM_THROW_FRMOBJ(MuscleCannotEquilibrate, ss.str());
             break;
@@ -971,13 +989,13 @@ double Haeufle2014Muscle::calcVmax() const
 
 double Haeufle2014Muscle::clampFiberLength(double lce) const
 {
-    if (lce < 0.0) {
+    if (lce < getMinimumFiberLength()) {
         log_warn("Exception caught in Haeufle2014Muscle:: clampFiberLength "
                  "from {} \n Fiber length can't be smaller than 0",
                 getName());
         // throw OpenSim::Exception(msg); // only show warning dont throw error
     }
-    return max(lce, 0.0);
+    return max(lce, getMinimumFiberLength());
 }
 
 
@@ -1249,14 +1267,13 @@ double Haeufle2014Muscle::calcC0dash(double ldotMTC,
 
 std::pair<Haeufle2014Muscle::StatusFromInitMuscleState, 
     Haeufle2014Muscle::ValuesFromInitMuscleState>
-Haeufle2014Muscle::initMuscleState(
-        const double aActivation, const double pathLength, const double aSolTolerance,
-        const int aMaxIterations) const 
-{
+Haeufle2014Muscle::initMuscleState(const double pathLength,
+        const double excitation, const double aSolTolerance,
+        const int aMaxIterations) const {
     /** implementing a simple Bisection method to solve the inital fiber length
      * problem:
-     * cos(alpha) * ( q * Fisom * Fmax + Fpee) - Fsee = 0
-     * within the interval (0, lMTC)
+     * cos(alpha) * ( a * Fisom * Fmax + Fpee) - Fsee = 0
+     * within the interval (0, lMTC-lsee0)
      */
 
      // get interval borders:
@@ -1298,14 +1315,19 @@ Haeufle2014Muscle::initMuscleState(
                 cosPenAng_middle, middle_border, pathLength);
         double Fsee_middle = calcFsee(lsee_middle);
 
+        double activation_lower = getActivationModel().calculateActivation(
+                excitation, lower_border);
+        double activation_middle = getActivationModel().calculateActivation(
+                excitation, middle_border);
+
         // calculate the total lower and middle values:
         double initalEquilibrium_lower =
                 cosPenAng_lower *
-                        (aActivation * Fisom_lower * Fmax + Fpee_lower) -
+                        (activation_lower * Fisom_lower * Fmax + Fpee_lower) -
                 Fsee_lower;
         double initalEquilibrium_middle =
-                cosPenAng_middle *
-                        (aActivation * Fisom_middle * Fmax + Fpee_middle) -
+                cosPenAng_middle * (activation_middle * Fisom_middle * Fmax +
+                                           Fpee_middle) -
                 Fsee_middle;
         if ((initalEquilibrium_lower * initalEquilibrium_middle) < 0) {
             upper_border = middle_border;
@@ -1313,6 +1335,7 @@ Haeufle2014Muscle::initMuscleState(
             lower_border = middle_border;
         }
         ferr = upper_border - lower_border;
+        iter++;
     }
 
     // calculate final values:
