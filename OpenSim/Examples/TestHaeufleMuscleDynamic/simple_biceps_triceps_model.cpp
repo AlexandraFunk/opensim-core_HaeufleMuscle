@@ -30,7 +30,7 @@ int main() {
             new Haeufle2014Muscle("biceps", 200, 0.6, 0.55, 0.0);
 
     Haeufle2014Muscle* triceps =
-            new Haeufle2014Muscle("triceps", 200, 0.6, 0.55, 0.0);
+            new Haeufle2014Muscle("triceps", 200, 1, 0.8, 0.0);
 
     // set damping params to 0 to be more similar to millard muscle
     // biceps->setParallelDampingParams(0.0, 0.0);
