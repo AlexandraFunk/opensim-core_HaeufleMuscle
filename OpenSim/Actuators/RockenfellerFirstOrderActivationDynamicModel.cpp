@@ -54,7 +54,7 @@ void RockenfellerFirstOrderActivationDynamicModel::constructProperties()
     constructProperty_nue(3);
     constructProperty_roh_0(5.27);
     constructProperty_gamma_C(1.37);
-    constructProperty_minimum_gamma(0.001);
+    constructProperty_minimum_gamma(0.0);
     constructProperty_minimum_activation(0.005); // Hatze constant
     constructProperty_optimal_fiber_length(0.2);
 }

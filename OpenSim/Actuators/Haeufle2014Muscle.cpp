@@ -59,7 +59,7 @@ void Haeufle2014Muscle::setNull()
 }
 
 void Haeufle2014Muscle::constructProperties() {
-    constructProperty_default_calcium_concentration(0.001);
+    constructProperty_default_calcium_concentration(0.0);
     constructProperty_default_fiber_length(getOptimalFiberLength());
     constructProperty_exponent_descending_active_force_length(1.50);
     constructProperty_width_descending_active_force_length(0.45);
