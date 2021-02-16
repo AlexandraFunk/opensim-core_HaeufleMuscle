@@ -633,6 +633,7 @@ void Haeufle2014Muscle::calcMuscleLengthInfo(
             mli.fiberLength =
                     clampFiberLength(getPennationModel().calcFiberLength(
                             getLength(s), tendonSlackLen));
+
         } else { // elastic tendon
             mli.fiberLength = clampFiberLength(
                     getStateVariableValue(s, STATE_FIBER_LENGTH_NAME));
@@ -640,7 +641,7 @@ void Haeufle2014Muscle::calcMuscleLengthInfo(
 
         mli.normFiberLength = mli.fiberLength / optFiberLength;
         mli.pennationAngle =
-            getPennationModel().calcPennationAngle(mli.fiberLength);
+                getPennationModel().calcPennationAngle(mli.fiberLength);
         mli.cosPennationAngle = cos(mli.pennationAngle);
         mli.sinPennationAngle = sin(mli.pennationAngle);
         mli.fiberLengthAlongTendon =
@@ -866,7 +867,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     getName(), 0);
         }
 
-        double normFiberVelocity = lcedot / getMaxContractionVelocity(); //TODO set MaxContrationVelocity since it is always at 10
+        double normFiberVelocity = lcedot / getMaxContractionVelocity();
 
         double dphidt = getPennationModel().calcPennationAngularVelocity(
                 tan(mli.pennationAngle), mli.fiberLength, lcedot);
@@ -880,13 +881,16 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
             dtl = getPennationModel().calcTendonVelocity(mli.cosPennationAngle,
                     mli.sinPennationAngle, dphidt, mli.fiberLength, lcedot,
                     dmcldt);
+            // dtl = dmcldt - lcedot / mli.cosPennationAngle;
         }
 
         // Populate the struct.
         fvi.fiberVelocity = lcedot;
         // fvi.normFiberVelocity = normFiberVelocity; // TODO ask Maria if this is correct
         fvi.fiberVelocityAlongTendon = dlceAT;
+        // fvi.fiberVelocityAlongTendon = SimTK::NaN;
         fvi.pennationAngularVelocity = dphidt;
+        // fvi.pennationAngularVelocity = SimTK::NaN;
         fvi.tendonVelocity = dtl;
         // fvi.normTendonVelocity = dtl / getTendonSlackLength(); // TODO ask Maria if this is correct
         // This one is not implemented in this model
@@ -1093,7 +1097,7 @@ double Haeufle2014Muscle::calcBrele(double fiberLength,
 double Haeufle2014Muscle::calcFpee(double fiberLength) const {
     double Lceopt = getOptimalFiberLength();
     double Lpee0 = getParallelElasticZeroLength();
-    double Fpee = 0.0; // standard case that FiberLength is smaller than Lpee0
+    double Fpee = 0.0; // standard case that FiberLength is smaller than Lpee0 * lceopt
     if (fiberLength >= (Lpee0 * Lceopt)) {
         // double Kpee = calcKPEE(); // deprecated
         double deltaFpee =
