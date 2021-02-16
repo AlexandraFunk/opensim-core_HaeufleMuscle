@@ -8,7 +8,7 @@
 # Ignore tmp directory/file. We use it sometimes to write debug information.
 tmp
 # Ignore build trees.
-/build*
+**/build*
 # Ignore install dir.
 install
 
@@ -70,3 +70,12 @@ cmake-build-*
 
 ## File-based project format:
 *.iws
+
+# Ignore Visual Studio hidden folders
+/.vs*
+
+# Ignore VS Code hidden folder
+/.vscode*
+
+# Ignore out folder
+/out*
