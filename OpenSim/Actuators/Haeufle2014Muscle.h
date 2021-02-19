@@ -460,15 +460,16 @@ protected:
 
     /** Calculates the tendon damping force Fsde which depends on the serial
      * elastic length velocity and the elasticTendonForce (Fsee) */
-    double calcFsde(double serialElasticLengthVelocity,
-            double elasticTendonForce) const;
+    double calcFsde(double serialElasticLengthVelocity, double cosPenAng,
+            double parallelElasticForce,
+            double contractionForce) const;
  
     /** Calculates the parallel damping force Fpde which depends on the
      *  length velocity and the parallelElasticForce (Fpee) */
     double calcFpde(double lengthVelocity, double parallelElasticForce) const;
 
     double calcC2dash(double cosPenAngle, double activation, double Fpee,
-            double Fsee, double Brel) const;
+            double Brel, double Arel) const;
     double calcC1dash(double ldotMTC, double cosPenAngle, double activation,
             double Fisom, double Fpee, double Fsee, double Arel,
             double Brel) const;
@@ -553,8 +554,8 @@ private:
     };
 
     // Associative array of values returned by initMuscleState():
-    // solution_error, iterations, fiber_length, fiber_velocity, and
-    // tendon_force.
+    // solution_error, iterations, fiber_length, fiber_velocity,
+    // tendon_force and activation
     typedef std::map<std::string, double> ValuesFromInitMuscleState;
 
 

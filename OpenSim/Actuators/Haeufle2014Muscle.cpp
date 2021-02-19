@@ -77,8 +77,10 @@ void Haeufle2014Muscle::constructProperties() {
     constructProperty_relative_force_at_nonlinear_linear_transition(0.4); // before: dFsee0 = 0.4 * Fmax
     constructProperty_dse_damping_factor(0.3);
     constructProperty_rse_damping_factor(0.01);
+    //constructProperty_dpe_damping_factor(0.3);
+    //constructProperty_rpe_damping_factor(0.01);
     constructProperty_dpe_damping_factor(0.0);
-    constructProperty_rpe_damping_factor(1.0);
+    constructProperty_rpe_damping_factor(0.0);
 
     constructProperty_maximum_pennation_angle(acos(0.1)); // is this acos 0 or acos 0.1? 
     constructProperty_time_constant_hatze(11.3);
@@ -86,7 +88,7 @@ void Haeufle2014Muscle::constructProperties() {
     constructProperty_roh_0(5.27);
     constructProperty_gamma_C(1.37);
     // constructProperty_minimum_gamma(0.001); // same like default calcium concentration
-    constructProperty_minimum_activation(0.005); // Hatze constant
+    constructProperty_minimum_activation(0.001); // Hatze constant
 
     //TODO check if this is necessary?
     // setMinControl(get_minimum_activation());
@@ -580,10 +582,6 @@ void Haeufle2014Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const
     // Initial activation and fiber length from input State, s.
     _model->getMultibodySystem().realize(s, SimTK::Stage::Velocity);
 
-    // TODO this calls the muscle.h function getActivation -> which calculates muscledynamicsInfo 
-    // -> variables might not be available at this time of simulation
-    // double activation = getActivation(s); 
-
     double pathLength = getLength(s);
 
     // get initial excitation
@@ -603,6 +601,7 @@ void Haeufle2014Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const
         case StatusFromInitMuscleState::Success_Converged:
             setActuation(s, result.second["tendon_force"]);
             setFiberLength(s, result.second["fiber_length"]);
+            setActivation(s, excitation);
             break;
         case StatusFromInitMuscleState::Failure_MaxIterationsReached:
             // Report internal variables and throw exception.
@@ -734,7 +733,7 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
 
             // start calculating C2, C1, C0 and D
             double C2dashed = calcC2dash(
-                    mli.cosPennationAngle, activation, Fpee, Fsee, Brel);
+                    mli.cosPennationAngle, activation, Fpee, Brel, Arel);
             double C1dashed = calcC1dash(ldotMTC, mli.cosPennationAngle,
                     activation, Fisom, Fpee, Fsee, Arel, Brel);
             double C0dashed = calcC0dash(ldotMTC, mli.cosPennationAngle,
@@ -743,13 +742,13 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
 
             if (abs(C2dashed) > SimTK::SignificantReal) {
                 if (Ddashed >= 0) {
-                    if (calcConcCase) {
+                    //if (calcConcCase) {
                         lcedot = lceopt * (-C1dashed - sqrt(Ddashed)) /
                                  (2.0 * C2dashed);
-                    } else {
-                        lcedot = lceopt * (-C1dashed + sqrt(Ddashed)) /
-                                 (2.0 * C2dashed);
-                    }
+                    //} else {
+                    //    lcedot = lceopt * (-C1dashed + sqrt(Ddashed)) /
+                    //             (2.0 * C2dashed);
+                    //}
                 } else {
                     if (calcConcCase) {
                         /*
@@ -930,7 +929,7 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
                              mli.fiberLength, activation) *
                      Fmax;
         
-        double Fsde = calcFsde(fvi.tendonVelocity, Fsee);
+        double Fsde = calcFsde(fvi.tendonVelocity, mli.cosPennationAngle, Fpee, Fce);
         double Fpde = calcFpde(fvi.fiberVelocity, Fpee);
 
         mdi.activation = activation;
@@ -1185,7 +1184,8 @@ double Haeufle2014Muscle::calcIntegralFsee(double aSerialElasticLength) const
 }
 
 double Haeufle2014Muscle::calcFsde(double serialElasticLengthVelocity,
-        double elasticTendonForce) const {
+        double cosPenAng, double parallelElasticForce,
+        double contractionForce) const { // contractionForce == F_CE
 
     double Dse = getDseDampingFactor();
     double Rse = getRseDampingFactor();
@@ -1195,7 +1195,9 @@ double Haeufle2014Muscle::calcFsde(double serialElasticLengthVelocity,
     double Brel0 = getConcentricContractionBRel0();
 
     double Fsde = Dse * Fmax * Arel0 / (lceopt * Brel0) *
-                  ((1.0 - Rse) * elasticTendonForce / Fmax + Rse) *
+            ((1.0 - Rse) * cosPenAng *
+                            (parallelElasticForce + contractionForce) / Fmax +
+                    Rse) *
                   serialElasticLengthVelocity;
     return Fsde;
 }
@@ -1217,7 +1219,7 @@ double Haeufle2014Muscle::calcFpde(
 }
 
 double Haeufle2014Muscle::calcC2dash(
-        double cosPenAngle, double activation, double Fpee, double Fsee, double Brel) const 
+        double cosPenAngle, double activation, double Fpee, double Brel, double Arel) const 
 {
     double Arel0 = getConcentricContractionARel0();
     double Brel0 = getConcentricContractionBRel0();
@@ -1227,9 +1229,17 @@ double Haeufle2014Muscle::calcC2dash(
     double Dpe = getDpeDampingFactor();
     double Rpe = getRpeDampingFactor();
     double C2woFmax =
+            -Dse * Arel0 / (Brel * Brel0 ) *
+                    ((1 - Rse) * (Arel - Fpee / Fmax) - Rse/cosPenAngle) +
+            cosPenAngle * Dpe * Arel0 / (Brel * Brel0) *
+                    ((1 - Rpe) * Fpee / Fmax + Rpe);
+    /*
+    Old term with Fsde only depending on Fsee
+    double C2woFmax =
             Arel0 / (Brel0 * Brel) *
             (Dse / cosPenAngle * ((1.0 - Rse) * Fsee / Fmax + Rse) +
                     cosPenAngle * Dpe * ((1.0 - Rpe) * Fpee / Fmax + Rpe));
+    */
     return C2woFmax;
 }
 
@@ -1246,12 +1256,28 @@ double Haeufle2014Muscle::calcC1dash(
     double Fmax = getMaxIsometricForce();
     double Dpe = getDpeDampingFactor();
     double Rpe = getRpeDampingFactor();
+
+    double C1woFmax =
+            Dse * Arel0 / Brel0 *
+                    (ldotMTC * cosPenAngle / (Brel * lceopt) * (1 - Rse) *
+                                    (Arel - Fpee / Fmax) -
+                            ldotMTC * Rse / (Brel * lceopt) -
+                            (1 - Rse) * (activation * Fisom + Fpee / Fmax) -
+                            Rse / cosPenAngle) -
+            cosPenAngle * Dpe * Arel0 / Brel0 *
+                    ((1 - Rpe) * Fpee / Fmax + Rpe) -
+            cosPenAngle * Arel / Brel - Fsee / (Brel * Fmax) +
+            cosPenAngle * Fpee / (Brel * Fmax);
+    
+    /*
+     Old term with Fsde only depending on Fsee
     double C1woFmax = -Dse * Arel0 / Brel0 * ((1.0 - Rse) * Fsee / Fmax + Rse) *
                               (1.0 / cosPenAngle + ldotMTC / (Brel * lceopt)) -
                       cosPenAngle * Dpe * Arel0 / Brel0 *
                               ((1.0 - Rpe) * Fpee / Fmax + Rpe) -
                       cosPenAngle * Arel / Brel - Fsee / (Brel * Fmax) +
                       cosPenAngle * Fpee / (Brel * Fmax);
+    */
     return C1woFmax;
 }
 
@@ -1265,10 +1291,21 @@ double Haeufle2014Muscle::calcC0dash(double ldotMTC,
     double Rse = getRseDampingFactor();
     double Fmax = getMaxIsometricForce();
     
+    double C0woFmax =
+            Dse * Arel0 * ldotMTC / (lceopt * Brel0) *
+                    ((1 - Rse) * cosPenAngle *
+                                    (activation * Fisom + Fpee / Fmax) +
+                            Rse) -
+            cosPenAngle * activation * Fisom - cosPenAngle * Fpee / Fmax +
+            Fsee / Fmax;
+
+    /*
+    * Old term with Fsde only depending on Fsee
     double C0woFmax = Dse * Arel0 * ldotMTC / (lceopt * Brel0) *
                               ((1.0 - Rse) * Fsee / Fmax + Rse) -
                       cosPenAngle * activation * Fisom -
                       cosPenAngle * Fpee / Fmax + Fsee / Fmax;
+    */
     return C0woFmax;
 }
 
@@ -1354,7 +1391,7 @@ Haeufle2014Muscle::initMuscleState(const double pathLength,
             cosPenAng_init, lce_init, pathLength);
     double Fsee_init = calcFsee(lsee_init);
 
-        // Populate the result map.
+    // Populate the result map.
     ValuesFromInitMuscleState resultValues;
 
     if (abs(ferr) < aSolTolerance) { // The solution converged.
