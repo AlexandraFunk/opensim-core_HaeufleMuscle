@@ -16,17 +16,15 @@ public:
 //==============================================================================
 // PROPERTIES
 //==============================================================================
-    OpenSim_DECLARE_PROPERTY(time_constant_hatze, double,
+    OpenSim_DECLARE_PROPERTY(activation_Hatze_time_constant, double,
         "Time constant, in 1/seconds. (overridden when this is a subcomponent of a Muscle)");
-    OpenSim_DECLARE_PROPERTY(nue, double,
+    OpenSim_DECLARE_PROPERTY(activation_exponent, double,
         "Hatze Coefficient (overridden when this is a subcomponent of a Muscle)" );
-    OpenSim_DECLARE_PROPERTY(roh_0, double,
-        "Hatze constant [l/mol] from Rockenfeller2018 (overridden when this is a subcomponent of a Muscle)");
-    OpenSim_DECLARE_PROPERTY(gamma_C, double,
-        "Hatze Coefficient (overridden when this is a subcomponent of a Muscle)");
+    OpenSim_DECLARE_PROPERTY(
+            activation_optimal_calcium_concentration_fraction, double, "roh_0 * gamma_C");
     OpenSim_DECLARE_PROPERTY(minimum_gamma, double,
-        "Activation lower bound. (overridden when this is a subcomponent of a Muscle)");
-    OpenSim_DECLARE_PROPERTY(minimum_activation, double,
+        "Calcium concentration lower bound. (overridden when this is a subcomponent of a Muscle)");
+    OpenSim_DECLARE_PROPERTY(activation_minimum, double,
             "Activation lower bound (Hatze constant 0.005) equal to Kuh0");
     OpenSim_DECLARE_PROPERTY(optimal_fiber_length, double,
         "Optimal fiber length. (overridden when this is a subcomponent of a Muscle)");
@@ -39,10 +37,11 @@ public:
     RockenfellerFirstOrderActivationDynamicModel();
 
     /** Creates an activation dynamic model using the provided parameters. */
-    RockenfellerFirstOrderActivationDynamicModel(double time_constant_hatze,
-            double nue, double roh_0, double gamma_C, double minimum_gamma,
-            double minimum_activation, double optimal_fiber_length,
-            const std::string& muscleName);
+    RockenfellerFirstOrderActivationDynamicModel(
+            double activation_Hatze_time_constant, double activation_exponent,
+            double activation_optimal_calcium_concentration_fraction,
+            double minimum_gamma, double activation_minimum,
+            double optimal_fiber_length, const std::string& muscleName);
 
     /**
     @returns Activation clamped to the range [minActivation, 1.0].

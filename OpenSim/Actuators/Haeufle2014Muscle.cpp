@@ -61,37 +61,36 @@ void Haeufle2014Muscle::setNull()
 void Haeufle2014Muscle::constructProperties() {
     constructProperty_default_calcium_concentration(0.0);
     constructProperty_default_fiber_length(getOptimalFiberLength());
-    constructProperty_exponent_descending_active_force_length(1.50);
-    constructProperty_width_descending_active_force_length(0.45);
-    constructProperty_exponent_ascending_active_force_length(3.00);
-    constructProperty_width_ascending_active_force_length(0.45);
-    constructProperty_concentric_contraction_a_rel0(0.2);
-    constructProperty_concentric_contraction_b_rel0(2.0);
-    constructProperty_max_force_eccentric_extension(1.5);
-    constructProperty_slopefactor(2.0);
-    constructProperty_parallel_elastic_zero_length(0.95);
-    constructProperty_parallel_elastic_exponent(2.5);
-    constructProperty_parallel_elastic_force_rel_to_fmax(2.0);
-    constructProperty_relative_stretch_at_nonlinear_linear_transition(0.0425);
-    constructProperty_relative_stretch_at_linear_part(0.0170);
-    constructProperty_relative_force_at_nonlinear_linear_transition(0.4); // before: dFsee0 = 0.4 * Fmax
-    constructProperty_dse_damping_factor(0.3);
-    constructProperty_rse_damping_factor(0.01);
-    //constructProperty_dpe_damping_factor(0.3);
-    //constructProperty_rpe_damping_factor(0.01);
-    constructProperty_dpe_damping_factor(0.0);
-    constructProperty_rpe_damping_factor(0.0);
+    constructProperty_fibre_exponent_descending_active_force_length(1.50);
+    constructProperty_fibre_width_descending_active_force_length(0.45);
+    constructProperty_fibre_exponent_ascending_active_force_length(3.00);
+    constructProperty_fibre_width_ascending_active_force_length(0.45);
+    constructProperty_fibre_active_force_velocity_arel0(0.2);
+    constructProperty_fibre_active_force_velocity_brel0(2.0);
+    constructProperty_fibre_max_eccentric_force_rel_to_fmax(1.5);
+    constructProperty_fibre_eccentric_slopefactor(2.0);
+    constructProperty_fibre_elastic_zero_length(0.95);
+    constructProperty_fibre_elastic_exponent(2.5);
+    constructProperty_fibre_elastic_force_rel_to_fmax(2.0);
+    constructProperty_tendon_elastic_nonlinear_strain(0.0425);
+    constructProperty_tendon_elastic_linear_strain(0.0170);
+    constructProperty_tendon_elastic_force_rel_to_fmax(0.4); // before: dFsee0 = 0.4 * Fmax
+    constructProperty_tendon_maximum_damping_dse(0.3);
+    constructProperty_tendon_offset_damping_rse(0.01);
+    //constructProperty_fibre_maximum_damping_dpe(0.3);
+    //constructProperty_fibre_offset_damping_rpe(0.01);
+    constructProperty_fibre_maximum_damping_dpe(0.0);
+    constructProperty_fibre_offset_damping_rpe(0.0);
 
     constructProperty_maximum_pennation_angle(acos(0.1)); // is this acos 0 or acos 0.1? 
-    constructProperty_time_constant_hatze(11.3);
-    constructProperty_nue(3.0);
-    constructProperty_roh_0(5.27);
-    constructProperty_gamma_C(1.37);
-    // constructProperty_minimum_gamma(0.001); // same like default calcium concentration
-    constructProperty_minimum_activation(0.001); // Hatze constant
+    constructProperty_activation_Hatze_time_constant(11.3);
+    constructProperty_activation_exponent(3.0);
+    constructProperty_activation_optimal_calcium_concentration_fraction(
+            5.27 * 1.37); // roh_0 * gamma_C
+    constructProperty_activation_minimum(0.001); // Hatze constant
 
     //TODO check if this is necessary?
-    // setMinControl(get_minimum_activation());
+    // setMinControl(get_activation_minimum());
 
 }
 
@@ -103,83 +102,83 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
     const std::string& namePrefix = getName();
 
     // Ensure property values are within appropriate ranges.
-    OPENSIM_THROW_IF_FRMOBJ(get_exponent_descending_active_force_length() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_exponent_descending_active_force_length() <= 0,
             InvalidPropertyValue,
-            getProperty_exponent_descending_active_force_length().getName(),
+            getProperty_fibre_exponent_descending_active_force_length().getName(),
             "The exponent of the descending branch of the active force length "
             "must be greater than zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_width_descending_active_force_length() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_width_descending_active_force_length() <= 0,
             InvalidPropertyValue,
-            getProperty_width_descending_active_force_length().getName(),
+            getProperty_fibre_width_descending_active_force_length().getName(),
             "The width of the descending branch of the active force length "
             "curve must be greater than zero.");
-    OPENSIM_THROW_IF_FRMOBJ(get_exponent_ascending_active_force_length() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_exponent_ascending_active_force_length() <= 0,
             InvalidPropertyValue,
-            getProperty_exponent_ascending_active_force_length().getName(),
+            getProperty_fibre_exponent_ascending_active_force_length().getName(),
             "The exponent of the ascending branch of the active force length "
             "must be greater than zero.");
-    OPENSIM_THROW_IF_FRMOBJ(get_width_ascending_active_force_length() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_width_ascending_active_force_length() <= 0,
             InvalidPropertyValue,
-            getProperty_width_ascending_active_force_length().getName(),
+            getProperty_fibre_width_ascending_active_force_length().getName(),
             "The width of the ascending branch of the active force length must "
             "be greater than zero.");
-    OPENSIM_THROW_IF_FRMOBJ(get_concentric_contraction_a_rel0() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_active_force_velocity_arel0() <= 0,
             InvalidPropertyValue,
-            getProperty_concentric_contraction_a_rel0().getName(),
+            getProperty_fibre_active_force_velocity_arel0().getName(),
             "The relative concentric contraction dynamics of CE parameter "
             "Arel0 must be greater than zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_concentric_contraction_b_rel0() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_active_force_velocity_brel0() <= 0,
             InvalidPropertyValue,
-            getProperty_concentric_contraction_b_rel0().getName(),
+            getProperty_fibre_active_force_velocity_brel0().getName(),
             "The relative concentric contraction dynamics of CE parameter "
             "Brel0 must be greater than zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_max_force_eccentric_extension() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_max_eccentric_force_rel_to_fmax() <= 0,
             InvalidPropertyValue,
-            getProperty_max_force_eccentric_extension().getName(),
+            getProperty_fibre_max_eccentric_force_rel_to_fmax().getName(),
             "The maximum eccentric extension force must be greater than zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_slopefactor() <= 0, InvalidPropertyValue,
-            getProperty_slopefactor().getName(),
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_eccentric_slopefactor() <= 0, InvalidPropertyValue,
+            getProperty_fibre_eccentric_slopefactor().getName(),
             "The corresponding slopefactor must be greater than zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_parallel_elastic_zero_length() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_elastic_zero_length() <= 0,
             InvalidPropertyValue,
-            getProperty_parallel_elastic_zero_length().getName(),
+            getProperty_fibre_elastic_zero_length().getName(),
             "The zero length of the parallel elastic element must be greater "
             "than zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_parallel_elastic_exponent() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_elastic_exponent() <= 0,
             InvalidPropertyValue,
-            getProperty_parallel_elastic_exponent().getName(),
+            getProperty_fibre_elastic_exponent().getName(),
             "The exponent of the parallel elastic element must be greater than "
             "zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_parallel_elastic_force_rel_to_fmax() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_fibre_elastic_force_rel_to_fmax() <= 0,
             InvalidPropertyValue,
-            getProperty_parallel_elastic_force_rel_to_fmax().getName(),
+            getProperty_fibre_elastic_force_rel_to_fmax().getName(),
             "The elastic force relative to the maximum isometric force of the "
             "parallel elastic element must be greater than zero");
     OPENSIM_THROW_IF_FRMOBJ(get_tendon_slack_length() <= 0,
             InvalidPropertyValue, getProperty_tendon_slack_length().getName(),
             "The serial elastic rest length must be greater than zero");
     OPENSIM_THROW_IF_FRMOBJ(
-            get_relative_stretch_at_nonlinear_linear_transition() <= 0,
+            get_tendon_elastic_nonlinear_strain() <= 0,
             InvalidPropertyValue,
-            getProperty_relative_stretch_at_nonlinear_linear_transition()
+            getProperty_tendon_elastic_nonlinear_strain()
                     .getName(),
             "The relative stretch at nonlinear/linear transition must be "
             "greater than zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_relative_stretch_at_linear_part() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_tendon_elastic_linear_strain() <= 0,
             InvalidPropertyValue,
-            getProperty_relative_stretch_at_linear_part().getName(),
+            getProperty_tendon_elastic_linear_strain().getName(),
             "The relative stretch in the linear part must be greater than "
             "zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_relative_force_at_nonlinear_linear_transition() <= 0,
+    OPENSIM_THROW_IF_FRMOBJ(get_tendon_elastic_force_rel_to_fmax() <= 0,
             InvalidPropertyValue,
-            getProperty_relative_force_at_nonlinear_linear_transition().getName(),
+            getProperty_tendon_elastic_force_rel_to_fmax().getName(),
             "The force at the nonlinear/linear transition must be greater than "
             "zero");
-    OPENSIM_THROW_IF_FRMOBJ(get_dse_damping_factor() < 0, InvalidPropertyValue,
-            getProperty_dse_damping_factor().getName(),
+    OPENSIM_THROW_IF_FRMOBJ(get_tendon_maximum_damping_dse() < 0, InvalidPropertyValue,
+            getProperty_tendon_maximum_damping_dse().getName(),
             "The dse damping factor must be greater than zero")
-    OPENSIM_THROW_IF_FRMOBJ(get_rse_damping_factor() < 0, InvalidPropertyValue,
-            getProperty_rse_damping_factor().getName(),
+    OPENSIM_THROW_IF_FRMOBJ(get_tendon_offset_damping_rse() < 0, InvalidPropertyValue,
+            getProperty_tendon_offset_damping_rse().getName(),
             "The rse damping factor must be greater than zero");
 
     // TODO add checks for too small fiber lenghts, etc... and throw errors when
@@ -214,13 +213,14 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
                 updMemberSubcomponent<RockenfellerFirstOrderActivationDynamicModel>(
                         actMdlIdx);
         RockenfellerFirstOrderActivationDynamicModel actMdlCopy(actMdl);
-        actMdl.set_gamma_C(get_gamma_C());
         actMdl.set_minimum_gamma(get_default_calcium_concentration());
         actMdl.set_optimal_fiber_length(get_optimal_fiber_length());
-        actMdl.set_minimum_activation(get_minimum_activation());
-        actMdl.set_nue(get_nue());
-        actMdl.set_roh_0(get_roh_0());
-        actMdl.set_time_constant_hatze(get_time_constant_hatze());
+        actMdl.set_activation_minimum(get_activation_minimum());
+        actMdl.set_activation_exponent(get_activation_exponent());
+        actMdl.set_activation_optimal_calcium_concentration_fraction(
+                get_activation_optimal_calcium_concentration_fraction());
+        actMdl.set_activation_Hatze_time_constant(
+                get_activation_Hatze_time_constant());
         try {
             actMdl.finalizeFromProperties();
         } catch (const InvalidPropertyValue&) {
@@ -358,78 +358,78 @@ double Haeufle2014Muscle::getDefaultCalciumConcentration() const
     return get_default_calcium_concentration();
 }
 
-double Haeufle2014Muscle::getExponentDescendingActiveForceLength() const {
-    return get_exponent_descending_active_force_length();
+double Haeufle2014Muscle::getFibreExponentDescendingActiveForceLength() const {
+    return get_fibre_exponent_descending_active_force_length();
 }
 
-double Haeufle2014Muscle::getWidthDescendingActiveForceLength() const {
-    return get_width_descending_active_force_length();
+double Haeufle2014Muscle::getFibreWidthDescendingActiveForceLength() const {
+    return get_fibre_width_descending_active_force_length();
 }
 
-double Haeufle2014Muscle::getExponentAscendingActiveForceLength() const {
-    return get_exponent_ascending_active_force_length();
+double Haeufle2014Muscle::getFibreExponentAscendingActiveForceLength() const {
+    return get_fibre_exponent_ascending_active_force_length();
 }
 
-double Haeufle2014Muscle::getWidthAscendingActiveForceLength() const {
-    return get_width_ascending_active_force_length();
+double Haeufle2014Muscle::getFibreWidthAscendingActiveForceLength() const {
+    return get_fibre_width_ascending_active_force_length();
 }
 
-double Haeufle2014Muscle::getConcentricContractionARel0() const {
-    return get_concentric_contraction_a_rel0();
+double Haeufle2014Muscle::getFibreActiveForceVelocityArel0() const {
+    return get_fibre_active_force_velocity_arel0();
 }
 
-double Haeufle2014Muscle::getConcentricContractionBRel0() const {
-    return get_concentric_contraction_b_rel0();
+double Haeufle2014Muscle::getFibreActiveForceVelocityBrel0() const {
+    return get_fibre_active_force_velocity_brel0();
 }
 
-double Haeufle2014Muscle::getMaxForceEccentricExtension() const {
-    return get_max_force_eccentric_extension();
+double Haeufle2014Muscle::getFibreMaxEccentricForceRelToFmax() const {
+    return get_fibre_max_eccentric_force_rel_to_fmax();
 }
 
-double Haeufle2014Muscle::getSlopeFactor() const {
-    return get_slopefactor();
+double Haeufle2014Muscle::getFibreEccentricSlopefactor() const {
+    return get_fibre_eccentric_slopefactor();
 }
 
-double Haeufle2014Muscle::getParallelElasticZeroLength() const {
-    return get_parallel_elastic_zero_length();
+double Haeufle2014Muscle::getFibreElasticZeroLength() const {
+    return get_fibre_elastic_zero_length();
 }
 
-double Haeufle2014Muscle::getParallelElasticExponent() const {
-    return get_parallel_elastic_exponent();
+double Haeufle2014Muscle::getFibreElasticExponent() const {
+    return get_fibre_elastic_exponent();
 }
 
-double Haeufle2014Muscle::getParallelElasticForceRelToFmax() const {
-    return get_parallel_elastic_force_rel_to_fmax();
+double Haeufle2014Muscle::getFibreElasticForceRelToFmax() const {
+    return get_fibre_elastic_force_rel_to_fmax();
 }
 
 double
-Haeufle2014Muscle::getRelativeStretchAtNonlinearLinearTransition()
+Haeufle2014Muscle::getTendonElasticNonlinearStrain()
         const {
-    return get_relative_stretch_at_nonlinear_linear_transition();
+    return get_tendon_elastic_nonlinear_strain();
 }
 
-double Haeufle2014Muscle::getRelativeStretchAtLinearPart() const {
-    return get_relative_stretch_at_linear_part();
+double Haeufle2014Muscle::getTendonElasticLinearStrain() const {
+    return get_tendon_elastic_linear_strain();
 }
 
-double Haeufle2014Muscle::getRelativeForceAtNonlinearLinearTransition() const {
-    return get_relative_force_at_nonlinear_linear_transition();
+double Haeufle2014Muscle::getTendonElasticForceRelToFmax() const {
+    return get_tendon_elastic_force_rel_to_fmax();
 }
 
-double Haeufle2014Muscle::getDseDampingFactor() const {
-    return get_dse_damping_factor();
+double Haeufle2014Muscle::getTendonMaximumDampingDse() const {
+    return get_tendon_maximum_damping_dse();
 }
 
-double Haeufle2014Muscle::getRseDampingFactor() const {
-    return get_rse_damping_factor();
+double Haeufle2014Muscle::getTendonOffsetDampingRse() const {
+    return get_tendon_offset_damping_rse();
 }
 
-double Haeufle2014Muscle::getDpeDampingFactor() const {
-    return get_dpe_damping_factor();
+double Haeufle2014Muscle::getFibreMaximumDampingDpe() const {
+    return get_fibre_maximum_damping_dpe();
 }
 
-double Haeufle2014Muscle::getRpeDampingFactor() const {
-    return get_rpe_damping_factor();
+double Haeufle2014Muscle::getFibreOffsetDampingRpe() const {
+    return get_fibre_offset_damping_rpe();
 }
 
 const MuscleFixedWidthPennationModel&
@@ -477,66 +477,67 @@ void Haeufle2014Muscle::setDefaultFiberLength(double fiberLength) {
 }
 
 void Haeufle2014Muscle::setActiveForceLengthParameters(
-        double exponentDescendingActiveForceLength,
-        double widthDescendingActiveForceLength,
-        double exponentAscendingActiveForceLength,
-        double widthAscendingActiveForceLength) {
-    set_exponent_descending_active_force_length(
-            exponentDescendingActiveForceLength);
-    set_width_descending_active_force_length(widthDescendingActiveForceLength);
-    set_exponent_ascending_active_force_length(
-            exponentAscendingActiveForceLength);
-    set_width_ascending_active_force_length(widthAscendingActiveForceLength);
+        double fibreExponentDescendingActiveForceLength,
+        double fibreWidthDescendingActiveForceLength,
+        double fibreExponentAscendingActiveForceLength,
+        double fibreWidthAscendingActiveForceLength) {
+    set_fibre_exponent_descending_active_force_length(
+            fibreExponentDescendingActiveForceLength);
+    set_fibre_width_descending_active_force_length(fibreWidthDescendingActiveForceLength);
+    set_fibre_exponent_ascending_active_force_length(
+            fibreExponentAscendingActiveForceLength);
+    set_fibre_width_ascending_active_force_length(fibreWidthAscendingActiveForceLength);
 }
 
 void Haeufle2014Muscle::setFiberVelocityParameters(
-        double aConcentricContractionARel0, double aConcentricContractionBRel0,
-        double aMaxForceEccentricExtension, double aSlopeFactor) {
-    set_concentric_contraction_a_rel0(aConcentricContractionARel0);
-    set_concentric_contraction_b_rel0(aConcentricContractionBRel0);
-    set_max_force_eccentric_extension(aMaxForceEccentricExtension);
-    set_slopefactor(aSlopeFactor);
+        double aFibreActiveForceVelocityArel0, double aFibreActiveForceVelocityBrel0,
+        double aFibreMaxEccentricForceRelToFmax,
+        double aFibreEccentricSlopefactor) {
+    set_fibre_active_force_velocity_arel0(aFibreActiveForceVelocityArel0);
+    set_fibre_active_force_velocity_brel0(aFibreActiveForceVelocityBrel0);
+    set_fibre_max_eccentric_force_rel_to_fmax(aFibreMaxEccentricForceRelToFmax);
+    set_fibre_eccentric_slopefactor(aFibreEccentricSlopefactor);
 }
 
 void Haeufle2014Muscle::setParallelElasticParameters(
-        double aParallelElasticZeroLength, double aParallelElasticExponent,
-        double aParallelElasticForceRelToFmax) {
-    set_parallel_elastic_zero_length(aParallelElasticZeroLength);
-    set_parallel_elastic_exponent(aParallelElasticExponent);
-    set_parallel_elastic_force_rel_to_fmax(aParallelElasticForceRelToFmax);
+        double aFibreElasticZeroLength, double aFibreElasticExponent,
+        double aFibreElasticForceRelToFmax) {
+    set_fibre_elastic_zero_length(aFibreElasticZeroLength);
+    set_fibre_elastic_exponent(aFibreElasticExponent);
+    set_fibre_elastic_force_rel_to_fmax(aFibreElasticForceRelToFmax);
 }
 
-void Haeufle2014Muscle::setRelativeForceAtNonlinearLinearTransition(
-        double aRelativeForceAtNonlinearLinearTransition) {
-    set_relative_force_at_nonlinear_linear_transition(
-            aRelativeForceAtNonlinearLinearTransition);
+void Haeufle2014Muscle::setTendonElasticForceRelToFmax(
+        double aTendonElasticForceRelToFmax) {
+    set_tendon_elastic_force_rel_to_fmax(
+            aTendonElasticForceRelToFmax);
 }
 
 void Haeufle2014Muscle::
-        setRelativeStretchAtNonlinearLinearTransition(
-                double aRelativeStretchAtNonlinearLinearTransition) {
-    set_relative_stretch_at_nonlinear_linear_transition(
-            aRelativeStretchAtNonlinearLinearTransition);
+        setTendonElasticNonlinearStrain(
+                double aTendonElasticNonlinearStrain) {
+    set_tendon_elastic_nonlinear_strain(
+            aTendonElasticNonlinearStrain);
 }
 
-void Haeufle2014Muscle::setRelativeStretchAtLinearPart(
-        double aRelativeStretchAtLinearPart) 
+void Haeufle2014Muscle::setTendonElasticLinearStrain(
+        double aTendonElasticLinearStrain) 
 {
-    set_relative_stretch_at_linear_part(aRelativeStretchAtLinearPart);
+    set_tendon_elastic_linear_strain(aTendonElasticLinearStrain);
 }
 
-void Haeufle2014Muscle::setTendonDampingParams(double aDseDampingFactor,
-        double aRseDampingFactor) 
+void Haeufle2014Muscle::setTendonDampingParams(double aTendonMaximumDampingDse,
+        double aTendonOffsetDampingRse) 
 {
-    set_dse_damping_factor(aDseDampingFactor);
-    set_rse_damping_factor(aRseDampingFactor);
+    set_tendon_maximum_damping_dse(aTendonMaximumDampingDse);
+    set_tendon_offset_damping_rse(aTendonOffsetDampingRse);
 }
 
 void Haeufle2014Muscle::setParallelDampingParams(
-    double aDpeDampingFactor, double aRpeDampingFactor) 
+    double aFibreMaximumDampingDpe, double aFibreOffsetDampingRpe) 
 {
-    set_dpe_damping_factor(aDpeDampingFactor);
-    set_rpe_damping_factor(aRpeDampingFactor);
+    set_fibre_maximum_damping_dpe(aFibreMaximumDampingDpe);
+    set_fibre_offset_damping_rpe(aFibreOffsetDampingRpe);
 }
 
 
@@ -706,29 +707,28 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
          */
 
         bool uniqueSolution = false;
-        bool calcConcCase = false; 
-        // bool calcEccCase = false;
-        bool concentricCaseDone = false;
-        bool eccentricCaseDone = false;
+        bool concentric_case;
+        int error_case = 0;
         double lcedot = 0.0;
-        double Arel = getConcentricContractionARel0();
-        double Brel = getConcentricContractionBRel0();
+        double Arel = getFibreActiveForceVelocityArel0();
+        double Brel = getFibreActiveForceVelocityBrel0();
+
+        // ldotMTC <= 0 probably concentric movement (start calculating
+        // with Arel)
+        if (ldotMTC <= 0) {
+            concentric_case = true;
+        } else {
+            concentric_case = false;
+        }
 
         for (int loopvar = 0; loopvar < 2; loopvar++) {
-            // ldotMTC <= 0 probably concentric movement (start calculating
-            // with Arel)
-            if ( (ldotMTC <= 0 && !concentricCaseDone) || eccentricCaseDone) {
+            if (concentric_case) {
                 Arel = calcArel(mli.fiberLength, activation, Fisom);
                 Brel = calcBrel(activation);
-                calcConcCase = true;
-            } 
-            else {
-            // eccentric case
-            // if ( (ldotMTC > 0 && !eccentricCaseDone) || concentricCaseDone) {
+            } else {
+                // eccentric case
                 Arel = calcArele(activation, Fisom);
                 Brel = calcBrele(mli.fiberLength, activation, Fisom);
-                calcConcCase = false;
-                // calcEccCase = true;
             }
 
             // start calculating C2, C1, C0 and D
@@ -740,130 +740,66 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
                     activation, Fisom, Fpee, Fsee);
             double Ddashed = pow(C1dashed, 2.0) - 4.0 * C0dashed * C2dashed;
 
-            if (abs(C2dashed) > SimTK::SignificantReal) {
-                if (Ddashed >= 0) {
-                    //if (calcConcCase) {
-                        lcedot = lceopt * (-C1dashed - sqrt(Ddashed)) /
-                                 (2.0 * C2dashed);
-                    //} else {
-                    //    lcedot = lceopt * (-C1dashed + sqrt(Ddashed)) /
-                    //             (2.0 * C2dashed);
-                    //}
-                } else {
-                    if (calcConcCase) {
-                        /*
-                        log_warn(
-                                "'{}': Warning D for the {} case is {} "
-                                "than 0, can't calculate with imaginary "
-                                "values. If this is the first time for the "
-                                "calculation, retrying with the {} case...",
-                                getName(), "concentric", "smaller",
-                                "eccentric");
-                        */
-                        // reset calculation flags
-                        calcConcCase = false;
-                        concentricCaseDone = true;
+            if (abs(C2dashed) < SimTK::SignificantReal) {
+                if (abs(C1dashed) < SimTK::SignificantReal) {
+                    if (loopvar == 0) {
+                        error_case = 1;
+                        concentric_case = (!concentric_case);
                         continue;
                     } else {
-                        /*
-                        log_warn(
-                                "'{}': Warning D for the {} case is {} "
-                                "than 0, can't calculate with imaginary "
-                                "values. If this is the first time for the "
-                                "calculation, retrying with the {} case...",
-                                getName(), "eccentric", "smaller",
-                                "concentric");
-                        */
-                        // reset calculation flags
-                        // calcEccCase = false;
-                        eccentricCaseDone = true;
-                        continue;
+                        break;
                     }
+                } else {
+                    lcedot = -lceopt * C0dashed / C1dashed;
                 }
             } else {
-                if (abs(C1dashed) > SimTK::SignificantReal) {
-                    // this is actually only a linear equation
-                    lcedot = -lceopt * C0dashed / C1dashed;
-                } else {
-                    if (calcConcCase) {
-                        /* 
-                        log_warn(
-                                "'{}': Warning no algebraic solution found "
-                                "in {} case. C1 must not be equal to 0. If "
-                                "this is the first time for the "
-                                "calculation, retrying with the {} case...",
-                                getName(), "concentric", "eccentric");
-                        */
-                        // reset calculation flags
-                        calcConcCase = false;
-                        concentricCaseDone = true;
+                if (Ddashed < -SimTK::SignificantReal) { // this would lead to
+                                                         // complex lcedot
+                    if (loopvar == 0) {
+                        error_case = 2;
+                        concentric_case = (!concentric_case);
                         continue;
                     } else {
-                        /*
-                        log_warn(
-                                "'{}': Warning no algebraic solution found "
-                                "in {} case. C1 must not be equal to 0. If "
-                                "this is the first time for the "
-                                "calculation, retrying with the {} case...",
-                                getName(), "eccentric", "concentric");
-                        */
-                        // reset calculation flags
-                        // calcEccCase = false;
-                        eccentricCaseDone = true;
-                        continue;
-                    } // close else if calcConcCase
-                } // close else if C1 > 0
-            } // close else if C2 > 0
-
-            if (calcConcCase) {
-                // check if solution matches Arel/Brel (here < 0) otherwise continue
-                if (lcedot <= 0) {
-                    uniqueSolution = true;
-                    calcConcCase = false;
-                    concentricCaseDone = true;
-                    break;
-                } else {
-                    /*
-                    log_warn("'{}': Warning solution doens't match "
-                                "sign of Arel/Brel: Found solution "
-                                "lcedot = {}, but calculated {} case "
-                                "where Arel/Brel and therefore also "
-                                "lcedot should be {} than or equal to 0",
-                            getName(), lcedot, "concentric", "smaller");
-                    */
-                    calcConcCase = false;
-                    concentricCaseDone = true;
-                    continue;
+                        break;
+                    }
+                } else { // solve quadratic equation for lcedot
+                    lcedot = lceopt * (-C1dashed - sqrt(Ddashed)) /
+                             (2.0 * C2dashed);
                 }
+            }
+            if (((concentric_case == true) &&
+                        (lcedot <= SimTK::SignificantReal)) ||
+                    ((concentric_case == false) &&
+                            (lcedot >= -SimTK::SignificantReal))) {
+                error_case = 0;
+                break;
             } else {
-                // check if solution matches Arel/Brel (here > 0) otherwise continue
-                if (lcedot >= 0) {
-                    uniqueSolution = true;
-                    // calcEccCase = false;
-                    eccentricCaseDone = true;
-                    break;
-                } else {
-                    /*
-                    log_warn("'{}': Warning solution doens't match "
-                                "sign of Arel/Brel: Found solution "
-                                "lcedot = {}, but calculated {} case "
-                                "where Arel/Brel and therefore also "
-                                "lcedot should be {} than or equal to 0",
-                            getName(), lcedot, "eccentric", "larger");
-                    */
-                    // calcEccCase = false;
-                    eccentricCaseDone = true;
-                    continue;
-                } // else if lcedot >= 0
-            } // else if calcConCase
-        } // for loop
+                if (loopvar == 0) {
+                    error_case = 3;
+                    concentric_case = (!concentric_case);
+                }
+            }
+        }
 
-        // set lcedot to zero if no unique solution was found in the loop above
-        if (!uniqueSolution) { 
-            lcedot = 0.0; 
-            log_warn("'{}': Warning no unique solution found: setting lcedot "
-                     "to {}",
-                    getName(), 0);
+        if (error_case == 0) {
+            // nothing to do here since everything is working fine
+        } else if (error_case == 1) {
+            log_warn("Haeufle2014Muscle::calcFiberVelocityInfo(): no solution "
+                     "found for lcedot. C2=C1=0. Set lcedot=0.");
+            lcedot = 0.0;
+        } else if (error_case == 2) {
+            log_warn("Haeufle2014Muscle::calcFiberVelocityInfo(): complex "
+                     "solution found for lcedot. Set lcedot=0.");
+            lcedot = 0;
+        } else if (error_case == 3) {
+            log_warn(
+                    "Haeufle2014Muscle::calcFiberVelocityInfo(): no concentric "
+                    "or eccentric solution found for lcedot. Set lcedot=0.");
+            lcedot = 0.0;
+        } else {
+            log_warn("Haeufle2014Muscle::calcFiberVelocityInfo(): something is "
+                     "wrong, error_case is out of range");
+            lcedot = 0.0;
         }
 
         double normFiberVelocity = lcedot / getMaxContractionVelocity();
@@ -880,7 +816,6 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
             dtl = getPennationModel().calcTendonVelocity(mli.cosPennationAngle,
                     mli.sinPennationAngle, dphidt, mli.fiberLength, lcedot,
                     dmcldt);
-            // dtl = dmcldt - lcedot / mli.cosPennationAngle;
         }
 
         // Populate the struct.
@@ -985,8 +920,8 @@ void Haeufle2014Muscle::calcMusclePotentialEnergyInfo(
 
 double Haeufle2014Muscle::calcVmax() const 
 {
-    double Arel0 = getConcentricContractionARel0();
-    double Brel0 = getConcentricContractionBRel0();
+    double Arel0 = getFibreActiveForceVelocityArel0();
+    double Brel0 = getFibreActiveForceVelocityBrel0();
     double lceopt = getOptimalFiberLength();
 
     double vmax = Brel0 * lceopt / Arel0;
@@ -1000,7 +935,6 @@ double Haeufle2014Muscle::clampFiberLength(double lce) const
         log_warn("Exception caught in Haeufle2014Muscle:: clampFiberLength "
                  "from {} \n Fiber length can't be smaller than 0",
                 getName());
-        // throw OpenSim::Exception(msg); // only show warning dont throw error
     }
     return max(lce, getMinimumFiberLength());
 }
@@ -1021,12 +955,12 @@ double Haeufle2014Muscle::calcFisom(double fiberLength) const {
     // if normalized fiber length is greater than 1 we are in the descending
     // domain
     if (normFiberLength > 1) {
-        exponent_active_force_length = getExponentDescendingActiveForceLength();
-        width_active_force_length = getWidthDescendingActiveForceLength();
+        exponent_active_force_length = getFibreExponentDescendingActiveForceLength();
+        width_active_force_length = getFibreWidthDescendingActiveForceLength();
     } else { // if normalized fiber length is smaller than 1 we are in the
              // ascending domain
-        exponent_active_force_length = getExponentAscendingActiveForceLength();
-        width_active_force_length = getWidthAscendingActiveForceLength();
+        exponent_active_force_length = getFibreExponentAscendingActiveForceLength();
+        width_active_force_length = getFibreWidthAscendingActiveForceLength();
     }
     return exp(-pow(abs((normFiberLength - 1.0) / width_active_force_length),
             exponent_active_force_length));
@@ -1057,7 +991,7 @@ double Haeufle2014Muscle::calcNormFce(double fiberVelocity,
 
 double Haeufle2014Muscle::calcArel(double fiberLength,
         double activation, double Fisom) const {
-    double Arel0 = getConcentricContractionARel0();
+    double Arel0 = getFibreActiveForceVelocityArel0();
     double normFiberLength = fiberLength / getOptimalFiberLength();
     double Qarel = 1.0 / 4.0 * (1.0 + 3.0 * activation);
     double Larel = (normFiberLength < 1) ? 1.0 : Fisom;
@@ -1066,7 +1000,7 @@ double Haeufle2014Muscle::calcArel(double fiberLength,
 }
 
 double Haeufle2014Muscle::calcBrel(double activation) const {
-    double Brel0 = getConcentricContractionBRel0();
+    double Brel0 = getFibreActiveForceVelocityBrel0();
     double Qbrel = 1.0 / 7.0 * (3.0 + 4.0 * activation);
     // double Lbrel = 1; // not necessary due to multiplication
     double Brel = Brel0 * Qbrel;
@@ -1075,7 +1009,7 @@ double Haeufle2014Muscle::calcBrel(double activation) const {
 
 double Haeufle2014Muscle::calcArele(
         double activation, double Fisom) const {
-    double maxEccentricForce = getMaxForceEccentricExtension();
+    double maxEccentricForce = getFibreMaxEccentricForceRelToFmax();
     double Arele = -maxEccentricForce * activation * Fisom;
     return Arele;
 }
@@ -1085,9 +1019,8 @@ double Haeufle2014Muscle::calcBrele(double fiberLength,
     double Arel = calcArel(
             fiberLength, activation, Fisom);
     double Brel = calcBrel(activation);
-    double slopefactor = getSlopeFactor();
-    double maxEccentricForce = getMaxForceEccentricExtension();
-
+    double slopefactor = getFibreEccentricSlopefactor();
+    double maxEccentricForce = getFibreMaxEccentricForceRelToFmax();
     double Brele = Brel * (1.0 - maxEccentricForce) /
                    (slopefactor * (1.0 + Arel / (activation * Fisom)));
     return Brele;
@@ -1095,14 +1028,14 @@ double Haeufle2014Muscle::calcBrele(double fiberLength,
 
 double Haeufle2014Muscle::calcFpee(double fiberLength) const {
     double Lceopt = getOptimalFiberLength();
-    double Lpee0 = getParallelElasticZeroLength();
+    double Lpee0 = getFibreElasticZeroLength();
     double Fpee = 0.0; // standard case that FiberLength is smaller than Lpee0 * lceopt
     if (fiberLength >= (Lpee0 * Lceopt)) {
         // double Kpee = calcKPEE(); // deprecated
         double deltaFpee =
-                getParallelElasticForceRelToFmax() * getMaxIsometricForce();
-        double nuepee = getParallelElasticExponent();
-        double Wdes = getWidthDescendingActiveForceLength();
+                getFibreElasticForceRelToFmax() * getMaxIsometricForce();
+        double nuepee = getFibreElasticExponent();
+        double Wdes = getFibreWidthDescendingActiveForceLength();
         Fpee = deltaFpee *
                pow((fiberLength / Lceopt - Lpee0) / (Wdes + 1 - Lpee0), nuepee);
     }
@@ -1112,11 +1045,11 @@ double Haeufle2014Muscle::calcFpee(double fiberLength) const {
 /* DEPRECATED
 double Haeufle2014Muscle::calcKPEE() const {
     double Lceopt = getOptimalFiberLength();
-    double Fpee = getParallelElasticForceRelToFmax();
-    double Lpee0 = getParallelElasticZeroLength();
-    double nuepee = getParallelElasticExponent();
+    double Fpee = getFibreElasticForceRelToFmax();
+    double Lpee0 = getFibreElasticZeroLength();
+    double nuepee = getFibreElasticExponent();
     double Fmax = getMaxIsometricForce();
-    double Wdes = getWidthDescendingActiveForceLength();
+    double Wdes = getFibreWidthDescendingActiveForceLength();
     return (Fpee * Fmax / (pow(Lceopt * (Wdes + 1.0 - Lpee0), nuepee)));
 }
 */
@@ -1124,12 +1057,12 @@ double Haeufle2014Muscle::calcKPEE() const {
 double Haeufle2014Muscle::calcIntegralFpee(double fiberLength) const 
 {
     double Lceopt = getOptimalFiberLength();
-    double Lpee0 = getParallelElasticZeroLength();
+    double Lpee0 = getFibreElasticZeroLength();
     double IntegralFpee = 0.0; // standard case that FiberLength is smaller than Lpee0
     if (fiberLength >= (Lpee0*Lceopt)) 
     {
         double Fpee = calcFpee(fiberLength);
-        double nuepee = getParallelElasticExponent();
+        double nuepee = getFibreElasticExponent();
         IntegralFpee = Fpee * (fiberLength - Lpee0*Lceopt) / (nuepee + 1.0);      
     }
     return IntegralFpee;
@@ -1140,17 +1073,17 @@ double Haeufle2014Muscle::calcFsee(double aSerialElasticLength) const
     double Lsee0 = getTendonSlackLength();
     // initialize Fsee for first case aSerialElasticLength < Lsee0
     double Fsee = 0.0; 
-    double deltaUseenll = getRelativeStretchAtNonlinearLinearTransition();
+    double deltaUseenll = getTendonElasticNonlinearStrain();
     if (aSerialElasticLength > Lsee0 &&
             aSerialElasticLength <= (Lsee0 * (1.0 + deltaUseenll))) {
-        double deltaFsee0 = getRelativeForceAtNonlinearLinearTransition() * getMaxIsometricForce();
-        double nuesee = deltaUseenll / getRelativeStretchAtLinearPart();
+        double deltaFsee0 = getTendonElasticForceRelToFmax() * getMaxIsometricForce();
+        double nuesee = deltaUseenll / getTendonElasticLinearStrain();
         Fsee = deltaFsee0 *
                pow((aSerialElasticLength - Lsee0) / (deltaUseenll * Lsee0),
                        nuesee);
     } else if (aSerialElasticLength > (Lsee0 * (1.0 + deltaUseenll))) {
-        double deltaFsee0 = getRelativeForceAtNonlinearLinearTransition() * getMaxIsometricForce();
-        double deltaUseel = getRelativeStretchAtLinearPart();
+        double deltaFsee0 = getTendonElasticForceRelToFmax() * getMaxIsometricForce();
+        double deltaUseel = getTendonElasticLinearStrain();
         Fsee = deltaFsee0 *
                (1.0 + (aSerialElasticLength - Lsee0 * (1.0 + deltaUseenll)) /
                                (deltaUseel * Lsee0));
@@ -1163,19 +1096,19 @@ double Haeufle2014Muscle::calcIntegralFsee(double aSerialElasticLength) const
     // initialize for case serialElasticLength < lsee,0
     double IntegralFsee = 0.0; 
     double Lsee0 = getTendonSlackLength();
-    double deltaUseenll = getRelativeStretchAtNonlinearLinearTransition();
+    double deltaUseenll = getTendonElasticNonlinearStrain();
     if (aSerialElasticLength > Lsee0 &&
             aSerialElasticLength <= (Lsee0 * (1.0 + deltaUseenll))) 
     {
         double Fsee = calcFsee(aSerialElasticLength);
-        double nuesee = deltaUseenll / getRelativeStretchAtLinearPart();
+        double nuesee = deltaUseenll / getTendonElasticLinearStrain();
         IntegralFsee = Fsee * (aSerialElasticLength - Lsee0) / (nuesee + 1.0);
     } else if (aSerialElasticLength > (Lsee0 * (1.0 + deltaUseenll))) 
     {
         double Fsee = calcFsee(aSerialElasticLength);
-        double nuesee = deltaUseenll / getRelativeStretchAtLinearPart();
-        double deltaFsee0 = getRelativeForceAtNonlinearLinearTransition() * getMaxIsometricForce();
-        double deltaUseel = getRelativeStretchAtLinearPart();
+        double nuesee = deltaUseenll / getTendonElasticLinearStrain();
+        double deltaFsee0 = getTendonElasticForceRelToFmax() * getMaxIsometricForce();
+        double deltaUseel = getTendonElasticLinearStrain();
         IntegralFsee = deltaFsee0 * deltaUseenll * Lsee0 / (nuesee + 1.0) +
                        (aSerialElasticLength - Lsee0 * (deltaUseenll + 1.0) / 2.0 *
                                                        (Fsee + deltaFsee0));
@@ -1187,13 +1120,12 @@ double Haeufle2014Muscle::calcFsde(double serialElasticLengthVelocity,
         double cosPenAng, double parallelElasticForce,
         double contractionForce) const { // contractionForce == F_CE
 
-    double Dse = getDseDampingFactor();
-    double Rse = getRseDampingFactor();
+    double Dse = getTendonMaximumDampingDse();
+    double Rse = getTendonOffsetDampingRse();
     double Fmax = getMaxIsometricForce();
     double lceopt = getOptimalFiberLength();
-    double Arel0 = getConcentricContractionARel0();
-    double Brel0 = getConcentricContractionBRel0();
-
+    double Arel0 = getFibreActiveForceVelocityArel0();
+    double Brel0 = getFibreActiveForceVelocityBrel0();
     double Fsde = Dse * Fmax * Arel0 / (lceopt * Brel0) *
             ((1.0 - Rse) * cosPenAng *
                             (parallelElasticForce + contractionForce) / Fmax +
@@ -1205,13 +1137,12 @@ double Haeufle2014Muscle::calcFsde(double serialElasticLengthVelocity,
 double Haeufle2014Muscle::calcFpde(
     double lengthVelocity, double parallelElasticForce) const 
 {
-    double Dpe = getDpeDampingFactor();
-    double Rpe = getRpeDampingFactor();
+    double Dpe = getFibreMaximumDampingDpe();
+    double Rpe = getFibreOffsetDampingRpe();
     double Fmax = getMaxIsometricForce();
     double lceopt = getOptimalFiberLength();
-    double Arel0 = getConcentricContractionARel0();
-    double Brel0 = getConcentricContractionBRel0();
-
+    double Arel0 = getFibreActiveForceVelocityArel0();
+    double Brel0 = getFibreActiveForceVelocityBrel0();
     double Fpde = Dpe * Fmax * Arel0 / (lceopt * Brel0) *
                   ((1.0 - Rpe) * parallelElasticForce / Fmax + Rpe) * lengthVelocity;
 
@@ -1221,13 +1152,13 @@ double Haeufle2014Muscle::calcFpde(
 double Haeufle2014Muscle::calcC2dash(
         double cosPenAngle, double activation, double Fpee, double Brel, double Arel) const 
 {
-    double Arel0 = getConcentricContractionARel0();
-    double Brel0 = getConcentricContractionBRel0();
-    double Dse = getDseDampingFactor();
-    double Rse = getRseDampingFactor();
+    double Arel0 = getFibreActiveForceVelocityArel0();
+    double Brel0 = getFibreActiveForceVelocityBrel0();
+    double Dse = getTendonMaximumDampingDse();
+    double Rse = getTendonOffsetDampingRse();
     double Fmax = getMaxIsometricForce();
-    double Dpe = getDpeDampingFactor();
-    double Rpe = getRpeDampingFactor();
+    double Dpe = getFibreMaximumDampingDpe();
+    double Rpe = getFibreOffsetDampingRpe();
     double C2woFmax =
             -Dse * Arel0 / (Brel * Brel0 ) *
                     ((1 - Rse) * (Arel - Fpee / Fmax) - Rse/cosPenAngle) +
@@ -1248,15 +1179,14 @@ double Haeufle2014Muscle::calcC1dash(
         double cosPenAngle, double activation, double Fisom, double Fpee, double Fsee, double Arel,
         double Brel) const 
 {
-    double Arel0 = getConcentricContractionARel0();
-    double Brel0 = getConcentricContractionBRel0();
+    double Arel0 = getFibreActiveForceVelocityArel0();
+    double Brel0 = getFibreActiveForceVelocityBrel0();
     double lceopt = getOptimalFiberLength();
-    double Dse = getDseDampingFactor();
-    double Rse = getRseDampingFactor();
+    double Dse = getTendonMaximumDampingDse();
+    double Rse = getTendonOffsetDampingRse();
     double Fmax = getMaxIsometricForce();
-    double Dpe = getDpeDampingFactor();
-    double Rpe = getRpeDampingFactor();
-
+    double Dpe = getFibreMaximumDampingDpe();
+    double Rpe = getFibreOffsetDampingRpe();
     double C1woFmax =
             Dse * Arel0 / Brel0 *
                     (ldotMTC * cosPenAngle / (Brel * lceopt) * (1 - Rse) *
@@ -1284,13 +1214,12 @@ double Haeufle2014Muscle::calcC1dash(
 double Haeufle2014Muscle::calcC0dash(double ldotMTC,
         double cosPenAngle, double activation, double Fisom, double Fpee,
         double Fsee) const {
-    double Arel0 = getConcentricContractionARel0();
-    double Brel0 = getConcentricContractionBRel0();
+    double Arel0 = getFibreActiveForceVelocityArel0();
+    double Brel0 = getFibreActiveForceVelocityBrel0();
     double lceopt = getOptimalFiberLength();
-    double Dse = getDseDampingFactor();
-    double Rse = getRseDampingFactor();
+    double Dse = getTendonMaximumDampingDse();
+    double Rse = getTendonOffsetDampingRse();
     double Fmax = getMaxIsometricForce();
-    
     double C0woFmax =
             Dse * Arel0 * ldotMTC / (lceopt * Brel0) *
                     ((1 - Rse) * cosPenAngle *

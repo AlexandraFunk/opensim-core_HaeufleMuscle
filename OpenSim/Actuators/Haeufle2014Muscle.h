@@ -83,61 +83,57 @@ public:
     OpenSim_DECLARE_PROPERTY(default_fiber_length, double,
             "Assumed initial fiber length if none is assigned.");
 
-    OpenSim_DECLARE_PROPERTY(exponent_descending_active_force_length, double,
+    OpenSim_DECLARE_PROPERTY(fibre_exponent_descending_active_force_length, double,
             "The exponent of the normalized bell curve in its descending"
             "limb as used in Haeufle et al (2014).");
-    OpenSim_DECLARE_PROPERTY(width_descending_active_force_length, double,
+    OpenSim_DECLARE_PROPERTY(fibre_width_descending_active_force_length, double,
             "The width of the normalized bell curve in its descending"
             "limb as used in Haeufle et al (2014).");
-    OpenSim_DECLARE_PROPERTY(exponent_ascending_active_force_length, double,
+    OpenSim_DECLARE_PROPERTY(fibre_exponent_ascending_active_force_length, double,
             "The exponent of the normalized bell curve in its ascending"
             "limb as used in Haeufle et al (2014).");
-    OpenSim_DECLARE_PROPERTY(width_ascending_active_force_length, double,
+    OpenSim_DECLARE_PROPERTY(fibre_width_ascending_active_force_length, double,
             "The width of the normalized bell curve in its ascending"
             "limb as used in Haeufle et al (2014).");
-    OpenSim_DECLARE_PROPERTY(concentric_contraction_a_rel0, double,
+    OpenSim_DECLARE_PROPERTY(fibre_active_force_velocity_arel0, double,
             "Derived from the classical Hill constant a");
-    OpenSim_DECLARE_PROPERTY(concentric_contraction_b_rel0, double,
+    OpenSim_DECLARE_PROPERTY(fibre_active_force_velocity_brel0, double,
             "Derived from the classical Hill constant b");
-    OpenSim_DECLARE_PROPERTY(max_force_eccentric_extension, double,
+    OpenSim_DECLARE_PROPERTY(fibre_max_eccentric_force_rel_to_fmax, double,
             "Maximal Force during eccentric lengthening");
-    OpenSim_DECLARE_PROPERTY(slopefactor, double,
+    OpenSim_DECLARE_PROPERTY(fibre_eccentric_slopefactor, double,
             "The ratio between the eccentric and concentric derivatives "
             "dF/dVce");
-    OpenSim_DECLARE_PROPERTY(parallel_elastic_zero_length, double,
+    OpenSim_DECLARE_PROPERTY(fibre_elastic_zero_length, double,
             "Zero length of the parallel elastic element");
-    OpenSim_DECLARE_PROPERTY(parallel_elastic_exponent, double,
+    OpenSim_DECLARE_PROPERTY(fibre_elastic_exponent, double,
             "Exponent of the parallel elastic element");
-    OpenSim_DECLARE_PROPERTY(parallel_elastic_force_rel_to_fmax, double,
+    OpenSim_DECLARE_PROPERTY(fibre_elastic_force_rel_to_fmax, double,
             " Parallel elastic element force relative to Fmax at "
             "Lceopt*(1+dWdes)");
     OpenSim_DECLARE_PROPERTY(
-            relative_stretch_at_nonlinear_linear_transition, double, "");
-    OpenSim_DECLARE_PROPERTY(relative_stretch_at_linear_part, double, "");
-    OpenSim_DECLARE_PROPERTY(relative_force_at_nonlinear_linear_transition, double, "");
-    OpenSim_DECLARE_PROPERTY(dse_damping_factor, double,
+            tendon_elastic_nonlinear_strain, double, "");
+    OpenSim_DECLARE_PROPERTY(tendon_elastic_linear_strain, double, "");
+    OpenSim_DECLARE_PROPERTY(tendon_elastic_force_rel_to_fmax, double, "");
+    OpenSim_DECLARE_PROPERTY(tendon_maximum_damping_dse, double,
             "The dse damping factor as used in Moerl et al (2012)");
-    OpenSim_DECLARE_PROPERTY(rse_damping_factor, double,
+    OpenSim_DECLARE_PROPERTY(tendon_offset_damping_rse, double,
             "The rse damping factor as used in Moerl et al (2012)");
-    OpenSim_DECLARE_PROPERTY(dpe_damping_factor, double,
+    OpenSim_DECLARE_PROPERTY(fibre_maximum_damping_dpe, double,
             "The dpe damping factor as used in Moerl et al (2012)");
-    OpenSim_DECLARE_PROPERTY(rpe_damping_factor, double,
+    OpenSim_DECLARE_PROPERTY(fibre_offset_damping_rpe, double,
             "The rpe damping factor as used in Moerl et al (2012)");
     OpenSim_DECLARE_PROPERTY(maximum_pennation_angle, double,
             "Maximum pennation angle (in radians).");
-    OpenSim_DECLARE_PROPERTY(time_constant_hatze, double,
+    OpenSim_DECLARE_PROPERTY(activation_Hatze_time_constant, double,
             "Time constant, in 1/seconds. (overridden when this is a "
             "subcomponent of a Muscle)");
-    OpenSim_DECLARE_PROPERTY(nue, double,
+    OpenSim_DECLARE_PROPERTY(activation_exponent, double,
             "Hatze Coefficient (overridden when this is a subcomponent of a "
             "Muscle)");
-    OpenSim_DECLARE_PROPERTY(roh_0, double,
-            "Hatze constant [l/mol] from Rockenfeller2018 (overridden when "
-            "this is a subcomponent of a Muscle)");
-    OpenSim_DECLARE_PROPERTY(gamma_C, double,
-            "Hatze Coefficient (overridden when this is a subcomponent of a "
-            "Muscle)");
-    OpenSim_DECLARE_PROPERTY(minimum_activation, double,
+    OpenSim_DECLARE_PROPERTY(activation_optimal_calcium_concentration_fraction,
+            double, "roh_0 * gamma_C");
+    OpenSim_DECLARE_PROPERTY(activation_minimum, double,
             "Activation lower bound (Hatze constant 0.005) equal to Kuh0");
 
 //==============================================================================
@@ -180,67 +176,67 @@ public:
 
     /** @returns The exponent of the descending limb of the normalized
     bell curve */
-    double getExponentDescendingActiveForceLength() const;
+    double getFibreExponentDescendingActiveForceLength() const;
 
     /** @returns The width of the descending limb of the normalized
     bell curve */
-    double getWidthDescendingActiveForceLength() const;
+    double getFibreWidthDescendingActiveForceLength() const;
 
     /** @returns The exponent of the ascending limb of the normalized
     bell curve */
-    double getExponentAscendingActiveForceLength() const;
+    double getFibreExponentAscendingActiveForceLength() const;
 
     /** @returns The width of the ascending limb of the normalized
     bell curve */
-    double getWidthAscendingActiveForceLength() const;
+    double getFibreWidthAscendingActiveForceLength() const;
 
     /** @returns The concentric contraction parameter which is called Arel in
     Haeufle et al */
-    double getConcentricContractionARel0() const;
+    double getFibreActiveForceVelocityArel0() const;
 
     /** @returns The concentric contraction parameter which is called Brel in
     Haeufle et al */
-    double getConcentricContractionBRel0() const;
+    double getFibreActiveForceVelocityBrel0() const;
 
     /** @returns The maximum force at eccentric lengthening which is called Fe
     in Haeufle et al */
-    double getMaxForceEccentricExtension() const;
+    double getFibreMaxEccentricForceRelToFmax() const;
 
-    /** @returns The slopefactor of the curve which is called Se in
+    /** @returns The fibreEccentricSlopefactor of the curve which is called Se in
     Haeufle et al */
-    double getSlopeFactor() const;
+    double getFibreEccentricSlopefactor() const;
 
     /** @returns The parallel elastic elements zero length (L_PEE,0) */
-    double getParallelElasticZeroLength() const;
+    double getFibreElasticZeroLength() const;
 
     /** @returns The parallel elastic elements exponent (nue_PEE) */
-    double getParallelElasticExponent() const;
+    double getFibreElasticExponent() const;
 
     /** @returns The parallel elastic elemnts force relative to Fmax at
         Lceopt*(1+dWdes) */
-    double getParallelElasticForceRelToFmax() const;
+    double getFibreElasticForceRelToFmax() const;
 
     /** @returns The relative stretch at nonlinear/linear transition in Fsee */
-    double getRelativeStretchAtNonlinearLinearTransition() const;
+    double getTendonElasticNonlinearStrain() const;
 
     /** @returns The relative stretch in the linear part for force increase
      * delta Fsee,0 */
-    double getRelativeStretchAtLinearPart() const;
+    double getTendonElasticLinearStrain() const;
 
     /** @returns The force at nonlinear/linear transition in Fsee */
-    double getRelativeForceAtNonlinearLinearTransition() const;
+    double getTendonElasticForceRelToFmax() const;
 
     /** @returns The dse damping factor */
-    double getDseDampingFactor() const;
+    double getTendonMaximumDampingDse() const;
 
     /** @returns The rse damping factor */
-    double getRseDampingFactor() const;
+    double getTendonOffsetDampingRse() const;
 
     /** @returns The dse damping factor */
-    double getDpeDampingFactor() const;
+    double getFibreMaximumDampingDpe() const;
 
     /** @returns The rse damping factor */
-    double getRpeDampingFactor() const;
+    double getFibreOffsetDampingRpe() const;
 
     /** @returns The MuscleFixedWidthPennationModel owned by this model. */
     const MuscleFixedWidthPennationModel& getPennationModel() const;
@@ -279,78 +275,78 @@ public:
     void setDefaultFiberLength(double fiberLength);
 
     /**
-    @param exponentDescendingActiveForceLength
+    @param fibreExponentDescendingActiveForceLength
         The exponent of the descending limb of the normalized
         bell curve.
-    @param widthDescendingActiveForceLength
+    @param fibreWidthDescendingActiveForceLength
         The width of the descending limb of the normalized
         bell curve.
-    @param exponentAscendingActiveForceLength
+    @param fibreExponentAscendingActiveForceLength
         The exponent of the ascending limb of the normalized
         bell curve.
-    @param widthAscendingActiveForceLength
+    @param fibreWidthAscendingActiveForceLength
         The width of the ascending limb of the normalized
         bell curve.
     */
     void setActiveForceLengthParameters(
-            double exponentDescendingActiveForceLength,
-            double widthDescendingActiveForceLength,
-            double exponentAscendingActiveForceLength,
-            double widthAscendingActiveForceLength);
+            double fibreExponentDescendingActiveForceLength,
+            double fibreWidthDescendingActiveForceLength,
+            double fibreExponentAscendingActiveForceLength,
+            double fibreWidthAscendingActiveForceLength);
 
-    void setFiberVelocityParameters(double aConcentricContractionARel0,
-            double aConcentricContractionBRel0,
-            double aMaxForceEccentricExtension, double aSlopeFactor);
+    void setFiberVelocityParameters(double aFibreActiveForceVelocityArel0,
+            double aFibreActiveForceVelocityBrel0,
+            double aFibreMaxEccentricForceRelToFmax, double aFibreEccentricSlopefactor);
 
     /**
-    @param aParallelElasticZeroLength
+    @param aFibreElasticZeroLength
         The parallel elastic elements zero lenght
-    @param aParallelElasticExponent
+    @param aFibreElasticExponent
         The parallel elastic elements exponent
-    @param aParallelElasticForceRelToFmax
+    @param aFibreElasticForceRelToFmax
         The parallel elastic elemnsts force relative to Fmax at Lceopt*(1+dWdes)
     */
-    void setParallelElasticParameters(double aParallelElasticZeroLength,
-            double aParallelElasticExponent,
-            double aParallelElasticForceRelToFmax);
+    void setParallelElasticParameters(double aFibreElasticZeroLength,
+            double aFibreElasticExponent,
+            double aFibreElasticForceRelToFmax);
 
     /**
-    @param aRelativeForceAtNonlinearLinearTransition
+    @param aTendonElasticForceRelToFmax
         The force at non-linear/linear transition which is muscle specific
     */
-    void setRelativeForceAtNonlinearLinearTransition(
-            double aRelativeForceAtNonlinearLinearTransition);
+    void setTendonElasticForceRelToFmax(
+            double aTendonElasticForceRelToFmax);
 
     /**
     @param aForceAtNonlinearLinearTransition
         The force at non-linear/linear transition which is muscle specific
     */
-    void setRelativeStretchAtNonlinearLinearTransition(
-            double aRelativeStretchAtNonlinearLinearTransition);
+    void setTendonElasticNonlinearStrain(
+            double aTendonElasticNonlinearStrain);
 
     /**
     @param aForceAtNonlinearLinearTransition
         The force at non-linear/linear transition which is muscle specific
     */
-    void setRelativeStretchAtLinearPart(double aRelativeStretchAtLinearPart);
+    void setTendonElasticLinearStrain(double aTendonElasticLinearStrain);
 
     /**
-    @param aDseDampingFactor
+    @param aTendonMaximumDampingDse
         The Dse damping factor
-    @param aRseDampingFactor
+    @param aTendonOffsetDampingRse
         The Rse damping factor
     */
-    void setTendonDampingParams(double aDseDampingFactor,
-            double aRseDampingFactor);
+    void setTendonDampingParams(double aTendonMaximumDampingDse,
+            double aTendonOffsetDampingRse);
 
     /**
-    @param aDseDampingFactor
+    @param aTendonMaximumDampingDse
         The Dse damping factor
-    @param aRseDampingFactor
+    @param aTendonOffsetDampingRse
         The Rse damping factor
     */
     void setParallelDampingParams(
-            double aDpeDampingFactor, double aRpeDampingFactor);
+            double aFibreMaximumDampingDpe, double aFibreOffsetDampingRpe);
 
     /** @param[out] s The state of the system.
         @param fiberLength The desired fiber length (m). */

@@ -19,12 +19,11 @@ RockenfellerFirstOrderActivationDynamicModel::RockenfellerFirstOrderActivationDy
 }
 
 RockenfellerFirstOrderActivationDynamicModel::
-RockenfellerFirstOrderActivationDynamicModel(double time_constant_hatze,
-                                            double nue,
-                                            double roh_0,
-                                            double gamma_C,
+RockenfellerFirstOrderActivationDynamicModel(double activation_Hatze_time_constant,
+                                            double activation_exponent,
+                                            double activation_optimal_calcium_concentration_fraction,
                                             double minimum_gamma,
-                                            double minimum_activation,
+                                            double activation_minimum,
                                             double optimal_fiber_length,
                                             const std::string& muscleName)
 {
@@ -34,12 +33,12 @@ RockenfellerFirstOrderActivationDynamicModel(double time_constant_hatze,
     std::string name = muscleName + "_activation";
     setName(name);
     
-    set_time_constant_hatze(time_constant_hatze);
-    set_nue(nue);
-    set_roh_0(roh_0);
-    set_gamma_C(gamma_C);
+    set_activation_Hatze_time_constant(activation_Hatze_time_constant);
+    set_activation_exponent(activation_exponent);
+    set_activation_optimal_calcium_concentration_fraction(
+            activation_optimal_calcium_concentration_fraction);
     set_minimum_gamma(minimum_gamma);
-    set_minimum_activation(minimum_activation);
+    set_activation_minimum(activation_minimum);
     set_optimal_fiber_length(optimal_fiber_length);
 }
 
@@ -50,12 +49,11 @@ void RockenfellerFirstOrderActivationDynamicModel::setNull()
 
 void RockenfellerFirstOrderActivationDynamicModel::constructProperties()
 {
-    constructProperty_time_constant_hatze(11.3);
-    constructProperty_nue(3);
-    constructProperty_roh_0(5.27);
-    constructProperty_gamma_C(1.37);
+    constructProperty_activation_Hatze_time_constant(11.3);
+    constructProperty_activation_exponent(3);
+    constructProperty_activation_optimal_calcium_concentration_fraction(5.27 * 1.37); // roh_0 * gamma_C
     constructProperty_minimum_gamma(0.0);
-    constructProperty_minimum_activation(0.005); // Hatze constant
+    constructProperty_activation_minimum(0.005); // Hatze constant
     constructProperty_optimal_fiber_length(0.2);
 }
 
@@ -65,20 +63,19 @@ void RockenfellerFirstOrderActivationDynamicModel::constructProperties()
 double RockenfellerFirstOrderActivationDynamicModel::
 clampActivation(double activation) const
 {
-    return clamp(get_minimum_activation(), activation, 1.0);
+    return clamp(get_activation_minimum(), activation, 1.0);
 }
 
 double RockenfellerFirstOrderActivationDynamicModel::
 calculateActivation(double gamma, double fiber_length) const
 {
-    double gamma_C = get_gamma_C();
-    double rho_0 = get_roh_0();
-    double nue = get_nue();
+    double pomega = get_activation_optimal_calcium_concentration_fraction();
+    double activation_exponent = get_activation_exponent();
     double optimal_fiber_length = get_optimal_fiber_length();
-    double min_act = get_minimum_activation();
+    double min_act = get_activation_minimum();
 
-    double rho = gamma_C * rho_0 * fiber_length / optimal_fiber_length;
-    double rhogam = std::pow(gamma * rho, nue);
+    double rho = pomega * fiber_length / optimal_fiber_length;
+    double rhogam = std::pow(gamma * rho, activation_exponent);
     return ((min_act + rhogam) / (1.0 + rhogam));
 }
 
@@ -92,7 +89,7 @@ double RockenfellerFirstOrderActivationDynamicModel::
 calcDerivative(double gamma, double excitation) const
 {
     gamma = clamp(get_minimum_gamma(), gamma, 1.0);
-    double hatze_constant = get_time_constant_hatze();
+    double hatze_constant = get_activation_Hatze_time_constant();
     return hatze_constant * (excitation - gamma);
 }
 
@@ -108,25 +105,22 @@ void RockenfellerFirstOrderActivationDynamicModel::extendFinalizeFromProperties(
 
     // Ensure property values are within appropriate ranges.
     OPENSIM_THROW_IF_FRMOBJ(
-        get_time_constant_hatze() < SimTK::SignificantReal,
+        get_activation_Hatze_time_constant() < SimTK::SignificantReal,
         InvalidPropertyValue,
-        getProperty_time_constant_hatze().getName(),
+        getProperty_activation_Hatze_time_constant().getName(),
         "Time constant hatze must be greater than zero");
     OPENSIM_THROW_IF_FRMOBJ(
-        get_nue() < SimTK::SignificantReal,
+        get_activation_exponent() < SimTK::SignificantReal,
         InvalidPropertyValue,
-        getProperty_nue().getName(),
-        "Nue constant must be greater than zero");
+        getProperty_activation_exponent().getName(),
+        "activation_exponent constant must be greater than zero");
     OPENSIM_THROW_IF_FRMOBJ(
-        get_roh_0() < SimTK::SignificantReal,
+        get_activation_optimal_calcium_concentration_fraction() <
+                SimTK::SignificantReal,
         InvalidPropertyValue,
-        getProperty_roh_0().getName(),
-        "roh_0 constant must be greater than zero");
-    OPENSIM_THROW_IF_FRMOBJ(
-        get_gamma_C() < SimTK::SignificantReal,
-        InvalidPropertyValue,
-        getProperty_gamma_C().getName(),
-        "gamma_C constant must be greater than zero");
+        getProperty_activation_optimal_calcium_concentration_fraction()
+                .getName(),
+        "Roh_0 * Gamma_C constant must be greater than zero");
     OPENSIM_THROW_IF_FRMOBJ(
         get_minimum_gamma() < 0 ||
         get_minimum_gamma() > 1.0-SimTK::SignificantReal,
