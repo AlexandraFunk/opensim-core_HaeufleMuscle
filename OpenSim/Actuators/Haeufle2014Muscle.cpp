@@ -463,6 +463,23 @@ double Haeufle2014Muscle::getCalciumConcentrationDerivative(const SimTK::State& 
             getCalciumConcentration(s), getExcitation(s));
 }
 
+double Haeufle2014Muscle::getFpee(const SimTK::State& s) const {
+    return getMuscleDynamicsInfo(s).userDefinedDynamicsExtras[0];
+}
+
+double Haeufle2014Muscle::getFpde(const SimTK::State& s) const {
+    return getMuscleDynamicsInfo(s).userDefinedDynamicsExtras[1];
+}
+
+double Haeufle2014Muscle::getFsee(const SimTK::State& s) const {
+    return getMuscleDynamicsInfo(s).userDefinedDynamicsExtras[2];
+}
+
+double Haeufle2014Muscle::getFsde(const SimTK::State& s) const {
+    return getMuscleDynamicsInfo(s).userDefinedDynamicsExtras[3];
+}
+
+
 //==============================================================================
 // SET METHODS
 //==============================================================================
@@ -885,6 +902,13 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
         mdi.fiberPassivePower = SimTK::NaN; 
         mdi.tendonPower = SimTK::NaN;              
         mdi.musclePower = SimTK::NaN;               
+
+        // to make all forces accessible
+        mdi.userDefinedDynamicsExtras.resize(4);
+        mdi.userDefinedDynamicsExtras[0] = Fpee;
+        mdi.userDefinedDynamicsExtras[1] = Fpde;
+        mdi.userDefinedDynamicsExtras[2] = Fsee;
+        mdi.userDefinedDynamicsExtras[3] = Fsde;
     }
     catch (const std::exception& x) {
         std::string msg = "Exception caught in Haeufle2014Muscle::"

@@ -139,7 +139,14 @@ public:
 //==============================================================================
 // OUTPUTS
 //==============================================================================
-
+    OpenSim_DECLARE_OUTPUT(
+            Fpee, double, getFpee, SimTK::Stage::Dynamics);
+    OpenSim_DECLARE_OUTPUT(
+            Fpde, double, getFpde, SimTK::Stage::Dynamics);
+    OpenSim_DECLARE_OUTPUT(
+            Fsee, double, getFsee, SimTK::Stage::Dynamics);
+    OpenSim_DECLARE_OUTPUT(
+            Fsde, double, getFsde, SimTK::Stage::Dynamics);
 
 //==============================================================================
 // CONSTRUCTORS
@@ -256,11 +263,13 @@ public:
 
     double getMinimumFiberLengthAlongTendon() const;
 
-    // TODO add more getter methods which are needed during calculation, for example
-    // getFiberVelocity, getActivation (see Muscle.h) ....
+    double getFpee(const SimTK::State& s) const;
 
+    double getFpde(const SimTK::State& s) const;
 
+    double getFsee(const SimTK::State& s) const;
 
+    double getFsde(const SimTK::State& s) const;
 
 //==============================================================================
 // SET METHODS
