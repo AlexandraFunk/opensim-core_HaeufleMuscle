@@ -26,9 +26,9 @@ int main() {
     //    Millard2012EquilibriumMuscle("biceps", 200, 0.6, 0.55, 0);
 
     Haeufle2014Muscle* biceps =
-            new Haeufle2014Muscle("biceps", 200, 0.4, 0.55, 0.0);
+            new Haeufle2014Muscle("biceps", 200, 0.5, 0.2, 0.0);
     
-    Haeufle2014Muscle* triceps = new Haeufle2014Muscle("triceps", 200, 1, 0.8, 0.0);
+    Haeufle2014Muscle* triceps = new Haeufle2014Muscle("triceps", 300, 0.95, 0.5, 0.0);
 
     // set damping params to 0 to be more similar to millard muscle
     // biceps->setParallelDampingParams(0.0, 0.0);
@@ -79,11 +79,13 @@ int main() {
     reportTable->addToReport(biceps->getOutput("activation"));
     reportTable->addToReport(biceps->getOutput("fiber_length"));
     reportTable->addToReport(biceps->getOutput("tendon_length"));
+    reportTable->addToReport(biceps->getOutput("fiber_velocity"));
     reportTable->addToReport(triceps->getOutput("fiber_force"));
     reportTable->addToReport(triceps->getOutput("tendon_force"));
     reportTable->addToReport(triceps->getOutput("activation"));
     reportTable->addToReport(triceps->getOutput("fiber_length"));
     reportTable->addToReport(triceps->getOutput("tendon_length"));
+    reportTable->addToReport(triceps->getOutput("fiber_velocity"));
     reportTable->addToReport(
             elbow->getCoordinate(PinJoint::Coord::RotationZ).getOutput("value"),
             "elbow_angle");

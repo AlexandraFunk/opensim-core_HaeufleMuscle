@@ -27,10 +27,10 @@ int main() {
     //    Millard2012EquilibriumMuscle("biceps", 200, 0.6, 0.55, 0);
 
     Haeufle2014Muscle* biceps =
-            new Haeufle2014Muscle("biceps", 200, 0.6, 0.55, 0.0);
+            new Haeufle2014Muscle("biceps", 200, 0.45, 0.25, 0.0);
 
     Haeufle2014Muscle* triceps =
-            new Haeufle2014Muscle("triceps", 200, 1, 0.8, 0.0);
+            new Haeufle2014Muscle("triceps", 200, 0.9, 0.5, 0.0);
 
     // set damping params to 0 to be more similar to millard muscle
     // biceps->setParallelDampingParams(0.0, 0.0);
@@ -55,7 +55,7 @@ int main() {
     // creating hat function of type
     // t = [0,10]
     // x = 0 for 1 sec then 1 for 1 sec
-    double x[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    double x[10] = {1, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     double y[10] = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
     double y_flipped[10] = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
     auto controlFunction = new PiecewiseConstantFunction(10, x, y);
@@ -66,88 +66,7 @@ int main() {
 
     brain->prescribeControlForActuator("biceps", controlFunction);
     brain->prescribeControlForActuator("triceps", controlFunction_flipped);
-    /* brain->prescribeControlForActuator(
-            "biceps", new StepFunction(0.5, 1.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(0.5, 1.0, 0.1, 1));
-
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(1.0, 1.5, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(1.0, 1.5, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(1.5, 2.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(1.5, 2.0, 0.1, 1));
-
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(2.0, 2.5, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(2.0, 2.5, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(2.5, 3.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(2.5, 3.0, 0.1, 1));
-
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(3.0, 3.5, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(3.0, 3.5, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(3.5, 4.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(3.5, 4.0, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(4.0, 4.5, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(4.0, 4.5, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(4.5, 5.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(4.5, 5.0, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(5.0, 5.5, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(5.0, 5.5, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(5.5, 6.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(5.5, 6.0, 0.1, 1));
-
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(6.0, 6.5, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(6.0, 6.5, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(6.5, 7.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(6.5, 7.0, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(7.0, 7.5, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(7.0, 7.5, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(7.5, 8.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(7.5, 8.0, 0.1, 1));
-
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(8.0, 8.5, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(8.0, 8.5, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(8.5, 9.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(8.5, 9.0, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(9.0, 9.5, 0.1, 1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(9.0, 9.5, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "biceps", new StepFunction(9.5, 10.0, 1, 0.1));
-    brain->prescribeControlForActuator(
-            "triceps", new StepFunction(9.5, 10.0, 0.1, 1));
-    */
+    
     // Add components to the model.
     model.addBody(humerus);    model.addBody(radius);
     model.addJoint(shoulder);  model.addJoint(elbow);

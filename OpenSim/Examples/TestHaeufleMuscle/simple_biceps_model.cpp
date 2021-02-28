@@ -1,3 +1,7 @@
+#include "OpenSim/Common/STOFileAdapter.h"
+#include "OpenSim/Common/TimeSeriesTable.h"
+
+#include <OpenSim/Common/IO.h>
 #include <OpenSim/OpenSim.h> 
 using namespace SimTK;
 using namespace OpenSim;
@@ -25,8 +29,15 @@ int main() {
     // Millard2012EquilibriumMuscle* biceps = new
     //    Millard2012EquilibriumMuscle("biceps", 200, 0.6, 0.55, 0);
 
-    Haeufle2014Muscle* biceps =
-            new Haeufle2014Muscle("biceps", 200, 0.6, 0.55, 0.0);
+    //Haeufle2014Muscle* biceps =
+    //        new Haeufle2014Muscle("biceps", 200, 0.45, 0.25, 0.0);
+    //Haeufle2014Muscle* biceps = new Haeufle2014Muscle(
+    //        "biceps", 200, 0.6, 0.55, 20.0 * SimTK_DEGREE_TO_RADIAN);
+ 
+    Haeufle2014Muscle* biceps = new Haeufle2014Muscle(
+            "biceps", 200, 0.6, 0.15, 10.0 * SimTK_DEGREE_TO_RADIAN);
+    biceps->set_fibre_maximum_damping_dpe(0.3);
+    biceps->set_fibre_offset_damping_rpe(0.01);
 
     // set damping params to 0 to be more similar to millard muscle
     // biceps->setParallelDampingParams(0.0, 0.0);
@@ -45,8 +56,12 @@ int main() {
     PrescribedController* brain = new PrescribedController();
     brain->addActuator(*biceps);
     // Muscle excitation is 0.3 for the first 0.5 seconds, then increases to 1.
-    brain->prescribeControlForActuator("biceps",
-            new StepFunction(0.5, 3, 0.3, 1));
+    double x[] = {0.0, 0.5, 1.0, 2.0, 5.0};
+    double y[] = {0.3, 0.3, 1.0, 0.2, 0.2};
+    auto control_function = new PiecewiseLinearFunction(5, x, y);
+    brain->prescribeControlForActuator("biceps", control_function);
+    //brain->prescribeControlForActuator(
+    //        "biceps", new StepFunction(0.5, 3, 0.3, 1.0));
 
     // Add components to the model.
     model.addBody(humerus);    model.addBody(radius);
@@ -56,14 +71,30 @@ int main() {
 
     // Add a console reporter to print the muscle fiber force and elbow angle.
     ConsoleReporter* reporter = new ConsoleReporter();
-    reporter->set_report_time_interval(1.0);
-    reporter->addToReport(biceps->getOutput("fiber_force"));
-    reporter->addToReport(biceps->getOutput("activation"));
-    reporter->addToReport(biceps->getOutput("fiber_length"));
-    reporter->addToReport(
-        elbow->getCoordinate(PinJoint::Coord::RotationZ).getOutput("value"),
-        "elbow_angle");
-    model.addComponent(reporter);
+    TableReporter* length_reporter = new TableReporter();
+    length_reporter->set_report_time_interval(0.001);
+    length_reporter->addToReport(biceps->getOutput("fiber_length"));
+    length_reporter->addToReport(biceps->getOutput("tendon_length"));
+    length_reporter->addToReport(biceps->getOutput("pennation_angle"));
+    length_reporter->addToReport(biceps->getOutput("activation"));
+    length_reporter->addToReport(biceps->getOutput("excitation"));
+    length_reporter->addToReport(biceps->getOutput("fiber_velocity"));
+    length_reporter->addToReport(biceps->getOutput("speed"));
+
+
+    TableReporter* force_reporter = new TableReporter();
+    force_reporter->setName("Forces");
+    force_reporter->set_report_time_interval(0.001);
+    force_reporter->addToReport(biceps->getOutput("tendon_force"));
+    force_reporter->addToReport(biceps->getOutput("active_fiber_force"));
+    force_reporter->addToReport(biceps->getOutput("Fpee"));
+    force_reporter->addToReport(biceps->getOutput("Fpde"));
+    force_reporter->addToReport(biceps->getOutput("Fsee"));
+    force_reporter->addToReport(biceps->getOutput("Fsde"));
+
+    model.addComponent(length_reporter);
+    model.addComponent(force_reporter);
+
 
     // Add display geometry.
     Ellipsoid bodyGeometry(0.1, 0.5, 0.1);
@@ -80,6 +111,11 @@ int main() {
 
     // Configure the model.
     State& state = model.initSystem();
+
+    Manager manager(model);
+    manager.setIntegratorMethod(Manager::IntegratorMethod::RungeKuttaMerson);
+    manager.setIntegratorAccuracy(10e-6);
+
     // Fix the shoulder at its default angle and begin with the elbow flexed.
     shoulder->getCoordinate().setLocked(state, true);
     elbow->getCoordinate().setValue(state, 0.5 * Pi);
@@ -93,7 +129,28 @@ int main() {
     viz.setBackgroundColor(White);
 
     // Simulate.
-    simulate(model, state, 10.0);
+    //simulate(model, state, 5.0);
+
+    state.setTime(0.0);
+    manager.initialize(state);
+    std::cout << "\nIntegrating from " << 0.0 << " to " << 5.0
+              << std::endl;
+    manager.integrate(5.0);
+
+
+    // Display the table reporters
+    auto forcesTable = force_reporter->getTable();
+    STOFileAdapter_<double>::write(forcesTable, "forces_states.sto");
+    auto lengthTable = length_reporter->getTable();
+    STOFileAdapter_<double>::write(lengthTable, "length_states.sto");
+
+    // To print (serialize) the latest connections of the model, it is
+    // necessary to finalizeConnections() first.
+    model.finalizeConnections();
+    // Save the OpenSim model to a file
+    model.print("bicepsMain.osim");
+
+    std::cout << "\nFinished successfully!" << std::endl;
 
     return 0;
 };
