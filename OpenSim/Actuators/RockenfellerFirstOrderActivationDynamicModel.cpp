@@ -53,7 +53,7 @@ void RockenfellerFirstOrderActivationDynamicModel::constructProperties()
     constructProperty_activation_exponent(3);
     constructProperty_activation_optimal_calcium_concentration_fraction(5.27 * 1.37); // roh_0 * gamma_C
     constructProperty_minimum_gamma(0.0);
-    constructProperty_activation_minimum(0.005); // Hatze constant
+    constructProperty_activation_minimum(0.001); // Hatze constant
     constructProperty_optimal_fiber_length(0.2);
 }
 

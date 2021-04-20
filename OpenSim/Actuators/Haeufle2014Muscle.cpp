@@ -823,8 +823,9 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
         // calculation of lcedot changes
         double Fmax = getMaxIsometricForce();
         double Fce = calcNormFce(lcedot, mli.fiberLength, activation) * Fmax;
-        if (Fce < 0 || Fce < Fisom * activation * Fmax) {
-            double Ffibre = Fpee / Fmax + activation * Fisom;
+        double minActivation = getActivationModel().get_activation_minimum();
+        if (Fce < 0 || Fce < Fisom * minActivation * Fmax) {
+            double Ffibre = Fpee / Fmax + minActivation * Fisom;
             double vmax = getMaxContractionVelocity();
             double Dse = getTendonMaximumDampingDse();
             double Rse = getTendonOffsetDampingRse();
@@ -900,6 +901,13 @@ void Haeufle2014Muscle::calcMuscleDynamicsInfo(
         double Fce = calcNormFce(fvi.fiberVelocity,
                              mli.fiberLength, activation) *
                      Fmax;
+        // get the seldom case that if Fce < 0 or Fce < Fisom(lce)*a0*Fmax
+        // calculation of lcedot changes
+        double Fisom = calcFisom(mli.fiberLength);
+        double minActivation = getActivationModel().get_activation_minimum();
+        if (Fce < 0 || Fce < Fisom * minActivation * Fmax) {
+            Fce = Fisom * minActivation * Fmax;
+        }
         
         double Fsde = calcFsde(fvi.tendonVelocity, mli.cosPennationAngle, Fpee, Fce);
         double Fpde = calcFpde(fvi.fiberVelocity, Fpee);
