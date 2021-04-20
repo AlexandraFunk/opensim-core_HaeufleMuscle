@@ -819,6 +819,26 @@ void Haeufle2014Muscle::calcFiberVelocityInfo(
             lcedot = 0.0;
         }
 
+        // get the seldom case that if Fce < 0 or Fce < Fisom(lce)*a0*Fmax
+        // calculation of lcedot changes
+        double Fmax = getMaxIsometricForce();
+        double Fce = calcNormFce(lcedot, mli.fiberLength, activation) * Fmax;
+        if (Fce < 0 || Fce < Fisom * activation * Fmax) {
+            double Ffibre = Fpee / Fmax + activation * Fisom;
+            double vmax = getMaxContractionVelocity();
+            double Dse = getTendonMaximumDampingDse();
+            double Rse = getTendonOffsetDampingRse();
+            double Dpe = getFibreMaximumDampingDpe();
+            double Rpe = getFibreOffsetDampingRpe();
+            double cosAlpha = mli.cosPennationAngle;
+            lcedot = (-cosAlpha * Ffibre * vmax + vmax * Fsee / Fmax +
+                             ldotMTC * Dse *
+                                     ((1 - Rse) * cosAlpha * Ffibre + Rse)) /
+                     (Dse * ((1 - Rse) * Ffibre + Rse / cosAlpha) +
+                             Dpe * cosAlpha * ((1 - Rpe) * Fpee / Fmax + Rpe));
+        }
+
+
         double normFiberVelocity = lcedot / getMaxContractionVelocity();
 
         double dphidt = getPennationModel().calcPennationAngularVelocity(
