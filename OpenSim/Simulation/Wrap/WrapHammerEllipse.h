@@ -25,11 +25,11 @@
 
 // INCLUDE
 # include "WrapObject.h"
-class PathWrap;
-class WrapResult;
 
 namespace OpenSim {
 
+class PathWrap;
+class WrapResult;
 //=============================================================================
 //=============================================================================
 /**

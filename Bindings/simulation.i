@@ -161,6 +161,7 @@ OpenSim::ModelComponentSet<OpenSim::Controller>;
 %include <OpenSim/Simulation/Wrap/WrapCylinderObst.h>
 %include <OpenSim/Simulation/Wrap/WrapSphereObst.h>
 %include <OpenSim/Simulation/Wrap/WrapDoubleCylinderObst.h>
+%include <OpenSim/Simulation/Wrap/WrapHammerEllipse.h>
 
 %include <OpenSim/Simulation/Model/Probe.h>
 %template(SetProbes) OpenSim::Set<OpenSim::Probe, OpenSim::ModelComponent>;
