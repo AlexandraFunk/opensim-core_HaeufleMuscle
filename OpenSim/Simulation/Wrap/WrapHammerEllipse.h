@@ -79,8 +79,6 @@ public:
     origin of the torus in the body's reference frame. */
     void extendScale(const SimTK::State& s, const ScaleSet& scaleSet) override;
 
-    void connectToModelAndBody(Model& aModel, PhysicalFrame& aBody) override;
-
     const char* getWrapTypeName() const override;
 
     std::string getDimensionsString() const override;

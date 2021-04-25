@@ -23,6 +23,12 @@
 
 
 #include "WrapHammerEllipse.h"
+#include "PathWrap.h"
+#include "WrapResult.h"
+#include <OpenSim/Common/SimmMacros.h>
+#include <OpenSim/Common/Mtx.h>
+#include <OpenSim/Common/ModelDisplayHints.h>
+#include <OpenSim/Common/ScaleSet.h>
 
 using namespace std;
 using namespace OpenSim;
@@ -155,13 +161,14 @@ std::string WrapHammerEllipse::getDimensionsString() const
 }
 
 /// Implement generateDecorations to draw geometry in visualizer
-void WrapHammerEllipse::generateDecorations(bool fixed,
-        const ModelDisplayHints& hints,
-    const SimTK::State& state,
-    SimTK::Array_<SimTK::DecorativeGeometry>& appendToThis) const 
+void WrapHammerEllipse::generateDecorations(bool fixed, const ModelDisplayHints& hints,
+    const SimTK::State& state, SimTK::Array_<SimTK::DecorativeGeometry>& appendToThis) const 
 {
     Super::generateDecorations(fixed, hints, state, appendToThis);
-    if (!fixed) return;
+    if (!fixed) 
+    {
+        return;
+    }
 
     if (hints.get_show_wrap_geometry()) {
         const Appearance& defaultAppearance = get_Appearance();
@@ -178,7 +185,8 @@ void WrapHammerEllipse::generateDecorations(bool fixed,
         **/
         const Vec3 ellipsoidShape =
                 Vec3(0.01, getSemiAxisLengthG(), getSemiAxisLengthH());
-        appendToThis.push_back(SimTK::DecorativeEllipsoid(ellipsoidShape))
+        appendToThis.push_back(
+            SimTK::DecorativeEllipsoid(ellipsoidShape)
             .setTransform(X_BP).setResolution(2.0)
             .setColor(color).setOpacity(defaultAppearance.get_opacity())
             .setScale(1).setRepresentation(defaultAppearance.get_representation())
@@ -190,10 +198,4 @@ int WrapHammerEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
         SimTK::Vec3& aPoint2,
         const PathWrap& aPathWrap, WrapResult& aWrapResult, bool& aFlag) const {
     return 0;
-}
-
-void WrapHammerEllipse::connectToModelAndBody(
-        Model& aModel, PhysicalFrame& aBody) 
-{
-
 }
