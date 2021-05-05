@@ -194,8 +194,76 @@ void WrapHammerEllipse::generateDecorations(bool fixed, const ModelDisplayHints&
     }
 }
 
+int WrapHammerEllipse::wrapPathSegment(const SimTK::State& state, AbstractPathPoint& aPoint1,
+    AbstractPathPoint& aPoint2, const PathWrap& aPathWrap,
+    WrapResult& aWrapResult) const 
+{
+
+}
+
 int WrapHammerEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
         SimTK::Vec3& aPoint2,
-        const PathWrap& aPathWrap, WrapResult& aWrapResult, bool& aFlag) const {
+        const PathWrap& aPathWrap, WrapResult& aWrapResult, bool& aFlag) const 
+{
+    if (aFlag == false) { 
+        neglect_ellipse(aPoint1, aPoint2);
+    }
     return 0;
+}
+
+
+int WrapHammerEllipse::neglect_ellipse(
+    SimTK::Vec3& aPoint1, SimTK::Vec3& aPoint2) const 
+{
+   /** int neg;
+    double tmp, theta;
+    SimTK::Vec3 M, s1, s0, e_x, e_z, e_z_norm, e_x_norm, e_y_norm, g(0.0,0.0,0.0), h(0.0,0.0,0.0);
+
+    SimTK::Vec3 G = getSemiAxisLengthG(); // G und H in jedem Schritt aus double Werten berechnen
+    SimTK::Vec3 H = getSemiAxisLengthH();
+    
+    M = get_translation() + H - aPoint1;
+    s1 = aPoint2 - aPoint1;
+    s0 = aPoint1 - aPoint1;
+    e_x = s1;
+    Mtx::CrossProduct(s1, M, e_z);
+    double mag = Mtx::Normalize(3, e_z, e_z_norm);
+    if (mag == 0) {
+        neg = 0;
+    } // if M is a point on line s0s1, ellipse is neglected
+    else {
+        Mtx::Normalize(3, e_x, e_x_norm);
+        Mtx::CrossProduct(e_z_norm, e_x_norm, e_y_norm);
+
+        // transformation in coordinate system defined by: x-axis along (s1-s0),
+        // y-axis such that m_z=0, center of ccord. system at s0
+        // x- and y-component of M=(rEll+H-s0) in new coordinate system:
+        double m_y = Mtx::DotProduct(3, M, e_y_norm);
+        // x-, y- and z-components of G and H in new coordinate system
+        g[1] = Mtx::DotProduct(3, e_y_norm, G);
+        h[1] = Mtx::DotProduct(3, e_y_norm, H);
+        g[2] = Mtx::DotProduct(3, e_z_norm, G);
+        h[2] = Mtx::DotProduct(3, e_z_norm, H);
+
+        // calculate whether s0s1 goes through the ellipse (neg=0) or passes it
+        // (neg=1)
+        if (h[2] == 0) { 
+            tmp = m_y / h[1];
+        } else {
+            if (g[2] == 0) { 
+                tmp = -m_y / g[1];
+            } else {
+                theta = atan(h[2] / g[2]);
+                tmp = -m_y / sin(theta) / (g[1] - h[1] * g[2] / h[2]);
+            }
+        }
+
+        if (abs(tmp) < 1.0) { 
+            neg = 0;
+        } else {
+            neg = 1;
+        }
+    } **/
+    int neg = 0;
+    return neg;
 }

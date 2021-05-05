@@ -88,11 +88,17 @@ public:
     const double getSemiAxisLengthG() const;
     void setSemiAxisLengthG(double aSemiAxisLengthG);
 
+    int wrapPathSegment(const SimTK::State& state, AbstractPathPoint& aPoint1,
+            AbstractPathPoint& aPoint2, const PathWrap& aPathWrap,
+            WrapResult& aWrapResult) const override;
+
 
 protected:
     int wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
             SimTK::Vec3& aPoint2, const PathWrap& aPathWrap,
             WrapResult& aWrapResult, bool& aFlag) const override;
+
+    int neglect_ellipse(SimTK::Vec3& aPoint1, SimTK::Vec3& aPoint2) const;
 
     /// Implement generateDecorations to draw geometry in visualizer
     void generateDecorations(bool fixed, const ModelDisplayHints& hints,

@@ -103,13 +103,21 @@ void PathWrap::extendConnectToModel(Model& model)
         }
     }
 
-    if (get_method() == "hybrid" || get_method() == "Hybrid" || get_method() == "HYBRID")
+    if (get_method() == "hybrid" || get_method() == "Hybrid" ||
+            get_method() == "HYBRID") {
         _method = hybrid;
-    else if (get_method() == "midpoint" || get_method() == "Midpoint" || get_method() == "MIDPOINT")
+    } else if (get_method() == "midpoint" || get_method() == "Midpoint" ||
+               get_method() == "MIDPOINT") {
         _method = midpoint;
-    else if (get_method() == "axial" || get_method() == "Axial" || get_method() == "AXIAL")
+    } else if (get_method() == "axial" || get_method() == "Axial" ||
+               get_method() == "AXIAL") {
         _method = axial;
-    else if (get_method() == "Unassigned") {  // method was not specified in wrap object definition; use default
+    } else if (get_method() == "HammerWrapping" ||
+               get_method() == "hammerwrapping" ||
+               get_method() == "HAMMERWRAPPING" || get_method() == "Hammer" ||
+               get_method() == "HAMMER" || get_method() == "hammer") {
+        _method = hammerwrapping;
+    } else if (get_method() == "Unassigned") {  // method was not specified in wrap object definition; use default
         _method = hybrid;
         upd_method() = "hybrid";
     } else {  // method was specified incorrectly in wrap object definition; throw an exception
@@ -174,5 +182,9 @@ void PathWrap::setMethod(WrapMethod aMethod)
     } else if (aMethod == hybrid) {
         _method = hybrid;
         upd_method() = "hybrid";
+    } else if (aMethod == hammerwrapping) {
+        _method = hammerwrapping;
+        upd_method() = "hammerwrapping";
     }
+
 }

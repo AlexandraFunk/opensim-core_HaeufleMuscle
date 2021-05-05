@@ -863,8 +863,150 @@ void GeometryPath::computeLengtheningSpeed(const SimTK::State& s) const
 void GeometryPath::
 applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const 
 {
-    if (get_PathWrapSet().getSize() < 1)
+    if (get_PathWrapSet().getSize() < 1) { return; }
+
+    // generate different wrapping algorithm from Hammer et al 2019
+
+    // 1. Check for all WrapObjects in the set if they are of the HammerEllipse Type
+    // if not continue with code below
+    // if yes continue with code from umuscle (Hammer wrapping algorithm)
+    // 2. Set all ellipses from PathWrapSet to active 
+    // 3. ??? was wird hier in udeflection Zeile 960 -975 gemacht?
+    // 4. loop up to 8 times:
+    // 5a. check if one or more ellipses can be neglected
+    // (5b. if two or more ellipses are neglected, check again) // is not implemented here
+    // 5c. ??? was passiert in udeflection in Zeile 1016-1040?
+    // 5d. if only one ellipse is active -> calc short path single ellipse and check if ellipse can be neglected
+    // 6a. calc shortest path of single ellipses
+    // 6b. ??? was macht code in udeflection ganz am Ende?
+
+    
+        // TODO: find OpenSim equivalent for:
+    //  - path position  =
+    //          path der übergeben wird ist Array<AbstractPathPoint*> und
+    //          enthält alle active fixed and moving via points of the path From
+    //          Path_point_set?
+    //  - ellipses vector = get_PathWrapSet()
+    // AbstractPathPoint* orgPoint = path[0];
+    // AbstractPathPoint* insPoint = path[path.getSize() - 1];
+    // getParentFrame? getLocation?
+    // TODO: Hier G und H global berechnen aus HalbachsenLängen G und H
+    // TODO: aus G und H Global g und h local für deflection siehe neglect
+    // ellipse!! Objecte haben am besten Parameter für derzeitiges lokales
+    // Frame
+    //
+    //    Funktion für WrapObject mit Übergabe Globale Parameter und in
+    //    Funktion neglect Ellipse und Berechnung lokales Frame
+    // TODO find out which frame all these variables are in and then find
+    // out how to convert them into the ellipsoid frame getFrame -> welches
+    // Frame ist das? Body frame oder Ellipsen frame? Und dann wie auf
+    // Ellipsen Frame rückschließen in welchem Frame sind die Path punkte??
+    // path[1]->getParentFrame();
+
+    
+
+    // check if all WrapObjects in this PathWrapSet are from Type HammerEllipse
+    bool useHammerAlgorithm = true;
+    for (int i = 0; i < get_PathWrapSet().getSize(); i++) {
+        const WrapObject* wo = get_PathWrapSet().get(i).getWrapObject();
+        if (wo->getWrapTypeName() != "HammerEllipse") {
+            useHammerAlgorithm = false;
+        }
+        // Double check can be removed here
+        PathWrap& ws = get_PathWrapSet().get(i);
+        PathWrap::WrapMethod wm = ws.getMethod();
+        if (wm != PathWrap::WrapMethod::hammerwrapping) {
+            useHammerAlgorithm = false;
+        }
+    }
+
+    Array<bool> active_ellipses;
+    active_ellipses.setSize(get_PathWrapSet().getSize());
+
+    if (useHammerAlgorithm) {
+        // first set all wrapobjects to active
+        for (int i = 0; i < get_PathWrapSet().getSize(); i++) {
+            active_ellipses[i] = true;
+        }
+        // TODO neglect ellipses which lay directly at origin and insertion
+
+
+        int numActEll = 0;
+        for (int i = 0; i < active_ellipses.getSize(); i++) 
+        { 
+            if (active_ellipses[i]) 
+            { 
+                numActEll += 1;
+            } 
+        }
+        SimTK::Vector ne(numActEll, 1);
+        SimTK::Vector phi(numActEll, 1);
+
+        // If there is only one wrap object, calculate the wrapping only once.
+        // If there are two or more objects, perform up to 8 iterations
+        // where the result from one wrap object is used as the starting
+        // point for the next wrap.
+        const int maxIterations = get_PathWrapSet().getSize() < 2 ? 1 : 8;
+        for (int kk = 0; kk < maxIterations; kk++) {
+            // first check which ellipses can be neglected
+            for (int i = 0; i < get_PathWrapSet().getSize(); i++) { 
+                // get current ellipse, assuming the ellipses are order in the correct way 
+                // and there are no viaPoints in between them.
+                const WrapObject* wo = get_PathWrapSet().get(i).getWrapObject();
+
+                // define arbitrary points which show that this function is used for neglecting the ellipse
+                AbstractPathPoint pt1 =
+                        new AbstractPathPoint()
+                AbstractPathPoint pt2 = 
+                ne[i] = wo->wrapPathSegment(s, );
+
+                //ne[i] = wo->wrapPathSegment();
+
+                // How to call neglect ellipse from derived class?
+                //ne[i] = wo->neglect_ellipse();
+
+
+
+                SimTK::Vec3 pt1(0.0);
+                SimTK::Vec3 pt2(0.0);
+
+                // Convert the path points from the frames of the bodies they
+                // are attached to, to the frame of the wrap object's body
+                /**pt1 = aPoint1.getParentFrame()
+                              .findStationLocationInAnotherFrame(
+                                      s, aPoint1.getLocation(s), getFrame());
+
+                pt2 = aPoint2.getParentFrame()
+                              .findStationLocationInAnotherFrame(
+                                      s, aPoint2.getLocation(s), getFrame());
+
+                // Convert the path points from the frame of the wrap object's
+                // body into the frame of the wrap object
+                pt1 = _pose.shiftBaseStationToFrame(pt1);
+                pt2 = _pose.shiftBaseStationToFrame(pt2);
+
+
+                // Frame, the points are defined in
+                path[1]->getParentFrame();
+                // Frame from the wrapping object
+                wo->getFrame();
+                **/
+                // TODO: calculate sum of actual active Ellipses
+                // TODO: nochmal durch alle ellipsen iterieren und was machen??
+                // TODO: if else bedingung ob nur eine oder mehrere Ellipsen aktiv sind
+
+            }
+        
+        
+        
+        }
         return;
+    }
+
+
+
+
+
 
     WrapResult best_wrap;
     Array<int> result, order;
@@ -873,8 +1015,7 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
     order.setSize(get_PathWrapSet().getSize());
 
     // Set the initial order to be the order they are listed in the path.
-    for (int i = 0; i < get_PathWrapSet().getSize(); i++)
-        order[i] = i;
+    for (int i = 0; i < get_PathWrapSet().getSize(); i++) { order[i] = i; }
 
     // If there is only one wrap object, calculate the wrapping only once.
     // If there are two or more objects, perform up to 8 iterations where
@@ -883,7 +1024,7 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
     const int maxIterations = get_PathWrapSet().getSize() < 2 ? 1 : 8;
     double last_length = SimTK::Infinity;
     for (int kk = 0; kk < maxIterations; kk++)
-    {
+    { 
         for (int i = 0; i < get_PathWrapSet().getSize(); i++)
         {
             result[i] = 0;
