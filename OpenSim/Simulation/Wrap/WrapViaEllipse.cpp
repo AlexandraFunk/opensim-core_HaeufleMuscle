@@ -295,7 +295,7 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
             // much easier
             if (abs(G_norm - H_norm) < error) {
                 if (H_defl[1] == 0) { 
-                    push_back_vec()
+                    //push_back_vec()
                 }
             }
         }

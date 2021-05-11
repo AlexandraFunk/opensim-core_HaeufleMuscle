@@ -924,14 +924,9 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
         }
         // TODO neglect ellipses which lay directly at origin and insertion
 
-
         int numEll = 0;
-        for (int i = 0; i < active_ellipses.getSize(); i++) 
-        { 
-            if (active_ellipses[i]) 
-            { 
-                numEll += 1;
-            } 
+        for (int i = 0; i < active_ellipses.getSize(); i++) {
+            if (active_ellipses[i]) { numEll += 1; }
         }
         SimTK::Vector ne(numEll, 1);
         SimTK::Vector phi(numEll, 1);
@@ -943,11 +938,11 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
         const int maxIterations = get_PathWrapSet().getSize() < 2 ? 1 : 8;
         for (int kk = 0; kk < maxIterations; kk++) {
             // first check which ellipses can be neglected
-            for (int i = 0; i < numEll; i++) { 
+            for (int i = 0; i < numEll; i++) {
                 // assume there is only one ellipse at the moment
                 PathWrap& ws = get_PathWrapSet().get(i);
                 const WrapObject* wo = ws.getWrapObject();
-                
+
                 // get muscles origin and insertion points
                 AbstractPathPoint& pt1 = *path.get(i);
                 AbstractPathPoint& pt2 = *path.get(path.getSize() - 1);
@@ -956,113 +951,115 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
 
                 wo->wrapPathSegment(s, pt1, pt2, ws, wr);
 
-        /**
-                // get current ellipse, assuming the ellipses are order in the correct way 
-                // and there are no viaPoints in between them.
-                PathWrap& ws = get_PathWrapSet().get(i);
-                const WrapObject* wo = ws.getWrapObject();
+                /**
+                        // get current ellipse, assuming the ellipses are order
+                   in the correct way
+                        // and there are no viaPoints in between them.
+                        PathWrap& ws = get_PathWrapSet().get(i);
+                        const WrapObject* wo = ws.getWrapObject();
 
-                
 
-                // get the points next to the ellipse 
-                // (beaware that they always need to be defined in wo s Frame!!)
-                SimTK::Vec3 pt1, pt2;
-                if (i == 0) {
-                    // ref point for first ellipse is path origin
-                    pt1 = path[i];
-                } else {
-                    // ref point is the attachment point from previous ellipse i-1
-                    //pt1 = get_PathWrapSet().get(i-1).
 
-                    // possible way to get the location from one ellipse attachment point 
-                    const WrapObject* wo_before =
-                            get_PathWrapSet().get(i - 1).getWrapObject();
-                    SimTK::Vec3 r_att_before = wo_before->get_translation();
-                    pt1 = wo_before->getFrame()
-                                  .findStationLocationInAnotherFrame(
-                                          s, r_att_before, wo->getFrame());
-                }
-                if (i == (numEll - 1)) {
-                    // ref point for last elllipse is path insertion
-                    pt2 = path[path.getSize() - 1];
-                } else {
-                    // ref point is the attachment point from next ellipse i+1
-                    //pt2 = get_PathWrapSet().get(i+1).
+                        // get the points next to the ellipse
+                        // (beaware that they always need to be defined in wo s
+                   Frame!!) SimTK::Vec3 pt1, pt2; if (i == 0) {
+                            // ref point for first ellipse is path origin
+                            pt1 = path[i];
+                        } else {
+                            // ref point is the attachment point from previous
+                   ellipse i-1
+                            //pt1 = get_PathWrapSet().get(i-1).
 
-                    // possible way to get the location from one ellipse
-                    // attachment point
-                    const WrapObject* wo_after =
-                            get_PathWrapSet().get(i + 1).getWrapObject();
-                    SimTK::Vec3 r_att_after = wo_after->get_translation();
-                    pt2 = wo_after->getFrame()
-                                  .findStationLocationInAnotherFrame(
-                                          s, r_att_after, wo->getFrame());
-                }
-                WrapResult wr;
-                ne[i] = wo->neglectWrapObject(s, pt1, pt2, ws, wr);
-            }
-
-            int numEll_act = ne.sum();
-
-            if (numEll_act < 2) {
-                int ne_false = 0;
-                for (int i = 0; i < numEll; i++) { 
-                    // TODO add if ne_3(i) == 1 ??
-                    PathWrap& ws = get_PathWrapSet().get(i);
-                    const WrapObject* wo = ws.getWrapObject();
-                    phi[i] = wo->wrapPathSegment(s, );
-                    for (int k = 0; k < i; k++) {
-                        ne_false = wo->neglectWrapObject(s,);
-                    }
-                    if (ne_false == 0) {
-                        for (int k = i + 1; k < numEll; k++) {
-                            ne_false = wo->neglectWrapObject(s, );
+                            // possible way to get the location from one ellipse
+                   attachment point const WrapObject* wo_before =
+                                    get_PathWrapSet().get(i -
+                   1).getWrapObject(); SimTK::Vec3 r_att_before =
+                   wo_before->get_translation(); pt1 = wo_before->getFrame()
+                                          .findStationLocationInAnotherFrame(
+                                                  s, r_att_before,
+                   wo->getFrame());
                         }
+                        if (i == (numEll - 1)) {
+                            // ref point for last elllipse is path insertion
+                            pt2 = path[path.getSize() - 1];
+                        } else {
+                            // ref point is the attachment point from next
+                   ellipse i+1
+                            //pt2 = get_PathWrapSet().get(i+1).
+
+                            // possible way to get the location from one ellipse
+                            // attachment point
+                            const WrapObject* wo_after =
+                                    get_PathWrapSet().get(i +
+                   1).getWrapObject(); SimTK::Vec3 r_att_after =
+                   wo_after->get_translation(); pt2 = wo_after->getFrame()
+                                          .findStationLocationInAnotherFrame(
+                                                  s, r_att_after,
+                   wo->getFrame());
+                        }
+                        WrapResult wr;
+                        ne[i] = wo->neglectWrapObject(s, pt1, pt2, ws, wr);
                     }
-                    i = numEll;
-                }
-                if (ne_false == 0) { 
-                    // TODO ist das equivalent zu break outer loop?
-                    kk = 10; 
-                }
-                else {
-                    kk--;
-                }
-            } else {
-                // TODO implement code for more than one active Ellipse
+
+                    int numEll_act = ne.sum();
+
+                    if (numEll_act < 2) {
+                        int ne_false = 0;
+                        for (int i = 0; i < numEll; i++) {
+                            // TODO add if ne_3(i) == 1 ??
+                            PathWrap& ws = get_PathWrapSet().get(i);
+                            const WrapObject* wo = ws.getWrapObject();
+                            phi[i] = wo->wrapPathSegment(s, );
+                            for (int k = 0; k < i; k++) {
+                                ne_false = wo->neglectWrapObject(s,);
+                            }
+                            if (ne_false == 0) {
+                                for (int k = i + 1; k < numEll; k++) {
+                                    ne_false = wo->neglectWrapObject(s, );
+                                }
+                            }
+                            i = numEll;
+                        }
+                        if (ne_false == 0) {
+                            // TODO ist das equivalent zu break outer loop?
+                            kk = 10;
+                        }
+                        else {
+                            kk--;
+                        }
+                    } else {
+                        // TODO implement code for more than one active Ellipse
+                    }
+                */
+
+                // Convert the path points from the frames of the bodies they
+                // are attached to, to the frame of the wrap object's body
+                /**pt1 = aPoint1.getParentFrame()
+                              .findStationLocationInAnotherFrame(
+                                      s, aPoint1.getLocation(s), getFrame());
+
+                pt2 = aPoint2.getParentFrame()
+                              .findStationLocationInAnotherFrame(
+                                      s, aPoint2.getLocation(s), getFrame());
+
+                // Convert the path points from the frame of the wrap object's
+                // body into the frame of the wrap object
+                pt1 = _pose.shiftBaseStationToFrame(pt1);
+                pt2 = _pose.shiftBaseStationToFrame(pt2);
+
+
+                // Frame, the points are defined in
+                path[1]->getParentFrame();
+                // Frame from the wrapping object
+                wo->getFrame();
+                **/
+                // TODO: calculate sum of actual active Ellipses
+                // TODO: nochmal durch alle ellipsen iterieren und was machen??
+                // TODO: if else bedingung ob nur eine oder mehrere Ellipsen
+                // aktiv sind
             }
-        */
-
-            // Convert the path points from the frames of the bodies they
-            // are attached to, to the frame of the wrap object's body
-            /**pt1 = aPoint1.getParentFrame()
-                          .findStationLocationInAnotherFrame(
-                                  s, aPoint1.getLocation(s), getFrame());
-
-            pt2 = aPoint2.getParentFrame()
-                          .findStationLocationInAnotherFrame(
-                                  s, aPoint2.getLocation(s), getFrame());
-
-            // Convert the path points from the frame of the wrap object's
-            // body into the frame of the wrap object
-            pt1 = _pose.shiftBaseStationToFrame(pt1);
-            pt2 = _pose.shiftBaseStationToFrame(pt2);
-
-
-            // Frame, the points are defined in
-            path[1]->getParentFrame();
-            // Frame from the wrapping object
-            wo->getFrame();
-            **/
-            // TODO: calculate sum of actual active Ellipses
-            // TODO: nochmal durch alle ellipsen iterieren und was machen??
-            // TODO: if else bedingung ob nur eine oder mehrere Ellipsen aktiv
-            // sind
-        
-        
-        
+            return;
         }
-        return;
     }
 
 
