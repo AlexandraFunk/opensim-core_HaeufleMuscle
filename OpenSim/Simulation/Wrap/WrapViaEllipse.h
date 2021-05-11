@@ -1,7 +1,7 @@
 #ifndef OPENSIM_WRAP_HAMMER_ELLIPSE_H_
 #define OPENSIM_WRAP_HAMMER_ELLIPSE_H_
 /* -------------------------------------------------------------------------- *
- *                           OpenSim:  WrapHammerEllipse.h                    *
+ *                           OpenSim:  WrapViaEllipse.h                    *
  * -------------------------------------------------------------------------- *
  * The OpenSim API is a toolkit for musculoskeletal modeling and simulation.  *
  * See http://opensim.stanford.edu and the NOTICE file for more information.  *
@@ -38,8 +38,8 @@ class WrapResult;
  *
  * @author Maria Hammer, Mike Spahr
  */
-class OSIMSIMULATION_API WrapHammerEllipse : public WrapObject {
-    OpenSim_DECLARE_CONCRETE_OBJECT(WrapHammerEllipse, WrapObject);
+class OSIMSIMULATION_API WrapViaEllipse : public WrapObject {
+    OpenSim_DECLARE_CONCRETE_OBJECT(WrapViaEllipse, WrapObject);
 
 public:
 //==============================================================================
@@ -71,9 +71,9 @@ public:
 //=============================================================================
 
     // constructor
-    WrapHammerEllipse();
+    WrapViaEllipse();
     // destructor
-    virtual ~WrapHammerEllipse();
+    virtual ~WrapViaEllipse();
 
     /** Scale the torus's dimensions. The base class (WrapObject) scales the
     origin of the torus in the body's reference frame. */
@@ -110,7 +110,7 @@ protected:
 private:
     void constructProperties();
 
-}; // END of class WrapHammerEllipse
+}; // END of class WrapViaEllipse
 
 } // end of namespace OpenSim
 

@@ -100,7 +100,7 @@
 #include "Wrap/WrapCylinderObst.h"
 #include "Wrap/WrapSphereObst.h"
 #include "Wrap/WrapDoubleCylinderObst.h"
-#include "Wrap/WrapHammerEllipse.h"
+#include "Wrap/WrapViaEllipse.h"
 
 #include "SimbodyEngine/SimbodyEngine.h"
 #include "SimbodyEngine/Body.h"
@@ -207,7 +207,7 @@ OSIMSIMULATION_API void RegisterTypes_osimSimulation()
     Object::registerType( WrapCylinderObst() );
     Object::registerType( WrapSphereObst() );
     Object::registerType( WrapDoubleCylinderObst() );
-    Object::registerType( WrapHammerEllipse() );
+    Object::registerType( WrapViaEllipse() );
 
     // CURRENT RELEASE
     Object::registerType( SimbodyEngine() );

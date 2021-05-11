@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- *
- *                          OpenSim:  WrapHammerEllipse.cpp                   *
+ *                          OpenSim:  WrapViaEllipse.cpp                   *
  * -------------------------------------------------------------------------- *
  * The OpenSim API is a toolkit for musculoskeletal modeling and simulation.  *
  * See http://opensim.stanford.edu and the NOTICE file for more information.  *
@@ -22,7 +22,7 @@
  * -------------------------------------------------------------------------- */
 
 
-#include "WrapHammerEllipse.h"
+#include "WrapViaEllipse.h"
 #include "PathWrap.h"
 #include "WrapResult.h"
 #include <OpenSim/Common/SimmMacros.h>
@@ -43,7 +43,7 @@ static const char* wrapTypeName = "ViaEllipse";
 /**
  * Default constructor.
  */
-WrapHammerEllipse::WrapHammerEllipse()
+WrapViaEllipse::WrapViaEllipse()
 { 
 	constructProperties();
 }
@@ -52,7 +52,7 @@ WrapHammerEllipse::WrapHammerEllipse()
 /**
  * Destructor.
  */
-WrapHammerEllipse::~WrapHammerEllipse()
+WrapViaEllipse::~WrapViaEllipse()
 {
 
 }
@@ -61,13 +61,13 @@ WrapHammerEllipse::~WrapHammerEllipse()
 /**
  * Connect properties to local pointers.
  */
-void WrapHammerEllipse::constructProperties() 
+void WrapViaEllipse::constructProperties() 
 {
     constructProperty_semi_axis_length_H(0.05); // TODO set realistic default value
     constructProperty_semi_axis_length_G(0.05); // TODO set realistic default value
 }
 
-void WrapHammerEllipse::extendFinalizeFromProperties()
+void WrapViaEllipse::extendFinalizeFromProperties()
 {
     // Base class
     Super::extendFinalizeFromProperties();
@@ -80,28 +80,28 @@ void WrapHammerEllipse::extendFinalizeFromProperties()
             "Semi axis length G cannot be less than zero");
 }
 
-const double WrapHammerEllipse::getSemiAxisLengthH() const 
+const double WrapViaEllipse::getSemiAxisLengthH() const 
 {
     return get_semi_axis_length_H();
 }
 
-void WrapHammerEllipse::setSemiAxisLengthH(double aSemiAxisLengthH) 
+void WrapViaEllipse::setSemiAxisLengthH(double aSemiAxisLengthH) 
 {
     set_semi_axis_length_H(aSemiAxisLengthH);
 }
 
-const double WrapHammerEllipse::getSemiAxisLengthG() const 
+const double WrapViaEllipse::getSemiAxisLengthG() const 
 {
     return get_semi_axis_length_G();
 }
 
-void WrapHammerEllipse::setSemiAxisLengthG(double aSemiAxisLengthG) 
+void WrapViaEllipse::setSemiAxisLengthG(double aSemiAxisLengthG) 
 {
     set_semi_axis_length_G(aSemiAxisLengthG);
 }
 
 
-void WrapHammerEllipse::extendScale(
+void WrapViaEllipse::extendScale(
     const SimTK::State& s, const ScaleSet& scaleSet) 
 {
     Super::extendScale(s, scaleSet);
@@ -139,7 +139,7 @@ void WrapHammerEllipse::extendScale(
  *
  * @return A string representing the type of wrap object
  */
-const char* WrapHammerEllipse::getWrapTypeName() const 
+const char* WrapViaEllipse::getWrapTypeName() const 
 { 
     return wrapTypeName; 
 }
@@ -152,7 +152,7 @@ const char* WrapHammerEllipse::getWrapTypeName() const
  *
  * @return A string containing the dimensions of the wrap object
  */
-std::string WrapHammerEllipse::getDimensionsString() const 
+std::string WrapViaEllipse::getDimensionsString() const 
 {
     stringstream dimensions;
     dimensions << "semi axis length H " << get_semi_axis_length_H()
@@ -161,7 +161,7 @@ std::string WrapHammerEllipse::getDimensionsString() const
 }
 
 /// Implement generateDecorations to draw geometry in visualizer
-void WrapHammerEllipse::generateDecorations(bool fixed, const ModelDisplayHints& hints,
+void WrapViaEllipse::generateDecorations(bool fixed, const ModelDisplayHints& hints,
     const SimTK::State& state, SimTK::Array_<SimTK::DecorativeGeometry>& appendToThis) const 
 {
     Super::generateDecorations(fixed, hints, state, appendToThis);
@@ -197,7 +197,7 @@ void WrapHammerEllipse::generateDecorations(bool fixed, const ModelDisplayHints&
 /**
 * Old stuff which is not used anymore
 * 
-int WrapHammerEllipse::neglectWrapObject(const SimTK::State& state,
+int WrapViaEllipse::neglectWrapObject(const SimTK::State& state,
         SimTK::Vec3 aPoint1, SimTK::Vec3 aPoint2, const PathWrap& aPathWrap,
         WrapResult& aWrapResult) const {
     Vec3 pt1(0.0);
@@ -219,15 +219,15 @@ int WrapHammerEllipse::neglectWrapObject(const SimTK::State& state,
     return 0;
 }
 */
-int WrapHammerEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
+int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
         SimTK::Vec3& aPoint2,
         const PathWrap& aPathWrap, WrapResult& aWrapResult, bool& aFlag) const 
 {
     // 1. Umrechnung der Points 1 und 2 in deflection frame
     // 2. neglect ellipse? -> ja? -> return pfadpunkt ist erstmal attachmentpoint und noWrap
     // 3. -> Nein -> wo liegt der Umlenkpunkt?
-    // 4. ellipse ist eig ein Kreis -> analytische Lösung udeflection zeile 660 - 667
-    // 5. ellipse ist ellipse -> numerische Lösung in calc_single_ellipse_numeric
+    // 4. ellipse ist eig ein Kreis -> analytische Lï¿½sung udeflection zeile 660 - 667
+    // 5. ellipse ist ellipse -> numerische Lï¿½sung in calc_single_ellipse_numeric
 
     double tmp, theta;
     SimTK::Vec3 e_x, e_y, e_z, M, M_defl(0., 0., 0.), G_defl(0., 0., 0.),
@@ -308,7 +308,7 @@ int WrapHammerEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
 }
 
 
-int WrapHammerEllipse::neglect_ellipse(
+int WrapViaEllipse::neglect_ellipse(
     SimTK::Vec3& aPoint1, SimTK::Vec3& aPoint2) const 
 {
    /** int neg;
