@@ -34,7 +34,7 @@ using namespace std;
 using namespace OpenSim;
 using SimTK::Vec3;
 
-static const char* wrapTypeName = "HammerEllipse";
+static const char* wrapTypeName = "ViaEllipse";
 
 //=============================================================================
 // CONSTRUCTOR(S) AND DESTRUCTOR
@@ -194,21 +194,117 @@ void WrapHammerEllipse::generateDecorations(bool fixed, const ModelDisplayHints&
     }
 }
 
-int WrapHammerEllipse::wrapPathSegment(const SimTK::State& state, AbstractPathPoint& aPoint1,
-    AbstractPathPoint& aPoint2, const PathWrap& aPathWrap,
-    WrapResult& aWrapResult) const 
-{
+/**
+* Old stuff which is not used anymore
+* 
+int WrapHammerEllipse::neglectWrapObject(const SimTK::State& state,
+        SimTK::Vec3 aPoint1, SimTK::Vec3 aPoint2, const PathWrap& aPathWrap,
+        WrapResult& aWrapResult) const {
+    Vec3 pt1(0.0);
+    Vec3 pt2(0.0);
 
+    // Convert the path points from the frames of the bodies they are attached
+    // to, to the frame of the wrap object's body
+    pt1 = aPoint1.getParentFrame().findStationLocationInAnotherFrame(
+            state, aPoint1.getLocation(s), getFrame());
+
+    pt2 = aPoint2.getParentFrame().findStationLocationInAnotherFrame(
+            state, aPoint2.getLocation(s), getFrame());
+
+    // Convert the path points from the frame of the wrap object's body
+    // into the frame of the wrap object
+    pt1 = _pose.shiftBaseStationToFrame(pt1);
+    pt2 = _pose.shiftBaseStationToFrame(pt2);
+
+    return 0;
 }
-
+*/
 int WrapHammerEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
         SimTK::Vec3& aPoint2,
         const PathWrap& aPathWrap, WrapResult& aWrapResult, bool& aFlag) const 
 {
-    if (aFlag == false) { 
-        neglect_ellipse(aPoint1, aPoint2);
+    // 1. Umrechnung der Points 1 und 2 in deflection frame
+    // 2. neglect ellipse? -> ja? -> return pfadpunkt ist erstmal attachmentpoint und noWrap
+    // 3. -> Nein -> wo liegt der Umlenkpunkt?
+    // 4. ellipse ist eig ein Kreis -> analytische Lösung udeflection zeile 660 - 667
+    // 5. ellipse ist ellipse -> numerische Lösung in calc_single_ellipse_numeric
+
+    double tmp, theta;
+    SimTK::Vec3 e_x, e_y, e_z, M, M_defl(0., 0., 0.), G_defl(0., 0., 0.),
+            H_defl(0., 0., 0.);
+
+    SimTK::Vec3 H(0., 0., get_semi_axis_length_H());
+    SimTK::Vec3 G(0., get_semi_axis_length_G(), 0.);
+
+
+    // start with calculation point 1 and point 2 into ellipse deflection frame for easier calculatio
+    // aPoint1 and a Point2 -> defined in the ellipse frame
+    // semi lengths g and h -> defined as scalars in the ellipse frame
+    
+    // TODO: is this correct??
+    M = H - aPoint1;
+
+    Mtx::Normalize(3, aPoint2 - aPoint1, e_x);
+    Mtx::CrossProduct(aPoint2 - aPoint1, M, e_z);
+
+    // if M is a point on line aPoint2aPoint1, ellipse is neglected
+    if (e_z == 0) { return 0; }
+
+    Mtx::Normalize(3, e_z, e_z);
+    Mtx::CrossProduct(e_z, e_x, e_y);
+
+    // calculate new center of deflection frame and express G and H in deflection frame
+    M_defl[0] = Mtx::DotProduct(3, M, e_x);
+    M_defl[1] = Mtx::DotProduct(3, M, e_y);
+    G_defl[0] = Mtx::DotProduct(3, G, e_x);
+    G_defl[1] = Mtx::DotProduct(3, G, e_y);
+    G_defl[2] = Mtx::DotProduct(3, G, e_z);
+    H_defl[0] = Mtx::DotProduct(3, H, e_x);
+    H_defl[1] = Mtx::DotProduct(3, H, e_y);
+    H_defl[2] = Mtx::DotProduct(3, H, e_z);
+
+    // check if ellipse can be neglected or not
+    if (abs(H_defl[2]) < SimTK::SignificantReal) {
+        tmp = M_defl[1] / H_defl[1];
+    } else {
+        if (abs(G_defl[2]) < SimTK::SignificantReal) {
+            tmp = -M_defl[1] / G_defl[1];
+        } else {
+            theta = atan(H_defl[2] / G_defl[2]);
+            tmp = -M_defl[1] / sin(theta) /
+                  (G_defl[1] - H_defl[1] * G_defl[2] / H_defl[2]);
+        }
     }
-    return 0;
+
+    if (abs(tmp) < 1.0) { return 0;}
+    // else not necessary since from here ellipse is not neglected
+
+    SimTK::Vector phi1;
+    
+    // zu testzwecken
+    if (M_defl[1] == 0) {
+
+    } else {
+        SimTK::Vec3 placeholder;
+        double G_norm = Mtx::Normalize(3, G_defl, placeholder);
+        double H_norm = Mtx::Normalize(3, H_defl, placeholder);
+        double error = 2.0e-3;
+        if ((abs(G_defl[0]) + abs(H_defl[0])) <
+                error * (G_norm + H_norm - 1.0)) {
+            // first check if ellipse is basically a circle -> calculation is
+            // much easier
+            if (abs(G_norm - H_norm) < error) {
+                if (H_defl[1] == 0) { 
+                    push_back_vec()
+                }
+            }
+        }
+
+    
+    }
+
+
+    return 1;
 }
 
 

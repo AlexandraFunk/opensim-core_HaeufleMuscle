@@ -72,8 +72,7 @@ public:
     enum WrapMethod {
         hybrid,
         midpoint,
-        axial,
-        hammerwrapping
+        axial
     };
 
 //=============================================================================

@@ -112,11 +112,6 @@ void PathWrap::extendConnectToModel(Model& model)
     } else if (get_method() == "axial" || get_method() == "Axial" ||
                get_method() == "AXIAL") {
         _method = axial;
-    } else if (get_method() == "HammerWrapping" ||
-               get_method() == "hammerwrapping" ||
-               get_method() == "HAMMERWRAPPING" || get_method() == "Hammer" ||
-               get_method() == "HAMMER" || get_method() == "hammer") {
-        _method = hammerwrapping;
     } else if (get_method() == "Unassigned") {  // method was not specified in wrap object definition; use default
         _method = hybrid;
         upd_method() = "hybrid";
@@ -182,9 +177,5 @@ void PathWrap::setMethod(WrapMethod aMethod)
     } else if (aMethod == hybrid) {
         _method = hybrid;
         upd_method() = "hybrid";
-    } else if (aMethod == hammerwrapping) {
-        _method = hammerwrapping;
-        upd_method() = "hammerwrapping";
     }
-
 }
