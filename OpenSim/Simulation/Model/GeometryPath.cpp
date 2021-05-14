@@ -903,13 +903,14 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
     // Ellipsen Frame rückschließen in welchem Frame sind die Path punkte??
     // path[1]->getParentFrame();
 
-    
+ 
 
     // check if all WrapObjects in this PathWrapSet are from Type HammerEllipse
     bool useViaEllipseAlgorithm = true;
     for (int i = 0; i < get_PathWrapSet().getSize(); i++) {
         const WrapObject* wo = get_PathWrapSet().get(i).getWrapObject();
-        if (wo->getWrapTypeName() != "ViaEllipse") {
+        string wrapTypeName = wo->getWrapTypeName();
+        if (wrapTypeName.compare("ViaEllipse") != 0) {
             useViaEllipseAlgorithm = false;
         }
     }
@@ -936,6 +937,34 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
         // where the result from one wrap object is used as the starting
         // point for the next wrap.
         const int maxIterations = get_PathWrapSet().getSize() < 2 ? 1 : 8;
+
+
+        /**
+
+        //FÜR SPÄTER NUTZEN WENN MEHR ALS NUR EINE ELLIPSE BERECHNET WERDEN SOLL
+
+        // for starting the wrapping algorithm in the first step: 
+        // assuming the wrapping is done with all ellipses and always at
+        // the r_attachment point of the ellipse 
+        // -> add this points to a vector to have them stored there
+        Array<AbstractPathPoint&> points;
+
+        for (int i = 0; i < numEll; i++) {
+            PathWrap& ws = get_PathWrapSet().get(i);
+            // update WrapPoint1 with setLocation to rattachment point
+            points.insert(i,ws.updWrapPoint1());
+            const WrapObject* wo = ws.getWrapObject();
+            wo->wrapPathSegment(s, points[1], points[2]);
+        }
+            
+
+        */
+
+
+
+
+
+
         for (int kk = 0; kk < maxIterations; kk++) {
             // first check which ellipses can be neglected
             for (int i = 0; i < numEll; i++) {
@@ -946,10 +975,36 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
                 // get muscles origin and insertion points
                 AbstractPathPoint& pt1 = *path.get(i);
                 AbstractPathPoint& pt2 = *path.get(path.getSize() - 1);
-
                 WrapResult wr;
 
+                wr.wrap_pts.setSize(0);
+
                 wo->wrapPathSegment(s, pt1, pt2, ws, wr);
+
+                // If wrapping did occur, copy wrap info into the PathStruct.
+                Array<SimTK::Vec3>& wrapPath = ws.updWrapPoint1().getWrapPath();
+                wrapPath = wr.wrap_pts;
+
+                // not sure if this is necessary
+                ws.updWrapPoint2().getWrapPath().setSize(0);
+
+                ws.updWrapPoint1().setWrapLength(0.0);
+                ws.updWrapPoint1().setLocation(wr.r1);
+
+                // insert the resulting point from the ellipse at the correct position of the path
+                // for only one ellipse we can directly insert the point behind the origin point
+                path.insert(1, &ws.updWrapPoint1());
+
+                // for debug print out whole path
+                /**
+                for (int i_runner = 0; i_runner < path.getSize(); i_runner++) {
+                    std::cout << "Path Point " << i_runner << " = "
+                              << path.get(i_runner)->getLocationInGround(s)[0] << " "
+                              << path.get(i_runner)->getLocationInGround(s)[1] << " "
+                              << path.get(i_runner)->getLocationInGround(s)[2] << " "
+                              << std::endl;
+                }
+                */
 
                 /**
                         // get current ellipse, assuming the ellipses are order

@@ -93,6 +93,8 @@ protected:
             SimTK::Vec3& aPoint2, const PathWrap& aPathWrap,
             WrapResult& aWrapResult, bool& aFlag) const override;
 
+    double pathLengthTroughEllipse(double s01, SimTK::Vec3 P) const;
+
     int neglect_ellipse(SimTK::Vec3& aPoint1, SimTK::Vec3& aPoint2) const;
 
     /// Implement generateDecorations to draw geometry in visualizer

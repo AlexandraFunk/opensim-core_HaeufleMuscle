@@ -223,32 +223,28 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
         SimTK::Vec3& aPoint2,
         const PathWrap& aPathWrap, WrapResult& aWrapResult, bool& aFlag) const 
 {
-    // 1. Umrechnung der Points 1 und 2 in deflection frame
-    // 2. neglect ellipse? -> ja? -> return pfadpunkt ist erstmal attachmentpoint und noWrap
-    // 3. -> Nein -> wo liegt der Umlenkpunkt?
-    // 4. ellipse ist eig ein Kreis -> analytische L�sung udeflection zeile 660 - 667
-    // 5. ellipse ist ellipse -> numerische L�sung in calc_single_ellipse_numeric
-
     double tmp, theta;
     SimTK::Vec3 e_x, e_y, e_z, M, M_defl(0., 0., 0.), G_defl(0., 0., 0.),
             H_defl(0., 0., 0.);
+    SimTK::Vec3 placeholder;
 
     SimTK::Vec3 H(0., 0., get_semi_axis_length_H());
     SimTK::Vec3 G(0., get_semi_axis_length_G(), 0.);
 
 
-    // start with calculation point 1 and point 2 into ellipse deflection frame for easier calculatio
+    // start with calculation point 1 and point 2 into ellipse deflection frame for easier calculation
     // aPoint1 and a Point2 -> defined in the ellipse frame
     // semi lengths g and h -> defined as scalars in the ellipse frame
-    
-    // TODO: is this correct??
     M = H - aPoint1;
 
     Mtx::Normalize(3, aPoint2 - aPoint1, e_x);
     Mtx::CrossProduct(aPoint2 - aPoint1, M, e_z);
 
     // if M is a point on line aPoint2aPoint1, ellipse is neglected
-    if (e_z == 0) { return 0; }
+    if (e_z == 0) { 
+        aFlag = false;
+        return 0; 
+    }
 
     Mtx::Normalize(3, e_z, e_z);
     Mtx::CrossProduct(e_z, e_x, e_y);
@@ -276,37 +272,98 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
         }
     }
 
-    if (abs(tmp) < 1.0) { return 0;}
+    if (abs(tmp) < 1.0) { 
+        aFlag = false;
+        return 0;
+    }
     // else not necessary since from here ellipse is not neglected
 
-    SimTK::Vector phi1;
-    
-    // zu testzwecken
-    if (M_defl[1] == 0) {
+    double phi = 0;
+    double G_norm = Mtx::Normalize(3, G_defl, placeholder);
+    double H_norm = Mtx::Normalize(3, H_defl, placeholder);
+    double error = 2.0e-3;
+    double s01 = Mtx::Normalize(3, aPoint2 - aPoint1, placeholder);
+    SimTK::Vec3 P_defl(0., 0., 0.);
 
+    // first check if ellipse is basically a circle -> calculation is
+    // much easier
+    if (abs(G_norm - H_norm) < error) {
+        if (H_defl[1] == 0) { 
+            double phi1 = SimTK::Pi / 2.0;
+            double phi2 = 3 * SimTK::Pi / 2.0;
+            SimTK::Vec3 P1 =
+                    M_defl + G_defl * sin(phi1) - H_defl * cos(phi1);
+            SimTK::Vec3 P2 =
+                    M_defl + G_defl * sin(phi2) - H_defl * cos(phi2);
+            double len1 = pathLengthTroughEllipse(s01, P1);
+            double len2 = pathLengthTroughEllipse(s01, P2);
+            phi = (len1 > len2) ? phi2 : phi1;
+        } else {
+            double phi1 = atan(-G_defl[1] / H_defl[1]);
+            double phi2 = atan(-G_defl[1] / H_defl[1]) + SimTK::Pi;
+            SimTK::Vec3 P1 =
+                    M_defl + G_defl * sin(phi1) - H_defl * cos(phi1);
+            SimTK::Vec3 P2 =
+                    M_defl + G_defl * sin(phi2) - H_defl * cos(phi2);
+            double len1 = pathLengthTroughEllipse(s01, P1);
+            double len2 = pathLengthTroughEllipse(s01, P2);
+            phi = (len1 > len2) ? phi2 : phi1;
+        }
     } else {
-        SimTK::Vec3 placeholder;
-        double G_norm = Mtx::Normalize(3, G_defl, placeholder);
-        double H_norm = Mtx::Normalize(3, H_defl, placeholder);
-        double error = 2.0e-3;
-        if ((abs(G_defl[0]) + abs(H_defl[0])) <
-                error * (G_norm + H_norm - 1.0)) {
-            // first check if ellipse is basically a circle -> calculation is
-            // much easier
-            if (abs(G_norm - H_norm) < error) {
-                if (H_defl[1] == 0) { 
-                    //push_back_vec()
-                }
+        // From here numerically calculation of shortest path
+        // find starting point on ellipse (phi=0,pi,pi/2 or 3*pi/2)
+        P_defl = M_defl + G_defl * sin(0.0) - H_defl * cos(0.0);
+        double min_length = pathLengthTroughEllipse(s01, P_defl);
+        double len_h1 = 0.0, len_h2 = 0.0, Alpha = SimTK::Pi / 2;
+
+        for (int i = 1; i < 4; i++) {
+            P_defl = M_defl + G_defl * sin(SimTK::Pi / 2 * i) -
+                H_defl * cos(SimTK::Pi / 2 * i);
+            len_h1 = pathLengthTroughEllipse(s01, P_defl);
+            if (len_h1 < min_length) {
+                min_length = len_h1;
+                phi = SimTK::Pi / 2 * i;
             }
         }
+        while (Alpha > 0.01) { // error of phi > 0.01 
+            P_defl = M_defl + G_defl * sin(phi - Alpha) - H_defl * cos(phi - Alpha);
+            len_h1 = pathLengthTroughEllipse(s01, P_defl);
+            P_defl = M_defl + G_defl * sin(phi + Alpha) - H_defl * cos(phi + Alpha);
+            len_h2 = pathLengthTroughEllipse(s01, P_defl);
 
-    
+            if (len_h1 < min_length) { 
+                phi -= Alpha;
+                min_length = len_h1;
+            }
+            if (len_h2 < min_length) {
+                phi += Alpha;
+                min_length = len_h2;
+            }
+            Alpha /= 2;
+        }            
     }
 
+    // shortest point on ellipse surface
+    //SimTK::Vec3 P = H + G * sin(phi) - H * cos(phi);
 
+    // recalculate P_defl into ellipse frame and add it to wrap_pts array
+    aWrapResult.wrap_pts.insert(0, H + G * sin(phi) - H * cos(phi));
+
+    // fill r1 and r2 of WrapResult with NaN value to check if they are used
+    aWrapResult.r1 = H + G * sin(phi) - H * cos(phi);
+    aWrapResult.r2 = SimTK::Vec3(SimTK::NaN, SimTK::NaN, SimTK::NaN);
+
+    aFlag = true;
     return 1;
 }
 
+// calculates the path length with one deflecting ellipse
+double WrapViaEllipse::pathLengthTroughEllipse(
+    double s01, SimTK::Vec3 P) const {
+    SimTK::Vec3 placeholder;
+    double p_norm = Mtx::Normalize(3, P, placeholder);
+    return p_norm + sqrt(pow(P[0] - s01, 2) + pow(P[1], 2) + pow(P[2], 2));
+}
 
 int WrapViaEllipse::neglect_ellipse(
     SimTK::Vec3& aPoint1, SimTK::Vec3& aPoint2) const 
