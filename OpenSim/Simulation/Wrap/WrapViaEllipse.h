@@ -65,6 +65,13 @@ public:
             "Ellipse semi-axis length in y-Direction of the ellipse reference "
             "frame.");
 
+//==============================================================================
+// OUTPUTS
+//==============================================================================
+    OpenSim_DECLARE_OUTPUT(angleOnEllipse, double, getAngleOnEllipse,
+            SimTK::Stage::Velocity); // TODO does this work with this stage?
+
+
 public:
 //=============================================================================
 // METHODS
@@ -88,7 +95,21 @@ public:
     const double getSemiAxisLengthG() const;
     void setSemiAxisLengthG(double aSemiAxisLengthG);
 
+    double getAngleOnEllipse(const SimTK::State& s) const;
+
 protected:
+    struct ViaEllipsePlottingInfos;
+    const ViaEllipsePlottingInfos& getViaEllipsePlottingInfos(const SimTK::State& s) const;
+
+    struct ViaEllipsePlottingInfos {
+        double phi;
+
+        ViaEllipsePlottingInfos() : phi(SimTK::NaN){};
+    };
+
+    mutable CacheVariable<WrapViaEllipse::ViaEllipsePlottingInfos>
+            _viaEllipseInfoCV;
+
     int wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
             SimTK::Vec3& aPoint2, const PathWrap& aPathWrap,
             WrapResult& aWrapResult, bool& aFlag) const override;
@@ -104,6 +125,7 @@ protected:
             const override;
 
     void extendFinalizeFromProperties() override;
+    void extendAddToSystem(SimTK::MultibodySystem& system) const override;
 
 private:
     void constructProperties();

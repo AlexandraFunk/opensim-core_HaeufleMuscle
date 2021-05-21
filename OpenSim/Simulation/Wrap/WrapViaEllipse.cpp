@@ -80,6 +80,14 @@ void WrapViaEllipse::extendFinalizeFromProperties()
             "Semi axis length G cannot be less than zero");
 }
 
+void WrapViaEllipse::extendAddToSystem(SimTK::MultibodySystem& system) const 
+{
+    Super::extendAddToSystem(system);
+
+    this->_viaEllipseInfoCV = addCacheVariable("viaEllipsePlottingInfos",
+            ViaEllipsePlottingInfos(), SimTK::Stage::Velocity);
+}
+
 const double WrapViaEllipse::getSemiAxisLengthH() const 
 {
     return get_semi_axis_length_H();
@@ -98,6 +106,23 @@ const double WrapViaEllipse::getSemiAxisLengthG() const
 void WrapViaEllipse::setSemiAxisLengthG(double aSemiAxisLengthG) 
 {
     set_semi_axis_length_G(aSemiAxisLengthG);
+}
+
+double WrapViaEllipse::getAngleOnEllipse(const SimTK::State& s) const {
+    return getViaEllipsePlottingInfos(s).phi;
+}
+
+const WrapViaEllipse::ViaEllipsePlottingInfos&
+WrapViaEllipse::getViaEllipsePlottingInfos(const SimTK::State& s) const {
+    if (isCacheVariableValid(s, _viaEllipseInfoCV)) {
+        return getCacheVariableValue(s, _viaEllipseInfoCV);
+    }
+
+    /* not valid variable */
+    ViaEllipsePlottingInfos& umdi = updCacheVariableValue(s, _viaEllipseInfoCV);
+    //calcMuscleDynamicsInfo(s, umdi);
+    //markCacheVariableValid(s, _viaEllipseInfoCV);
+    return umdi;
 }
 
 
@@ -344,7 +369,18 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
     }
 
     // shortest point on ellipse surface
-    //SimTK::Vec3 P = H + G * sin(phi) - H * cos(phi);
+    //SimTK::Vec3 P = H + G * sin(phi) - H * cos(phi); 
+
+   
+    ViaEllipsePlottingInfos& myInfos =
+            updCacheVariableValue(s, _viaEllipseInfoCV);
+    // populate struct into Plotting Infos
+    myInfos.phi = phi;
+    markCacheVariableValid(s, _viaEllipseInfoCV);
+    
+    // Debug
+    //std::cout << "Phi: " << getAngleOnEllipse(s) << std::endl;
+    //std::cout << "Phi calculated: " << phi << std::endl;
 
     // recalculate P_defl into ellipse frame and add it to wrap_pts array
     aWrapResult.wrap_pts.insert(0, H + G * sin(phi) - H * cos(phi));
