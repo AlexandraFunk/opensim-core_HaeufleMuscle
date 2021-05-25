@@ -112,6 +112,18 @@ double WrapViaEllipse::getAngleOnEllipse(const SimTK::State& s) const {
     return getViaEllipsePlottingInfos(s).phi;
 }
 
+double WrapViaEllipse::getDeflectionPointX(const SimTK::State& s) const {
+    return getViaEllipsePlottingInfos(s).deflectionPoint[0];
+}
+
+double WrapViaEllipse::getDeflectionPointY(const SimTK::State& s) const {
+    return getViaEllipsePlottingInfos(s).deflectionPoint[1];
+}
+
+double WrapViaEllipse::getDeflectionPointZ(const SimTK::State& s) const {
+    return getViaEllipsePlottingInfos(s).deflectionPoint[2];
+}
+
 const WrapViaEllipse::ViaEllipsePlottingInfos&
 WrapViaEllipse::getViaEllipsePlottingInfos(const SimTK::State& s) const {
     if (isCacheVariableValid(s, _viaEllipseInfoCV)) {
@@ -376,6 +388,7 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
             updCacheVariableValue(s, _viaEllipseInfoCV);
     // populate struct into Plotting Infos
     myInfos.phi = phi;
+    myInfos.deflectionPoint = H + G * sin(phi) - H * cos(phi);
     markCacheVariableValid(s, _viaEllipseInfoCV);
     
     // Debug

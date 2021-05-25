@@ -69,8 +69,16 @@ public:
 // OUTPUTS
 //==============================================================================
     OpenSim_DECLARE_OUTPUT(angleOnEllipse, double, getAngleOnEllipse,
-            SimTK::Stage::Velocity); // TODO does this work with this stage?
+            SimTK::Stage::Velocity);
 
+    OpenSim_DECLARE_OUTPUT(deflectionPointX, double, getDeflectionPointX,
+        SimTK::Stage::Velocity);
+    
+    OpenSim_DECLARE_OUTPUT(deflectionPointY, double, getDeflectionPointY,
+            SimTK::Stage::Velocity);
+    
+    OpenSim_DECLARE_OUTPUT(deflectionPointZ, double, getDeflectionPointZ,
+            SimTK::Stage::Velocity);
 
 public:
 //=============================================================================
@@ -96,6 +104,9 @@ public:
     void setSemiAxisLengthG(double aSemiAxisLengthG);
 
     double getAngleOnEllipse(const SimTK::State& s) const;
+    double getDeflectionPointX(const SimTK::State& s) const;
+    double getDeflectionPointY(const SimTK::State& s) const;
+    double getDeflectionPointZ(const SimTK::State& s) const;
 
 protected:
     struct ViaEllipsePlottingInfos;
@@ -103,8 +114,11 @@ protected:
 
     struct ViaEllipsePlottingInfos {
         double phi;
+        SimTK::Vec3 deflectionPoint;
 
-        ViaEllipsePlottingInfos() : phi(SimTK::NaN){};
+        ViaEllipsePlottingInfos() : 
+            phi(SimTK::NaN), 
+            deflectionPoint(SimTK::NaN){};
     };
 
     mutable CacheVariable<WrapViaEllipse::ViaEllipsePlottingInfos>
