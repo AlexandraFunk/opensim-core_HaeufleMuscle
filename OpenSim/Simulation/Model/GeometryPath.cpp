@@ -908,13 +908,23 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
                 PathWrap& ws = get_PathWrapSet().get(i);
                 const WrapObject* wo = ws.getWrapObject();
                 ws.updWrapPoint1().setLocation(wo->get_translation());
-                points.insert(i, &ws.updWrapPoint1());
+                points.insert(i+1, &ws.updWrapPoint1());
                 // Reset wrap path point
                 ws.updWrapPoint1().getWrapPath().setSize(0);
             }
         }
         // add insertion point to the wrapping point array
         points.insert(N_Ell + 1, path.get(path.getSize() - 1));
+
+        /*
+        // DEBUG Print all points:
+        for (int u = 0; u < points.getSize(); u++) { 
+            std::cout << "Point number" << u << ":"
+                      << points.get(u)->getLocation(s)
+                      << std::endl;
+        }
+        */
+        
 
         Array<int> active_ellipses; // here are only the ellipses present which do not lay at the muscle insertion point
         active_ellipses.setSize(N_Ell);
@@ -970,12 +980,12 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
             }
         }
         int counter = 0;
-        for (int i = 1; i <= N_Ell; i++) {
+        for (int i = 0; i < N_Ell; i++) {
             if (active_ellipses[i] == 1) {
                 // insert the resulting points from the ellipse at the correct
                 // position of the path if the ellipse is non-neglected
                 counter++;
-                path.insert(counter, points.get(i));
+                path.insert(counter, points.get(i+1));
             }
         }
         return;
