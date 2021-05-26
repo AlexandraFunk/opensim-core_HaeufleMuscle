@@ -865,46 +865,7 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
 {
     if (get_PathWrapSet().getSize() < 1) { return; }
 
-    // generate different wrapping algorithm from Hammer et al 2019
-
-    // 1. Check for all WrapObjects in the set if they are of the HammerEllipse Type
-    // if not continue with code below
-    // if yes continue with code from umuscle (Hammer wrapping algorithm)
-    // 2. Set all ellipses from PathWrapSet to active 
-    // 3. ??? was wird hier in udeflection Zeile 960 -975 gemacht?
-    // 4. loop up to 8 times:
-    // 5a. check if one or more ellipses can be neglected
-    // (5b. if two or more ellipses are neglected, check again) // is not implemented here
-    // 5c. ??? was passiert in udeflection in Zeile 1016-1040?
-    // 5d. if only one ellipse is active -> calc short path single ellipse and check if ellipse can be neglected
-    // 6a. calc shortest path of single ellipses
-    // 6b. ??? was macht code in udeflection ganz am Ende?
-
-    
-        // TODO: find OpenSim equivalent for:
-    //  - path position  =
-    //          path der übergeben wird ist Array<AbstractPathPoint*> und
-    //          enthält alle active fixed and moving via points of the path From
-    //          Path_point_set?
-    //  - ellipses vector = get_PathWrapSet()
-    // AbstractPathPoint* orgPoint = path[0];
-    // AbstractPathPoint* insPoint = path[path.getSize() - 1];
-    // getParentFrame? getLocation?
-    // TODO: Hier G und H global berechnen aus HalbachsenLängen G und H
-    // TODO: aus G und H Global g und h local für deflection siehe neglect
-    // ellipse!! Objecte haben am besten Parameter für derzeitiges lokales
-    // Frame
-    //
-    //    Funktion für WrapObject mit Übergabe Globale Parameter und in
-    //    Funktion neglect Ellipse und Berechnung lokales Frame
-    // TODO find out which frame all these variables are in and then find
-    // out how to convert them into the ellipsoid frame getFrame -> welches
-    // Frame ist das? Body frame oder Ellipsen frame? Und dann wie auf
-    // Ellipsen Frame rückschließen in welchem Frame sind die Path punkte??
-    // path[1]->getParentFrame();
-
- 
-
+    // Via Ellipse wrapping algorithm from Hammer et al 2019 
     // check if all WrapObjects in this PathWrapSet are from Type HammerEllipse
     bool useViaEllipseAlgorithm = true;
     for (int i = 0; i < get_PathWrapSet().getSize(); i++) {
@@ -916,6 +877,11 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
     }
 
     if (useViaEllipseAlgorithm) {
+        // create an array which holds all ellipse points which are not neglected
+        Array<AbstractPathPoint*> points;
+        // add muscles origin point
+        points.insert(0, path.get(0));
+
         // neglect ellipses which lay directly at origin and insertion
         int N_Ell = get_PathWrapSet().getSize();
         for (int i = 0; i < get_PathWrapSet().getSize(); i++) { 
@@ -935,112 +901,86 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
             SimTK::Vec3 ell_point = wo->get_translation();
             if (ell_point == pt1 || ell_point == pt2) { 
                 N_Ell--;
+            } else {
+                // for starting the wrapping algorithm in the first step:
+                // assuming the wrapping is done with all ellipses and always at
+                // the r_attachment point of the ellipse
+                PathWrap& ws = get_PathWrapSet().get(i);
+                const WrapObject* wo = ws.getWrapObject();
+                ws.updWrapPoint1().setLocation(wo->get_translation());
+                points.insert(i, &ws.updWrapPoint1());
+                // Reset wrap path point
+                ws.updWrapPoint1().getWrapPath().setSize(0);
             }
         }
-        Array<bool> active_ellipses; // here are only the ellipses present which do not lay at the muscle insertion point
+        // add insertion point to the wrapping point array
+        points.insert(N_Ell + 1, path.get(path.getSize() - 1));
+
+        Array<int> active_ellipses; // here are only the ellipses present which do not lay at the muscle insertion point
         active_ellipses.setSize(N_Ell);
 
-
-        // first set all wrapobjects to active
-        for (int i = 0; i < get_PathWrapSet().getSize(); i++) {
-            active_ellipses[i] = true;
+        // first set all wrapobjects (ellipses) to active
+        for (int i = 0; i < N_Ell; i++) {
+            active_ellipses[i] = 1;
         }
-        int numEll = active_ellipses.getSize();
-        
-        
-        //SimTK::Vector ne(numEll, 1);
-        //SimTK::Vector phi(numEll, 1);
 
-        // If there is only one wrap object, calculate the wrapping only once.
+        // If there is only one non-neglected wrap object, calculate the wrapping 
+        // only once.
         // If there are two or more objects, perform up to 8 iterations
         // where the result from one wrap object is used as the starting
         // point for the next wrap.
-        const int maxIterations = get_PathWrapSet().getSize() < 2 ? 1 : 8;
-
-
-        //FÜR SPÄTER NUTZEN WENN MEHR ALS NUR EINE ELLIPSE BERECHNET WERDEN SOLL
-
-        // for starting the wrapping algorithm in the first step: 
-        // assuming the wrapping is done with all ellipses and always at
-        // the r_attachment point of the ellipse 
-        // -> add this points to a vector to have them stored there        
-        Array<AbstractPathPoint*> points;
-        points.insert(0, path.get(0));
-        for (int i = 0; i < numEll; i++) {
-            PathWrap& ws = get_PathWrapSet().get(i);
-            const WrapObject* wo = ws.getWrapObject();
-            ws.updWrapPoint1().setLocation(wo->get_translation());
-            points.insert(i, &ws.updWrapPoint1());
-            // Reset wrap path point
-            ws.updWrapPoint1().getWrapPath().setSize(0);
-        }
-        points.insert(numEll+1, path.get(path.getSize() - 1));
+        const int maxIterations = N_Ell < 2 ? 1 : 8;
 
         for (int kk = 0; kk < maxIterations; kk++) {
-            // first check which ellipses can be neglected
-            for (int i = 0; i < numEll; i++) {
-                // assume there is only one ellipse at the moment
+            // iterate through all non-neglected ellipses
+            for (int i = 0; i < N_Ell; i++) {
                 PathWrap& ws = get_PathWrapSet().get(i);
                 const WrapObject* wo = ws.getWrapObject();
 
-                // get muscles origin and insertion points
-                //AbstractPathPoint& pt1 = *path.get(i);
-                //AbstractPathPoint& pt2 = *path.get(path.getSize() - 1);
+                // update points to get the correct ellipse 
                 AbstractPathPoint& pt1 = *points.get(i);
-                AbstractPathPoint& pt2 = *points.get(i + 1);
+                AbstractPathPoint& pt2 = *points.get(i + 2);
 
                 WrapResult wr;
-
                 wr.wrap_pts.setSize(0);
-
                 active_ellipses[i] = wo->wrapPathSegment(s, pt1, pt2, ws, wr);
 
-                // If wrapping did occur, copy wrap info into the PathStruct.
-                Array<SimTK::Vec3>& wrapPath = ws.updWrapPoint1().getWrapPath();
-                wrapPath = wr.wrap_pts;
+                // if ellipse is not neglected
+                if (active_ellipses[i] == 1) {
+                    // not sure if this is necessary
+                    // If wrapping did occur, copy wrap info into the
+                    // PathStruct.
+                    Array<SimTK::Vec3>& wrapPath =
+                            ws.updWrapPoint1().getWrapPath();
+                    wrapPath = wr.wrap_pts;
+                    ws.updWrapPoint2().getWrapPath().setSize(0);
 
-                // not sure if this is necessary
-                ws.updWrapPoint2().getWrapPath().setSize(0);
+                    ws.updWrapPoint1().setWrapLength(0.0);
+                    ws.updWrapPoint1().setLocation(wr.r1);
 
-                ws.updWrapPoint1().setWrapLength(0.0);
-                ws.updWrapPoint1().setLocation(wr.r1);
-
-                // insert the resulting point from the ellipse at the correct position of the path
-                // for only one ellipse we can directly insert the point behind the origin point
-                path.insert(1, &ws.updWrapPoint1());
-
-                // Convert the path points from the frames of the bodies they
-                // are attached to, to the frame of the wrap object's body
-                /**pt1 = aPoint1.getParentFrame()
-                              .findStationLocationInAnotherFrame(
-                                      s, aPoint1.getLocation(s), getFrame());
-
-                pt2 = aPoint2.getParentFrame()
-                              .findStationLocationInAnotherFrame(
-                                      s, aPoint2.getLocation(s), getFrame());
-
-                // Convert the path points from the frame of the wrap object's
-                // body into the frame of the wrap object
-                pt1 = _pose.shiftBaseStationToFrame(pt1);
-                pt2 = _pose.shiftBaseStationToFrame(pt2);
-
-
-                // Frame, the points are defined in
-                path[1]->getParentFrame();
-                // Frame from the wrapping object
-                wo->getFrame();
-                **/
-                // TODO: calculate sum of actual active Ellipses
-                // TODO: nochmal durch alle ellipsen iterieren und was machen??
-                // TODO: if else bedingung ob nur eine oder mehrere Ellipsen
-                // aktiv sind
+                    // update the PathPoints inside the points array
+                    points.set(i+1, &ws.updWrapPoint1());
+                } else {
+                    // set Wrap Point 1 back to r attachment point
+                    ws.updWrapPoint1().setLocation(wo->get_translation());
+                    points.set(i+1, &ws.updWrapPoint1());
+                    // Reset wrap path point
+                    ws.updWrapPoint1().getWrapPath().setSize(0);
+                }
             }
-            return;
         }
-    }
+        int counter = 0;
+        for (int i = 1; i <= N_Ell; i++) {
+            if (active_ellipses[i] == 1) {
+                // insert the resulting points from the ellipse at the correct
+                // position of the path if the ellipse is non-neglected
+                counter++;
+                path.insert(counter, points.get(i));
+            }
+        }
+        return;
 
-
-
+    } // END OF VIA ELLIPSE ALGORITHM
 
 
 
