@@ -221,7 +221,7 @@ void WrapViaEllipse::generateDecorations(bool fixed, const ModelDisplayHints& hi
         * not change the behaviour of the algorithm.
         **/
         const Vec3 ellipsoidShape =
-                Vec3(0.01, getSemiAxisLengthG(), getSemiAxisLengthH());
+                Vec3(0.01, getSemiAxisLengthH(), getSemiAxisLengthG());
         appendToThis.push_back(
             SimTK::DecorativeEllipsoid(ellipsoidShape)
             .setTransform(X_BP).setResolution(2.0)
@@ -265,8 +265,8 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
             H_defl(0., 0., 0.);
     SimTK::Vec3 placeholder;
 
-    SimTK::Vec3 H(0., 0., get_semi_axis_length_H());
-    SimTK::Vec3 G(0., get_semi_axis_length_G(), 0.);
+    SimTK::Vec3 H(0., get_semi_axis_length_H(), 0.);
+    SimTK::Vec3 G(0., 0., -get_semi_axis_length_G());
 
 
     // start with calculation point 1 and point 2 into ellipse deflection frame for easier calculation
