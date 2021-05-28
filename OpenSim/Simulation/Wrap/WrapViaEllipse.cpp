@@ -231,31 +231,6 @@ void WrapViaEllipse::generateDecorations(bool fixed, const ModelDisplayHints& hi
     }
 }
 
-/**
-* Old stuff which is not used anymore
-* 
-int WrapViaEllipse::neglectWrapObject(const SimTK::State& state,
-        SimTK::Vec3 aPoint1, SimTK::Vec3 aPoint2, const PathWrap& aPathWrap,
-        WrapResult& aWrapResult) const {
-    Vec3 pt1(0.0);
-    Vec3 pt2(0.0);
-
-    // Convert the path points from the frames of the bodies they are attached
-    // to, to the frame of the wrap object's body
-    pt1 = aPoint1.getParentFrame().findStationLocationInAnotherFrame(
-            state, aPoint1.getLocation(s), getFrame());
-
-    pt2 = aPoint2.getParentFrame().findStationLocationInAnotherFrame(
-            state, aPoint2.getLocation(s), getFrame());
-
-    // Convert the path points from the frame of the wrap object's body
-    // into the frame of the wrap object
-    pt1 = _pose.shiftBaseStationToFrame(pt1);
-    pt2 = _pose.shiftBaseStationToFrame(pt2);
-
-    return 0;
-}
-*/
 int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
         SimTK::Vec3& aPoint2,
         const PathWrap& aPathWrap, WrapResult& aWrapResult, bool& aFlag) const 
@@ -381,25 +356,20 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
     }
 
     // shortest point on ellipse surface
-    //SimTK::Vec3 P = H + G * sin(phi) - H * cos(phi); 
-
+    SimTK::Vec3 pointOnEllipse = H + G * sin(phi) - H * cos(phi); 
    
     ViaEllipsePlottingInfos& myInfos =
             updCacheVariableValue(s, _viaEllipseInfoCV);
     // populate struct into Plotting Infos
     myInfos.phi = phi;
-    myInfos.deflectionPoint = H + G * sin(phi) - H * cos(phi);
+    myInfos.deflectionPoint = pointOnEllipse;
     markCacheVariableValid(s, _viaEllipseInfoCV);
-    
-    // Debug
-    //std::cout << "Phi: " << getAngleOnEllipse(s) << std::endl;
-    //std::cout << "Phi calculated: " << phi << std::endl;
 
     // recalculate P_defl into ellipse frame and add it to wrap_pts array
-    aWrapResult.wrap_pts.insert(0, H + G * sin(phi) - H * cos(phi));
+    aWrapResult.wrap_pts.insert(0, pointOnEllipse);
 
     // fill r1 and r2 of WrapResult with NaN value to check if they are used
-    aWrapResult.r1 = H + G * sin(phi) - H * cos(phi);
+    aWrapResult.r1 = pointOnEllipse;
     aWrapResult.r2 = SimTK::Vec3(SimTK::NaN, SimTK::NaN, SimTK::NaN);
 
     aFlag = true;
@@ -412,60 +382,4 @@ double WrapViaEllipse::pathLengthTroughEllipse(
     SimTK::Vec3 placeholder;
     double p_norm = Mtx::Normalize(3, P, placeholder);
     return p_norm + sqrt(pow(P[0] - s01, 2) + pow(P[1], 2) + pow(P[2], 2));
-}
-
-int WrapViaEllipse::neglect_ellipse(
-    SimTK::Vec3& aPoint1, SimTK::Vec3& aPoint2) const 
-{
-   /** int neg;
-    double tmp, theta;
-    SimTK::Vec3 M, s1, s0, e_x, e_z, e_z_norm, e_x_norm, e_y_norm, g(0.0,0.0,0.0), h(0.0,0.0,0.0);
-
-    SimTK::Vec3 G = getSemiAxisLengthG(); // G und H in jedem Schritt aus double Werten berechnen
-    SimTK::Vec3 H = getSemiAxisLengthH();
-    
-    M = get_translation() + H - aPoint1;
-    s1 = aPoint2 - aPoint1;
-    s0 = aPoint1 - aPoint1;
-    e_x = s1;
-    Mtx::CrossProduct(s1, M, e_z);
-    double mag = Mtx::Normalize(3, e_z, e_z_norm);
-    if (mag == 0) {
-        neg = 0;
-    } // if M is a point on line s0s1, ellipse is neglected
-    else {
-        Mtx::Normalize(3, e_x, e_x_norm);
-        Mtx::CrossProduct(e_z_norm, e_x_norm, e_y_norm);
-
-        // transformation in coordinate system defined by: x-axis along (s1-s0),
-        // y-axis such that m_z=0, center of ccord. system at s0
-        // x- and y-component of M=(rEll+H-s0) in new coordinate system:
-        double m_y = Mtx::DotProduct(3, M, e_y_norm);
-        // x-, y- and z-components of G and H in new coordinate system
-        g[1] = Mtx::DotProduct(3, e_y_norm, G);
-        h[1] = Mtx::DotProduct(3, e_y_norm, H);
-        g[2] = Mtx::DotProduct(3, e_z_norm, G);
-        h[2] = Mtx::DotProduct(3, e_z_norm, H);
-
-        // calculate whether s0s1 goes through the ellipse (neg=0) or passes it
-        // (neg=1)
-        if (h[2] == 0) { 
-            tmp = m_y / h[1];
-        } else {
-            if (g[2] == 0) { 
-                tmp = -m_y / g[1];
-            } else {
-                theta = atan(h[2] / g[2]);
-                tmp = -m_y / sin(theta) / (g[1] - h[1] * g[2] / h[2]);
-            }
-        }
-
-        if (abs(tmp) < 1.0) { 
-            neg = 0;
-        } else {
-            neg = 1;
-        }
-    } **/
-    int neg = 0;
-    return neg;
 }
