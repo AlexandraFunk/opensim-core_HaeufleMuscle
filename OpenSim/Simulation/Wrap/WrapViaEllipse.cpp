@@ -212,7 +212,16 @@ void WrapViaEllipse::generateDecorations(bool fixed, const ModelDisplayHints& hi
         if (!defaultAppearance.get_visible()) return;
         const Vec3 color = defaultAppearance.get_color();
 
-        const auto X_BP = calcWrapGeometryTransformInBaseFrame();
+        /** 
+        * since DecorativeEllipsoid function generates a ellipsoid around the 
+        * center of the ellipse frame, which is basically defied as the rattachment
+        * point. Therefore, we need to shift the ellipse frame to the real center 
+        * of the ellipse, which lays the amount of the semi axis length H in 
+        * positive y-direction.
+        **/ 
+        SimTK::Transform translation_to_ell_center(SimTK::Vec3(0., get_semi_axis_length_H(), 0.));
+        const SimTK::Transform X_BP = calcWrapGeometryTransformInBaseFrame() *
+                                      translation_to_ell_center;
         /**
         * create decorative Ellipsoid since there is no decorative ellipse
         * available in SimTK. Here we just assume that the x dimension of the
@@ -221,9 +230,7 @@ void WrapViaEllipse::generateDecorations(bool fixed, const ModelDisplayHints& hi
         * not change the behaviour of the algorithm.
         **/
         const Vec3 ellipsoidShape =
-                Vec3(0.01, getSemiAxisLengthH(), getSemiAxisLengthG());
-
-        // TODO ellipse wird mit translation als mittelpunkt aufgebaut, sollte aber rattachment point sein
+                Vec3(0.001, getSemiAxisLengthH(), getSemiAxisLengthG());
 
         appendToThis.push_back(
             SimTK::DecorativeEllipsoid(ellipsoidShape)
