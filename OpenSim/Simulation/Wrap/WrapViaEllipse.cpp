@@ -222,6 +222,9 @@ void WrapViaEllipse::generateDecorations(bool fixed, const ModelDisplayHints& hi
         **/
         const Vec3 ellipsoidShape =
                 Vec3(0.01, getSemiAxisLengthH(), getSemiAxisLengthG());
+
+        // TODO ellipse wird mit translation als mittelpunkt aufgebaut, sollte aber rattachment point sein
+
         appendToThis.push_back(
             SimTK::DecorativeEllipsoid(ellipsoidShape)
             .setTransform(X_BP).setResolution(2.0)
@@ -239,6 +242,7 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
     SimTK::Vec3 e_x, e_y, e_z, M, M_defl(0., 0., 0.), G_defl(0., 0., 0.),
             H_defl(0., 0., 0.);
     SimTK::Vec3 placeholder;
+    double phi = 0;
 
     SimTK::Vec3 H(0., get_semi_axis_length_H(), 0.);
     SimTK::Vec3 G(0., 0., -get_semi_axis_length_G());
@@ -286,11 +290,16 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
 
     if (abs(tmp) < 1.0) { 
         aFlag = false;
+        ViaEllipsePlottingInfos& myInfos =
+                updCacheVariableValue(s, _viaEllipseInfoCV);
+        // populate struct into Plotting Infos
+        myInfos.phi = phi;
+        myInfos.deflectionPoint = (0,0,0);
+        markCacheVariableValid(s, _viaEllipseInfoCV);
         return 0;
     }
     // else not necessary since from here ellipse is not neglected
 
-    double phi = 0;
     double G_norm = Mtx::Normalize(3, G_defl, placeholder);
     double H_norm = Mtx::Normalize(3, H_defl, placeholder);
     double error = 2.0e-3;

@@ -896,7 +896,7 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
             AbstractPathPoint& point2 = *path.get(path.getSize() - 1);
             SimTK::Vec3 pt2 =
                     point2.getParentFrame().findStationLocationInAnotherFrame(
-                            s, point1.getLocation(s), wo->getFrame());
+                            s, point2.getLocation(s), wo->getFrame());
             // ell_point is in body frame (same body frame like pt2 and pt1)
             SimTK::Vec3 ell_point = wo->get_translation();
             if (ell_point == pt1 || ell_point == pt2) { 
@@ -937,9 +937,26 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
                 PathWrap& ws = get_PathWrapSet().get(i);
                 const WrapObject* wo = ws.getWrapObject();
 
+                int passive_ell_after = 0;
+                for (int n = i+1; n < N_Ell; n++) { 
+                    if (active_ellipses[n] == 0) { 
+                        passive_ell_after++;
+                    } else {
+                        break;
+                    }
+                }
+                int passive_ell_before = 0;
+                for (int n = i-1; n >= 0; n--) {
+                    if (active_ellipses[n] == 0) {
+                        passive_ell_before++;
+                    } else {
+                        break;
+                    }
+                }
+
                 // update points to get the correct ellipse 
-                AbstractPathPoint& pt1 = *points.get(i);
-                AbstractPathPoint& pt2 = *points.get(i + 2);
+                AbstractPathPoint& pt1 = *points.get(i - passive_ell_before);
+                AbstractPathPoint& pt2 = *points.get(i + 2 + passive_ell_after);
 
                 WrapResult wr;
                 wr.wrap_pts.setSize(0);
