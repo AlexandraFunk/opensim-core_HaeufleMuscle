@@ -13,11 +13,12 @@ int main() {
     OpenSim::Body* radius  = new OpenSim::Body("radius",  1, Vec3(0), Inertia(0));
 
     SimTK::Vec3 translation1(0.1, 0.1, 0.15);
-    SimTK::Vec3 translation2(0.1, 0.1, 0.1);
-    SimTK::Vec3 xyz_body_rotation1(60.0 * SimTK::Pi / 180.0,
-            60.0 * SimTK::Pi / 180.0, 60.0 * SimTK::Pi / 180.0);
-    SimTK::Vec3 xyz_body_rotation2(
-            36.5 * SimTK::Pi / 180.0, 17.0 * SimTK::Pi / 180.0, 23.0 * SimTK::Pi / 180.0);
+    SimTK::Vec3 translation2(0.1, 0.8, 0.05);
+
+    SimTK::Vec3 xyz_body_rotation1(45.0 * SimTK::Pi / 180.0,
+            0.0, 90.0 * SimTK::Pi / 180.0);
+    SimTK::Vec3 xyz_body_rotation2(50.1489 * SimTK::Pi / 180.0,
+            1.72794 * SimTK::Pi / 180.0, 80.1489 * SimTK::Pi / 180.0);
 
     OpenSim::WrapViaEllipse* firstEllipse = new OpenSim::WrapViaEllipse();
     firstEllipse->setName("ViaEllipse01");
@@ -26,17 +27,17 @@ int main() {
     firstEllipse->set_translation(translation1);
     firstEllipse->set_xyz_body_rotation(xyz_body_rotation1);
 
-
+    
     OpenSim::WrapViaEllipse* secondEllipse = new OpenSim::WrapViaEllipse();
     secondEllipse->setName("ViaEllipse02");
-    secondEllipse->setSemiAxisLengthG(.05);
-    secondEllipse->setSemiAxisLengthH(.025);
+    secondEllipse->setSemiAxisLengthG(.01);
+    secondEllipse->setSemiAxisLengthH(.02);
     secondEllipse->set_translation(translation2);
-    secondEllipse->set_xyz_body_rotation(xyz_body_rotation1);
+    secondEllipse->set_xyz_body_rotation(xyz_body_rotation2);
     
 
     humerus->addWrapObject(firstEllipse);
-    humerus->addWrapObject(secondEllipse);
+    radius->addWrapObject(secondEllipse);
 
     // Connect the bodies with pin joints. Assume each body is 1 m long.
     PinJoint* shoulder = new PinJoint("shoulder",
@@ -95,17 +96,17 @@ int main() {
     model.addComponent(reporter);
 
     // Add display geometry.
-    Ellipsoid bodyGeometry(0.1, 0.5, 0.1);
-    bodyGeometry.setColor(Gray);
+    //Ellipsoid bodyGeometry(0.05, 0.05, 0.0);
+    //bodyGeometry.setColor(Gray);
     // Attach an ellipsoid to a frame located at the center of each body.
     PhysicalOffsetFrame* humerusCenter = new PhysicalOffsetFrame(
         "humerusCenter", *humerus, Transform(Vec3(0, 0.5, 0)));
     humerus->addComponent(humerusCenter);
-    humerusCenter->attachGeometry(bodyGeometry.clone());
+    //humerusCenter->attachGeometry(bodyGeometry.clone());
     PhysicalOffsetFrame* radiusCenter = new PhysicalOffsetFrame(
         "radiusCenter", *radius, Transform(Vec3(0, 0.5, 0)));
     radius->addComponent(radiusCenter);
-    radiusCenter->attachGeometry(bodyGeometry.clone());
+    //radiusCenter->attachGeometry(bodyGeometry.clone());
 
     // Configure the model.
     State& state = model.initSystem();
