@@ -937,6 +937,7 @@ applyWrapObjects(const SimTK::State& s, Array<AbstractPathPoint*>& path) const
                 PathWrap& ws = get_PathWrapSet().get(i);
                 const WrapObject* wo = ws.getWrapObject();
 
+                // sum up all (currently) passive ellipses before and after the current ellipse
                 int passive_ell_after = 0;
                 for (int n = i+1; n < N_Ell; n++) { 
                     if (active_ellipses[n] == 0) { 

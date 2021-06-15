@@ -353,7 +353,7 @@ int WrapViaEllipse::wrapLine(const SimTK::State& s, SimTK::Vec3& aPoint1,
                 phi = SimTK::Pi / 2 * i;
             }
         }
-        while (Alpha > 0.01) { // error of phi > 0.01 
+        while (Alpha > 0.005) { // error of phi > 0.005 
             P_defl = M_defl + G_defl * sin(phi - Alpha) - H_defl * cos(phi - Alpha);
             len_h1 = pathLengthTroughEllipse(s01, P_defl);
             P_defl = M_defl + G_defl * sin(phi + Alpha) - H_defl * cos(phi + Alpha);
