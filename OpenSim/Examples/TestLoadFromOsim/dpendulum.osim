@@ -115,9 +115,6 @@
 								<active>
 									true
 								</active>
-								<quadrant>
-									allQuadrants
-								</quadrant>
 								<semi_axis_length_H>
 									0.025000
 								</semi_axis_length_H>
@@ -125,719 +122,549 @@
 									0.050000
 								</semi_axis_length_G>
 							</WrapViaEllipse>
-							<groups>
-							</groups>
 						</objects>
-						<mass>
-							1.000000
-						</mass>
-						<mass_center>
-							0 0 0
-						</mass_center>
-						<inertia>
-							0.083433 0.000200 0.083433 0.000000 -0.000000 -0.000000
-						</inertia>
+						<groups>
+						</groups>
 					</WrapObjectSet>
-					<Body name="Ulna">
-						<components>
-							<PhysicalOffsetFrame name="Ulna_geom_frame_0">
-								<FrameGeometry name="frame_geometry">
+					<mass>
+						1.000000
+					</mass>
+					<mass_center>
+						0 0 0
+					</mass_center>
+					<inertia>
+						0.083433 0.000200 0.083433 0.000000 -0.000000 -0.000000
+					</inertia>
+				</Body>
+				<Body name="Ulna">
+					<components>
+						<PhysicalOffsetFrame name="Ulna_geom_frame_0">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>
+									..
+								</socket_frame>
+								<input_transform>
+									
+								</input_transform>
+								<scale_factors>
+									0.200000 0.200000 0.200000
+								</scale_factors>
+							</FrameGeometry>
+							<attached_geometry>
+								<Cylinder name="Ulna_cylinder_geom_0">
 									<socket_frame>
 										..
 									</socket_frame>
 									<input_transform>
 										
 									</input_transform>
+									<!--Default appearance attributes for this GeometryPath-->
+									<Appearance>
+										<!--Flag indicating whether the associated Geometry is visible or hidden-->
+										<visible>
+											true
+										</visible>
+										<!--The opacity used to display the geometry between 0:transparent, 1:opaque-->
+										<opacity>
+											1.000000
+										</opacity>
+										<!--The color, (red,green,blue), [0,1], used to display the geometry.-->
+										<color>
+											0.000000 0.990000 0.990000
+										</color>
+										<!--Visuals applied to surfaces associated with this Appearance.-->
+										<SurfaceProperties>
+											<!--The representation (1:Points, 2:Wire, 3:Shaded) used to display the object.-->
+											<representation>
+												3
+											</representation>
+										</SurfaceProperties>
+									</Appearance>
 									<scale_factors>
-										0.200000 0.200000 0.200000
+										1 1 1
 									</scale_factors>
-								</FrameGeometry>
-								<attached_geometry>
-									<Cylinder name="Ulna_cylinder_geom_0">
-										<socket_frame>
-											..
-										</socket_frame>
-										<input_transform>
-											
-										</input_transform>
-										<!--Default appearance attributes for this GeometryPath-->
-										<Appearance>
-											<!--Flag indicating whether the associated Geometry is visible or hidden-->
-											<visible>
-												true
-											</visible>
-											<!--The opacity used to display the geometry between 0:transparent, 1:opaque-->
-											<opacity>
-												1.000000
-											</opacity>
-											<!--The color, (red,green,blue), [0,1], used to display the geometry.-->
-											<color>
-												0.000000 0.990000 0.990000
-											</color>
-											<!--Visuals applied to surfaces associated with this Appearance.-->
-											<SurfaceProperties>
-												<!--The representation (1:Points, 2:Wire, 3:Shaded) used to display the object.-->
-												<representation>
-													3
-												</representation>
-											</SurfaceProperties>
-										</Appearance>
-										<scale_factors>
-											1 1 1
-										</scale_factors>
-										<radius>
-											0.020000
-										</radius>
-										<half_height>
-											0.500000
-										</half_height>
-									</Cylinder>
-								</attached_geometry>
-								<socket_parent>
-									..
-								</socket_parent>
-								<translation>
-									0.000000 0.500000 -0.000000
-								</translation>
-								<orientation>
-									0.000000 0.000000 -0.000000
-								</orientation>
-							</PhysicalOffsetFrame>
-						</components>
-						<!--Set of wrap objects fixed to this body that GeometryPaths can wrap over. This property used to be a member of Body but was moved up with the introduction of Frames.-->
-						<WrapObjectSet>
-							<!--List of components that this component owns and serializes-->
-							<components>
-							</components>
-							<objects>
-								<WrapViaEllipse name="Ell2_M_flexor">
-									<xyz_body_rotation>
-										0.875264 0.030158 1.398863
-									</xyz_body_rotation>
-									<translation>
-										0.100000 0.800000 0.050000
-									</translation>
-									<active>
-										true
-									</active>
-									<quadrant>
-										allQuadrants
-									</quadrant>
-									<semi_axis_length_H>
+									<radius>
 										0.020000
-									</semi_axis_length_H>
-									<semi_axis_length_G>
-										0.010000
-									</semi_axis_length_G>
-								</WrapViaEllipse>
-								<groups>
-								</groups>
-							</objects>
-							<mass>
-								1.000000
-							</mass>
-							<mass_center>
-								0 0 0
-							</mass_center>
-							<inertia>
-								0.083433 0.000200 0.083433 0.000000 -0.000000 -0.000000
-							</inertia>
-						</WrapObjectSet>
-					</Body>
+									</radius>
+									<half_height>
+										0.500000
+									</half_height>
+								</Cylinder>
+							</attached_geometry>
+							<socket_parent>
+								..
+							</socket_parent>
+							<translation>
+								0.000000 0.500000 -0.000000
+							</translation>
+							<orientation>
+								0.000000 0.000000 -0.000000
+							</orientation>
+						</PhysicalOffsetFrame>
+					</components>
+					<!--Set of wrap objects fixed to this body that GeometryPaths can wrap over. This property used to be a member of Body but was moved up with the introduction of Frames.-->
+					<WrapObjectSet>
+						<!--List of components that this component owns and serializes-->
+						<components>
+						</components>
+						<objects>
+							<WrapViaEllipse name="Ell2_M_flexor">
+								<xyz_body_rotation>
+									0.875264 0.030158 1.398863
+								</xyz_body_rotation>
+								<translation>
+									0.100000 0.800000 0.050000
+								</translation>
+								<active>
+									true
+								</active>
+								<semi_axis_length_H>
+									0.020000
+								</semi_axis_length_H>
+								<semi_axis_length_G>
+									0.010000
+								</semi_axis_length_G>
+							</WrapViaEllipse>
+						</objects>
+						<groups>
+						</groups>
+					</WrapObjectSet>
+					<mass>
+						1.000000
+					</mass>
+					<mass_center>
+						0 0 0
+					</mass_center>
+					<inertia>
+						0.083433 0.000200 0.083433 0.000000 -0.000000 -0.000000
+					</inertia>
 				</Body>
-				<JointSet name="jointset">
-					<objects>
-						<CustomJoint name="Joint_world->Humerus">
-							<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
-							<socket_parent_frame>
-								world_Joint_Humerus
-							</socket_parent_frame>
-							<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
-							<socket_child_frame>
-								Humerus_Joint_world
-							</socket_child_frame>
-							<coordinates>
-								<Coordinate name="Joint_world->Humerus_coord_0">
-									<default_value>
-										-0.000000
-									</default_value>
-									<default_speed_value>
-										0.000000
-									</default_speed_value>
-								</Coordinate>
-							</coordinates>
-							<frames>
-								<PhysicalOffsetFrame name="Humerus_Joint_world">
-									<FrameGeometry name="frame_geometry">
-										<socket_frame>
-											..
-										</socket_frame>
-										<input_transform>
-											
-										</input_transform>
-										<scale_factors>
-											0.200000 0.200000 0.200000
-										</scale_factors>
-									</FrameGeometry>
-									<socket_parent>
-										/bodyset/Humerus
-									</socket_parent>
-									<translation>
-										0.000000 1.000000 -0.000000
-									</translation>
-									<orientation>
-										0.000000 0.000000 -0.000000
-									</orientation>
-								</PhysicalOffsetFrame>
-								<PhysicalOffsetFrame name="world_Joint_Humerus">
-									<FrameGeometry name="frame_geometry">
-										<socket_frame>
-											..
-										</socket_frame>
-										<input_transform>
-											
-										</input_transform>
-										<scale_factors>
-											0.200000 0.200000 0.200000
-										</scale_factors>
-									</FrameGeometry>
-									<socket_parent>
-										/ground
-									</socket_parent>
-									<translation>
-										0.000000 0.000000 -0.000000
-									</translation>
-									<orientation>
-										0.000000 0.000000 -0.000000
-									</orientation>
-								</PhysicalOffsetFrame>
-							</frames>
-							<SpatialTransform>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="rotation1">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										Joint_world->Humerus_coord_0
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										0.000000 0.000000 1.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<LinearFunction name="function">
-										<coefficients>
-											1.000000 0.000000
-										</coefficients>
-									</LinearFunction>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="rotation2">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										0.000000 1.000000 0.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="rotation3">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										1.000000 0.000000 0.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="translation1">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										1.000000 0.000000 0.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="translation2">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										0.000000 1.000000 0.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="translation3">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										0.000000 0.000000 1.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-							</SpatialTransform>
-						</CustomJoint>
-						<CustomJoint name="Joint_Humerus->Ulna">
-							<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
-							<socket_parent_frame>
-								Humerus_Joint_Ulna
-							</socket_parent_frame>
-							<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
-							<socket_child_frame>
-								Ulna_Joint_Humerus
-							</socket_child_frame>
-							<coordinates>
-								<Coordinate name="Joint_Humerus->Ulna_coord_0">
-									<default_value>
-										-0.000000
-									</default_value>
-									<default_speed_value>
-										0.000000
-									</default_speed_value>
-								</Coordinate>
-							</coordinates>
-							<frames>
-								<PhysicalOffsetFrame name="Ulna_Joint_Humerus">
-									<FrameGeometry name="frame_geometry">
-										<socket_frame>
-											..
-										</socket_frame>
-										<input_transform>
-											
-										</input_transform>
-										<scale_factors>
-											0.200000 0.200000 0.200000
-										</scale_factors>
-									</FrameGeometry>
-									<socket_parent>
-										/bodyset/Ulna
-									</socket_parent>
-									<translation>
-										0.000000 1.000000 -0.000000
-									</translation>
-									<orientation>
-										0.000000 0.000000 -0.000000
-									</orientation>
-								</PhysicalOffsetFrame>
-								<PhysicalOffsetFrame name="Humerus_Joint_Ulna">
-									<FrameGeometry name="frame_geometry">
-										<socket_frame>
-											..
-										</socket_frame>
-										<input_transform>
-											
-										</input_transform>
-										<scale_factors>
-											0.200000 0.200000 0.200000
-										</scale_factors>
-									</FrameGeometry>
-									<socket_parent>
-										/bodyset/Humerus
-									</socket_parent>
-									<translation>
-										0.000000 0.000000 -0.000000
-									</translation>
-									<orientation>
-										0.000000 0.000000 -0.000000
-									</orientation>
-								</PhysicalOffsetFrame>
-							</frames>
-							<SpatialTransform>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="rotation1">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										Joint_Humerus->Ulna_coord_0
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										0.000000 0.000000 1.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<LinearFunction name="function">
-										<coefficients>
-											1.000000 0.000000
-										</coefficients>
-									</LinearFunction>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="rotation2">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										0.000000 1.000000 0.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="rotation3">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										1.000000 0.000000 0.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="translation1">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										1.000000 0.000000 0.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="translation2">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										0.000000 1.000000 0.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-								<!--3 Axes for rotations are listed first.-->
-								<TransformAxis name="translation3">
-									<!--Names of the coordinates that serve as the independent variables of the transform function.-->
-									<coordinates>
-										
-									</coordinates>
-									<!--Rotation or translation axis for the transform.-->
-									<axis>
-										0.000000 0.000000 1.000000
-									</axis>
-									<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
-									<Constant name="function">
-										<value>
-											0
-										</value>
-									</Constant>
-								</TransformAxis>
-							</SpatialTransform>
-						</CustomJoint>
-					</objects>
-				</JointSet>
-				<ForceSet name="forceset">
-					<objects>
-						<Millard2012EquilibriumMuscle name="M_flexor">
-							<components>
-							</components>
-							<appliesForce>
-								true
-							</appliesForce>
-							<min_control>
-								0.01
-							</min_control>
-							<max_control>
-								1
-							</max_control>
-							<!--The set of points defining the path of the actuator-->
-							<GeometryPath>
-								<!--List of components that this component owns and serializes-->
-								<components>
-								</components>
-								<!--The set of points defining the path-->
-								<PathPointSet>
-									<objects>
-										<PathPoint name="O_M_flexor">
-											<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-											<socket_parent_frame>
-												/bodyset/Humerus
-											</socket_parent_frame>
-											<!--The fixed location of the path point expressed in its parent frame.-->
-											<location>
-												0.000000 0.800000 -0.000000
-											</location>
-										</PathPoint>
-										<PathPoint name="I_M_flexor">
-											<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-											<socket_parent_frame>
-												/bodyset/Ulna
-											</socket_parent_frame>
-											<!--The fixed location of the path point expressed in its parent frame.-->
-											<location>
-												0.000000 0.700000 -0.000000
-											</location>
-										</PathPoint>
-									</objects>
-									<groups>
-									</groups>
-								</PathPointSet>
-								<!--The wrap objects that are associated with this path-->
-								<PathWrapSet>
-									<objects>
-										<PathWrap name="Ell1_M_flexor">
-											<wrap_object>
-												Ell1_M_flexor
-											</wrap_object>
-										</PathWrap>
-										<PathWrap name="Ell2_M_flexor">
-											<wrap_object>
-												Ell2_M_flexor
-											</wrap_object>
-										</PathWrap>
-									</objects>
-									<groups>
-									</groups>
-								</PathWrapSet>
-								<!--Default appearance attributes for this GeometryPath-->
-								<Appearance>
-									<!--Flag indicating whether the associated Geometry is visible or hidden-->
-									<visible>
-										true
-									</visible>
-									<!--The opacity used to display the geometry between 0:transparent, 1:opaque-->
-									<opacity>
-										1.000000
-									</opacity>
-									<!--The color, (red,green,blue), [0,1], used to display the geometry.-->
-									<color>
-										1.000000 0.000000 0.000000
-									</color>
-									<!--Visuals applied to surfaces associated with this Appearance.-->
-									<SurfaceProperties>
-										<!--The representation (1:Points, 2:Wire, 3:Shaded) used to display the object.-->
-										<representation>
-											3
-										</representation>
-									</SurfaceProperties>
-								</Appearance>
-							</GeometryPath>
-							<!--The maximum force this actuator can produce-->
-							<optimal_force>
-								1
-							</optimal_force>
-							<!--Maximum isometric force that the fibers can generate.-->
-							<max_isometric_force>
-								0.100000
-							</max_isometric_force>
-							<!--Optimal length of the muscle fibers-->
-							<optimal_fiber_length>
-								0.200000
-							</optimal_fiber_length>
-							<!--Resting length of the tendon-->
-							<tendon_slack_length>
-								0.300000
-							</tendon_slack_length>
-							<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
-							<pennation_angle_at_optimal>
-								0
-							</pennation_angle_at_optimal>
-							<!--Maximuam contraction velocity of the fibers, in optimal fiberlenghts/second-->
-							<max_contraction_velocity>
-								10
-							</max_contraction_velocity>
-							<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-							<ignore_tendon_compliance>
-								false
-							</ignore_tendon_compliance>
-							<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
-							<ignore_activation_dynamics>
-								false
-							</ignore_activation_dynamics>
-							<!--The linear damping of the fiber.-->
-							<fiber_damping>
-								0.10000000000000001
-							</fiber_damping>
-							<!--Assumed initial activation level if none is assigned.-->
-							<default_activation>
-								0.050000000000000003
-							</default_activation>
-							<!--Assumed initial fiber length if none is assigned.-->
-							<default_fiber_length>
-								0.10000000000000001
-							</default_fiber_length>
-							<!--Activation time constant (in seconds).-->
-							<activation_time_constant>
-								0.01
-							</activation_time_constant>
-							<!--Deactivation time constant (in seconds)-->
-							<deactivation_time_constant>
-								0.040000000000000001
-							</deactivation_time_constant>
-							<!--Activation lower bound-->
-							<minimum_activation>
-								0.01
-							</minimum_activation>
-							<!--Maximum pennation angle (in radians).-->
-							<maximum_pennation_angle>
-								1.4706289056333368
-							</maximum_pennation_angle>
-							<!--active force length curve-->
-							<ActiveForceLengthCurve name="ActiveForceLengthCurve">
-								<!--Normalized fiber length where the steep ascending limb starts-->
-								<min_norm_active_fiber_length>
-									0.4440999999999999999
-								</min_norm_active_fiber_length>
-								<!--Normalized fiber length where the steep ascending limb transitions to the shallow ascending limb-->
-								<transition_norm_fiber_length>
-									0.72999999999999998
-								</transition_norm_fiber_length>
-								<!--Normalized fiber length where the descending limb ends-->
-								<max_norm_active_fiber_length>
-									1.8123
-								</max_norm_active_fiber_length>
-								<!--Slope of the shallow ascending limb-->
-								<shallow_ascending_slope>
-									0.86160000000000003
-								</shallow_ascending_slope>
-								<!--Minimum value of the active-force-length curve-->
-								<minimum_value>
-									0.10000000000000001
-								</minimum_value>
-							</ActiveForceLengthCurve>
-							<!--force velocity curve-->
-							<ForceVelocityCurve name="ForceVelocityCurve">
-								<!--Curve slope at the macimum normalized concentric (shortening) velocity (normalized velocity of -1)-->
-								<concentric_slope_at_vmax>
-									0
-								</concentric_slope_at_vmax>
-								<!--Curve slope just before reaching concentric_slope_at_vmax-->
-								<concentric_slope_near_vmax>
-									0.25
-								</concentric_slope_near_vmax>
-								<!--Curve slope at isometric (normalized velocity of 0)-->
-								<isometric_slope>
-									5
-								</isometric_slope>
-								<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
-								<eccentric_slope_at_vmax>
-									0
-								</eccentric_slope_at_vmax>
-								<!--Curve slope just before reaching eccentric_slope_at_vmax-->
-								<eccentric_slope_near_vmax>
-									0.14999999999999999
-								</eccentric_slope_near_vmax>
-								<!--Curve value at the maximum normalized eccentric contraction velocity-->
-								<max_eccentric_velocity_force_multiplier>
-									1.3999999999999999
-								</max_eccentric_velocity_force_multiplier>
-								<!--Concentric curve shape, from linear(0) to maximal curve(1)-->
-								<concentric_curviness>
-									0.59999999999999998
-								</concentric_curviness>
-								<!--Eccentric curve shape, from linear(0) to maximal curve(1)-->
-								<eccentric_curviness>
-									0.90000000000000002
-								</eccentric_curviness>
-							</ForceVelocityCurve>
-							<!--fiber force length curve-->
-							<FiberForceLengthCurve name="FiberForceLengthCurve">
-								<!--Fiber strain at zero force-->
-								<strain_at_zero_force>
-									0
-								</strain_at_zero_force>
-								<!--Fiber strain at a tension of 1 normalized force-->
-								<strain_at_one_norm_force>
-									0.69999999999999996
-								</strain_at_one_norm_force>
-								<!--Fiber stiffness at the end of the low-force region-->
-								<stiffness_at_low_force>
-								</stiffness_at_low_force>
-								<!--Fiber stiffness at a tension of 1 normalized force-->
-								<stiffness_at_one_norm_force>
-								</stiffness_at_one_norm_force>
-								<!--fiber curve bend, from linear (0) to maximum bend (1)-->
-								<curviness>
-								</curviness>
-							</FiberForceLengthCurve>
-							<!--Tendon force length curve-->
-							<TendonForceLengthCurve name="TendonForceLengthCurve">
-								<!--Tendon strain at a tension of 1 normalized force-->
-								<strain_at_one_norm_force>
-									0.0490000000000000002
-								</strain_at_one_norm_force>
-								<!--Tendon stiffness at a tension of 1 normalized force-->
-								<stiffness_at_one_norm_force>
-								</stiffness_at_one_norm_force>
-								<!--Normalized force developed at the end of the toe region-->
-								<norm_force_at_toe_end>
-								</norm_force_at_toe_end>
-								<!--Tendon curve bend, from linear (0) to maximum bend(1)-->
-								<curviness>
-								</curviness>
-							</TendonForceLengthCurve>
-						</Millard2012EquilibriumMuscle>
-					</objects>
-				</ForceSet>
-				<!--Markers in the model.-->
-				<MarkerSet name="markerset">
-					<objects>
-					</objects>
-					<groups>
-					</groups>
-				</MarkerSet>
 			</objects>
 		</BodySet>
+		<JointSet name="jointset">
+			<objects>
+				<CustomJoint name="Joint_world->Humerus">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
+					<socket_parent_frame>
+						world_Joint_Humerus
+					</socket_parent_frame>
+					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
+					<socket_child_frame>
+						Humerus_Joint_world
+					</socket_child_frame>
+					<coordinates>
+						<Coordinate name="Joint_world->Humerus_coord_0">
+							<default_value>
+								-0.000000
+							</default_value>
+							<default_speed_value>
+								0.000000
+							</default_speed_value>
+						</Coordinate>
+					</coordinates>
+					<frames>
+						<PhysicalOffsetFrame name="Humerus_Joint_world">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>
+									..
+								</socket_frame>
+								<input_transform>
+									
+								</input_transform>
+								<scale_factors>
+									0.200000 0.200000 0.200000
+								</scale_factors>
+							</FrameGeometry>
+							<socket_parent>
+								/bodyset/Humerus
+							</socket_parent>
+							<translation>
+								0.000000 1.000000 -0.000000
+							</translation>
+							<orientation>
+								0.000000 0.000000 -0.000000
+							</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="world_Joint_Humerus">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>
+									..
+								</socket_frame>
+								<input_transform>
+									
+								</input_transform>
+								<scale_factors>
+									0.200000 0.200000 0.200000
+								</scale_factors>
+							</FrameGeometry>
+							<socket_parent>
+								/ground
+							</socket_parent>
+							<translation>
+								0.000000 0.000000 -0.000000
+							</translation>
+							<orientation>
+								0.000000 0.000000 -0.000000
+							</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+					<SpatialTransform>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="rotation1">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								Joint_world->Humerus_coord_0
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								0.000000 0.000000 1.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<LinearFunction name="function">
+								<coefficients>
+									1.000000 0.000000
+								</coefficients>
+							</LinearFunction>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="rotation2">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								0.000000 1.000000 0.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="rotation3">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								1.000000 0.000000 0.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="translation1">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								1.000000 0.000000 0.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="translation2">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								0.000000 1.000000 0.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="translation3">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								0.000000 0.000000 1.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+					</SpatialTransform>
+				</CustomJoint>
+				<CustomJoint name="Joint_Humerus->Ulna">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
+					<socket_parent_frame>
+						Humerus_Joint_Ulna
+					</socket_parent_frame>
+					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
+					<socket_child_frame>
+						Ulna_Joint_Humerus
+					</socket_child_frame>
+					<coordinates>
+						<Coordinate name="Joint_Humerus->Ulna_coord_0">
+							<default_value>
+								-0.000000
+							</default_value>
+							<default_speed_value>
+								0.000000
+							</default_speed_value>
+						</Coordinate>
+					</coordinates>
+					<frames>
+						<PhysicalOffsetFrame name="Ulna_Joint_Humerus">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>
+									..
+								</socket_frame>
+								<input_transform>
+									
+								</input_transform>
+								<scale_factors>
+									0.200000 0.200000 0.200000
+								</scale_factors>
+							</FrameGeometry>
+							<socket_parent>
+								/bodyset/Ulna
+							</socket_parent>
+							<translation>
+								0.000000 1.000000 -0.000000
+							</translation>
+							<orientation>
+								0.000000 0.000000 -0.000000
+							</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="Humerus_Joint_Ulna">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>
+									..
+								</socket_frame>
+								<input_transform>
+									
+								</input_transform>
+								<scale_factors>
+									0.200000 0.200000 0.200000
+								</scale_factors>
+							</FrameGeometry>
+							<socket_parent>
+								/bodyset/Humerus
+							</socket_parent>
+							<translation>
+								0.000000 0.000000 -0.000000
+							</translation>
+							<orientation>
+								0.000000 0.000000 -0.000000
+							</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+					<SpatialTransform>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="rotation1">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								Joint_Humerus->Ulna_coord_0
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								0.000000 0.000000 1.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<LinearFunction name="function">
+								<coefficients>
+									1.000000 0.000000
+								</coefficients>
+							</LinearFunction>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="rotation2">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								0.000000 1.000000 0.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="rotation3">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								1.000000 0.000000 0.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="translation1">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								1.000000 0.000000 0.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="translation2">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								0.000000 1.000000 0.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+						<!--3 Axes for rotations are listed first.-->
+						<TransformAxis name="translation3">
+							<!--Names of the coordinates that serve as the independent variables of the transform function.-->
+							<coordinates>
+								
+							</coordinates>
+							<!--Rotation or translation axis for the transform.-->
+							<axis>
+								0.000000 0.000000 1.000000
+							</axis>
+							<!--Transform function of the generalized coordinates used to represent the amount of displacement along a specified axis.-->
+							<Constant name="function">
+								<value>
+									0
+								</value>
+							</Constant>
+						</TransformAxis>
+					</SpatialTransform>
+				</CustomJoint>
+			</objects>
+		</JointSet>
+		<ForceSet name="forceset">
+			<objects>
+				<Millard2012EquilibriumMuscle name="M_flexor">
+					<components>
+					</components>
+					<!--The set of points defining the path of the actuator-->
+					<GeometryPath>
+						<!--List of components that this component owns and serializes-->
+						<components>
+						</components>
+						<!--The set of points defining the path-->
+						<PathPointSet>
+							<objects>
+								<PathPoint name="O_M_flexor">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>
+										/bodyset/Humerus
+									</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>
+										0.000000 0.800000 -0.000000
+									</location>
+								</PathPoint>
+								<PathPoint name="I_M_flexor">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>
+										/bodyset/Ulna
+									</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>
+										0.000000 0.700000 -0.000000
+									</location>
+								</PathPoint>
+							</objects>
+							<groups>
+							</groups>
+						</PathPointSet>
+						<!--The wrap objects that are associated with this path-->
+						<PathWrapSet>
+							<objects>
+								<PathWrap name="Ell1_M_flexor">
+									<wrap_object>
+										Ell1_M_flexor
+									</wrap_object>
+								</PathWrap>
+								<PathWrap name="Ell2_M_flexor">
+									<wrap_object>
+										Ell2_M_flexor
+									</wrap_object>
+								</PathWrap>
+							</objects>
+							<groups>
+							</groups>
+						</PathWrapSet>
+					</GeometryPath>
+					<!--Maximum isometric force that the fibers can generate.-->
+					<max_isometric_force>
+						0.100000
+					</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>
+						0.200000
+					</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>
+						0.300000
+					</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>
+						0
+					</pennation_angle_at_optimal>
+				</Millard2012EquilibriumMuscle>
+			</objects>
+		</ForceSet>
+		<!--Markers in the model.-->
+		<MarkerSet name="markerset">
+			<objects>
+			</objects>
+			<groups>
+			</groups>
+		</MarkerSet>
+	</Model>
+</OpenSimDocument>
