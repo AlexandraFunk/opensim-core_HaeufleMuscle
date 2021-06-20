@@ -5,6 +5,7 @@
  * -------------------------------------------------------------------------- *
 */
 #include "osimPluginDLL.h"
+#include <OpenSim/Actuators/osimActuatorsDLL.h>
 #include <OpenSim/Simulation/Model/ModelComponent.h>
 
 namespace OpenSim {

@@ -23,6 +23,7 @@
  * limitations under the License.                                             *
  * -------------------------------------------------------------------------- */
 #include "osimPluginDLL.h"
+#include <OpenSim/Actuators/osimActuatorsDLL.h>
 #include <simbody/internal/common.h>
 
 // The parent class, Muscle.h, provides
@@ -41,10 +42,10 @@
 #include "RockenfellerFirstOrderActivationDynamicModel.h"
 
 #ifdef SWIG
-    #ifdef OSIMACTUATORS_API
-        #undef OSIMACTUATORS_API
-        #define OSIMACTUATORS_API
-    #endif
+#    ifdef OSIMACTUATORS_API
+#        undef OSIMACTUATORS_API
+#        define OSIMACTUATORS_API
+#    endif
 #endif
 
 namespace OpenSim {

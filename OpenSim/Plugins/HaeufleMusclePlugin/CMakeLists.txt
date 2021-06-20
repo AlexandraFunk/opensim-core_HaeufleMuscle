@@ -8,7 +8,7 @@ file(GLOB INCLUDE_FILES *.h)
 set(OPENSIM_INSTALL_DIR $ENV{OPENSIM_HOME}
     CACHE PATH "Top-level directory of OpenSim install")
 
-set(PLUGIN_NAME "HaeufleMusclePlugin" CACHE STRING "Name of shared library to create")
+set(PLUGIN_NAME "haeufleMusclePlugin" CACHE STRING "Name of shared library to create")
 
 # OpenSim uses C++11 language features.
 set(CMAKE_CXX_STANDARD 11)

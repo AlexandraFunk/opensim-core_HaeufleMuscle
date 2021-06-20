@@ -25,8 +25,8 @@
 #include <OpenSim/Common/Object.h>
 #include "RegisterTypes_osimPlugin.h"
 
-#include "RockenfellerFirstOrderActivationDynamicModel.h"
 #include "Haeufle2014Muscle.h"
+#include "RockenfellerFirstOrderActivationDynamicModel.h"
 
 using namespace OpenSim;
 using namespace std;
