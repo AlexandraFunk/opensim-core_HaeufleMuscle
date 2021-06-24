@@ -107,7 +107,7 @@ int main() {
     model.addComponent(reportTable);
 
     // Add display geometry.
-    /* 
+    
     Ellipsoid bodyGeometry(0.1, 0.5, 0.1);
     bodyGeometry.setColor(Gray);
     // Attach an ellipsoid to a frame located at the center of each body.
@@ -119,7 +119,7 @@ int main() {
         "radiusCenter", *radius, Transform(Vec3(0, 0.5, 0)));
     radius->addComponent(radiusCenter);
     radiusCenter->attachGeometry(bodyGeometry.clone());
-    */
+    
     // Configure the model.
     State& state = model.initSystem();
     // Fix the shoulder at its default angle and begin with the elbow flexed.
@@ -135,6 +135,12 @@ int main() {
 
     // Simulate.
     simulate(model, state, 10.0);
+
+    // To print (serialize) the latest connections of the model, it is
+    // necessary to finalizeConnections() first.
+    model.finalizeConnections();
+    // Save the OpenSim model to a file
+    model.print("simple_biceps_triceps_model_Haeufle.osim");
 
     return 0;
 };
