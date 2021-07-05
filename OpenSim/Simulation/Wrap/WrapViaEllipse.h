@@ -45,19 +45,6 @@ public:
 //==============================================================================
 // PROPERTIES
 //==============================================================================
-
-    /**
-    * Schon in WrapObject enthalten??
-    *
-    *
-    OpenSim_DECLARE_PROPERTY(xyz_ellipse_frame_rotation, SimTK::Vec3,
-            "Body-fixed Euler angle sequence describing the orientation of the "
-            "ellipse reference frame relative to the body reference system.");
-
-    OpenSim_DECLARE_PROPERTY(ellipse_attachment_point, SimTK::Vec3,
-        "Location of the ellipse attachment point.");
-    **/
-
     OpenSim_DECLARE_PROPERTY(semi_axis_length_H, double,
             "Ellipse semi-axis length in z-Direction of the ellipse "
             "reference frame.");
@@ -68,16 +55,16 @@ public:
 //==============================================================================
 // OUTPUTS
 //==============================================================================
-    OpenSim_DECLARE_OUTPUT(angleOnEllipse, double, getAngleOnEllipse,
+    OpenSim_DECLARE_OUTPUT(angle_on_ellipse, double, getAngleOnEllipse,
             SimTK::Stage::Velocity);
 
-    OpenSim_DECLARE_OUTPUT(deflectionPointX, double, getDeflectionPointX,
+    OpenSim_DECLARE_OUTPUT(deflection_point_x, double, getDeflectionPointX,
         SimTK::Stage::Velocity);
     
-    OpenSim_DECLARE_OUTPUT(deflectionPointY, double, getDeflectionPointY,
+    OpenSim_DECLARE_OUTPUT(deflection_point_y, double, getDeflectionPointY,
             SimTK::Stage::Velocity);
     
-    OpenSim_DECLARE_OUTPUT(deflectionPointZ, double, getDeflectionPointZ,
+    OpenSim_DECLARE_OUTPUT(deflection_point_z, double, getDeflectionPointZ,
             SimTK::Stage::Velocity);
 
 public:
@@ -98,14 +85,28 @@ public:
 
     std::string getDimensionsString() const override;
 
+    /** @returns The ellipses semi axis length H */
     const double getSemiAxisLengthH() const;
+
+    /** @param aSemiAxisLengthH The semi axis length H of the ellipse */
     void setSemiAxisLengthH(double aSemiAxisLengthH);
+
+    /** @returns The ellipses semi axis length G */
     const double getSemiAxisLengthG() const;
+
+    /** @param aSemiAxisLengthG The semi axis length G of the ellipse */
     void setSemiAxisLengthG(double aSemiAxisLengthG);
 
+    /** @returns The angle on the ellipse */
     double getAngleOnEllipse(const SimTK::State& s) const;
+
+    /** @returns The deflection points x variable */
     double getDeflectionPointX(const SimTK::State& s) const;
+
+    /** @returns The deflection points y variable */
     double getDeflectionPointY(const SimTK::State& s) const;
+
+    /** @returns The deflection points z variable*/
     double getDeflectionPointZ(const SimTK::State& s) const;
 
 protected:
@@ -128,6 +129,9 @@ protected:
             SimTK::Vec3& aPoint2, const PathWrap& aPathWrap,
             WrapResult& aWrapResult, bool& aFlag) const override;
 
+    /**
+    * Checks if the path goes through the ellipse with centre point P
+    */
     double pathLengthTroughEllipse(double s01, SimTK::Vec3 P) const;
 
     /// Implement generateDecorations to draw geometry in visualizer
