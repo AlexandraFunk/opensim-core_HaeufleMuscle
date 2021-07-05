@@ -1,7 +1,7 @@
-#ifndef OPENSIM_Haeufle2014Muscle_h__
-#define OPENSIM_Haeufle2014Muscle_h__
+#ifndef OPENSIM_HAEUFLE2014MUSCLE_H_
+#define OPENSIM_HAEUFLE2014MUSCLE_H_
 /* -------------------------------------------------------------------------- *
- *                  OpenSim:  Haeufle2014Muscle.h                  *
+ *                  OpenSim:  Haeufle2014Muscle.h                             *
  * -------------------------------------------------------------------------- *
  * The OpenSim API is a toolkit for musculoskeletal modeling and simulation.  *
  * See http://opensim.stanford.edu and the NOTICE file for more information.  *
@@ -38,8 +38,6 @@
 // Sub-models used by this muscle model
 #include <OpenSim/Actuators/MuscleFixedWidthPennationModel.h>
 
-
-// TODO check if the included curve headers need to be transformed to modelcomponents
 // like the activation dynamic of the fixedwidth pennation models are
 #include <OpenSim/Actuators/RockenfellerFirstOrderActivationDynamicModel.h>
 
@@ -57,9 +55,19 @@ namespace OpenSim {
 //==============================================================================
 /**
 This class implements a configurable muscle model, as described in
-Haufle et al.\ (2013). 
+Haufle et al.\ (2013). Abstract
 
-TODO: Add more description
+Hill-type muscle models are commonly used in biomechanical simulations to
+predict passive and active muscle forces. Here, a model is presented which
+consists of four elements: a contractile element with force-length and
+force-velocity relations for concentric and eccentric contractions, a parallel
+elastic element, a series elastic element, and a serial damping element. With
+this, it combines previously published effects relevant for muscular
+contraction, i.e. serial damping and eccentric force-velocity relation. The
+model is exemplarily applied to arm movements. The more realistic representation
+of the eccentric force-velocity relation results in human-like elbow-joint
+flexion.
+
 
 <B>Reference</B>
 
@@ -76,8 +84,6 @@ public:
 //==============================================================================
 // PROPERTIES
 //==============================================================================
-    // TODO check which other properties are necessary?
-    // which of these properties are essential to describe a muscle and are needed for calculations?
     OpenSim_DECLARE_PROPERTY(default_calcium_concentration, double,
             "Assumed initial activation level if none is assigned.");
     OpenSim_DECLARE_PROPERTY(default_fiber_length, double,
@@ -209,8 +215,8 @@ public:
     in Haeufle et al */
     double getFibreMaxEccentricForceRelToFmax() const;
 
-    /** @returns The fibreEccentricSlopefactor of the curve which is called Se in
-    Haeufle et al */
+    /** @returns The fibreEccentricSlopefactor of the curve which is called Se 
+     * in Haeufle et al */
     double getFibreEccentricSlopefactor() const;
 
     /** @returns The parallel elastic elements zero length (L_PEE,0) */
@@ -250,7 +256,7 @@ public:
 
     /** @returns The RockenfellerFirstOrderActivationDynamicModel owned by this
     model. */
-    const RockenfellerFirstOrderActivationDynamicModel&
+    const RockenfellerFirstOrderActivationDynamicModel& 
     getActivationModel() const;
 
     /** @returns The current calcium concentration derivative value */
@@ -259,24 +265,30 @@ public:
     /** @returns The current calcium concentration */
     double getCalciumConcentration(const SimTK::State& s) const;
 
+    /** @returns The minimum fiber length **/
     double getMinimumFiberLength() const;
 
+    /** @returns The minimum fiber length along the tendon **/
     double getMinimumFiberLengthAlongTendon() const;
 
+    /** @returns The parallel elastic elements force **/
     double getFpee(const SimTK::State& s) const;
 
+    /** @returns The parallel damping elements force **/
     double getFpde(const SimTK::State& s) const;
 
+    /** @returns The serial elastic elements force **/
     double getFsee(const SimTK::State& s) const;
 
+    /** @returns The serial damping elements force **/
     double getFsde(const SimTK::State& s) const;
 
 //==============================================================================
 // SET METHODS
 //==============================================================================
 
-    /** @param calciumConcentration The default concentration level that is used to
-    initialize the muscle. */
+    /** @param calciumConcentration The default concentration level that is used 
+     * to initialize the muscle. */
     void setDefaultCalciumConcentration(double calciumConcentration);
 
     /** @param fiberLength The default fiber length that is used to initialize
@@ -303,6 +315,17 @@ public:
             double fibreExponentAscendingActiveForceLength,
             double fibreWidthAscendingActiveForceLength);
 
+    /** 
+    @param aFibreActiveForceVelocityArel0
+        The parameter for the concentric contraction dynamics of the CE Arel0
+    @param aFibreActiveForceVelocityBrel0
+        The parameter for the concentric contraction dynamics of the CE Brel0
+    @param aFibreMaxEccentricForceRelToFmax
+        The force value at a maximal eccentric extension as defined by van 
+        Soest & Bobbert, 1993
+    @param aFibreEccentricSlopefactor
+        The corresponding slope factor as defined by van Soest & Bobbert, 1993
+    */
     void setFiberVelocityParameters(double aFibreActiveForceVelocityArel0,
             double aFibreActiveForceVelocityBrel0,
             double aFibreMaxEccentricForceRelToFmax, double aFibreEccentricSlopefactor);
@@ -365,7 +388,6 @@ public:
 //==============================================================================
 // MUSCLE.H INTERFACE
 //==============================================================================
-    /** DEPRECATED: only for backward compatibility */
     /**  This is neccessary  since it is implemented in the muscle.h interface
      * as virtual but sets here the normalized calcium concentration and not the
      * activation */
@@ -444,13 +466,6 @@ protected:
      * 'FiberLength'. */
     double calcFpee(double fiberLength) const;
 
-    // DEPRECATED
-    /**
-    @returns The constanst K for the parallel elastic element which is
-        neded during the calceValue routine
-    */
-    // double calcKPEE() const;
-
     /** Calculates the integral of the parallel elastic force at 
      * a fiber length of 'FiberLength'. */
     double calcIntegralFpee(double fiberLength) const;
@@ -473,15 +488,27 @@ protected:
      *  length velocity and the parallelElasticForce (Fpee) */
     double calcFpde(double lengthVelocity, double parallelElasticForce) const;
 
+    /** Helper function to calculate C2 dashed which is needed during the 
+     * calculation of the fiber velocity 
+     */
     double calcC2dash(double cosPenAngle, double activation, double Fpee,
             double Brel, double Arel) const;
+
+    /** Helper function to calculate C1 dashed which is needed during the 
+     * calculation of the fiber velocity 
+     */
     double calcC1dash(double ldotMTC, double cosPenAngle, double activation,
             double Fisom, double Fpee, double Fsee, double Arel,
             double Brel) const;
+
+    /** Helper function to calculate C0 dashed which is needed during the 
+     * calculation of the fiber velocity 
+     */
     double calcC0dash(double ldotMTC, double cosPenAngle,
             double activation, double Fisom, double Fpee, double Fsee) const;
 
-    /** Calculate the maximum contraction velocity at the beginning of the simulation.*/
+    /** Calculate the maximum contraction velocity at the beginning of the 
+     * simulation.*/
     double calcVmax() const;
 
     //--------------------------------------------------------------------------
@@ -568,8 +595,9 @@ private:
     // length.
     double clampFiberLength(double lce) const;
 
-    // The tendon Damping Force which is not included in the Muscle.h MuscleDynamicsInfo struct
-    // but is necessary for the Haeufle2014Muscle modell.
+    // The tendon Damping Force which is not included in the Muscle.h 
+    // MuscleDynamicsInfo struct but is necessary for the Haeufle2014Muscle 
+    // modell.
     double m_tendonDampingForce;
 
     double m_minimumFiberLength;
@@ -583,4 +611,4 @@ private:
 
 } //end of namespace OpenSim
 
-#endif // OPENSIM_Haeufle2014Muscle_h__
+#endif // OPENSIM_HAEUFLE2014MUSCLE_H_
