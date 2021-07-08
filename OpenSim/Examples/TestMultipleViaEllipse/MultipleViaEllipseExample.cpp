@@ -49,8 +49,8 @@ int main() {
             *humerus, Vec3(0), Vec3(0), *radius, Vec3(0, 1, 0), Vec3(0));
 
     // Add a muscle that flexes the elbow.
-    Millard2012EquilibriumMuscle* biceps = new
-        Millard2012EquilibriumMuscle("biceps", 200, 0.6, 0.55, 0);
+    Haeufle2014Muscle* biceps =
+            new Haeufle2014Muscle("biceps", 200, 0.6, 0.55, 0);
     biceps->addNewPathPoint("origin",    *humerus, Vec3(0, 0.8, 0));
     biceps->addNewPathPoint("insertion", *radius,  Vec3(0, 0.7, 0));
 
@@ -80,8 +80,8 @@ int main() {
         "elbow_angle");
     reporter->addToReport(biceps->getOutput("tendon_length"));
     reporter->addToReport(biceps->getOutput("fiber_length"));
-    reporter->addToReport(firstEllipse->getOutput("angleOnEllipse"));
-    reporter->addToReport(secondEllipse->getOutput("angleOnEllipse"));
+    reporter->addToReport(firstEllipse->getOutput("angle_on_ellipse"));
+    reporter->addToReport(secondEllipse->getOutput("angle_on_ellipse"));
 
     /*
     std::cout << "Ellipse Outputs:" << std::endl;
@@ -121,8 +121,20 @@ int main() {
     viz.setBackgroundType(viz.SolidColor);
     viz.setBackgroundColor(White);
 
-    // Simulate.
-    simulate(model, state, 10.0);
+    double initialTime = 0.0;
+    double finalTime = 10.0;
+    Manager manager(model);
+    state.setTime(initialTime);
+    manager.initialize(state);
+    std::cout << "\nIntegrating from " << initialTime << " to " << finalTime
+              << std::endl;
+    manager.integrate(finalTime);
+
+    // To print (serialize) the latest connections of the model, it is
+    // necessary to finalizeConnections() first.
+    model.finalizeConnections();
+    // Save the OpenSim model to a file
+    model.print("MultipleViaEllipses.osim");
 
     return 0;
 };
