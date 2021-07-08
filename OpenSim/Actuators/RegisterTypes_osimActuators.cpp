@@ -111,6 +111,9 @@ OSIMACTUATORS_API void RegisterTypes_osimActuators()
     Object::RegisterType(MuscleFirstOrderActivationDynamicModel());
     Object::RegisterType(MuscleFixedWidthPennationModel());
 
+    Object::RegisterType(Haeufle2014Muscle());
+    Object::RegisterType(RockenfellerFirstOrderActivationDynamicModel());
+
     Object::RegisterType(Millard2012EquilibriumMuscle());
     Object::RegisterType(Millard2012AccelerationMuscle());        
     Object::RegisterType(DeGrooteFregly2016Muscle());
