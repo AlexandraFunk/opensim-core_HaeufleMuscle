@@ -55,6 +55,9 @@
 
 #include "MuscleFixedWidthPennationModel.h"
 
+#include "RockenfellerFirstOrderActivationDynamicModel.h"
+#include "Haeufle2014Muscle.h"
+
 #include "Millard2012EquilibriumMuscle.h"
 #include "Millard2012AccelerationMuscle.h"
 #include "DeGrooteFregly2016Muscle.h"
@@ -107,6 +110,9 @@ OSIMACTUATORS_API void RegisterTypes_osimActuators()
 
     Object::RegisterType(MuscleFirstOrderActivationDynamicModel());
     Object::RegisterType(MuscleFixedWidthPennationModel());
+
+    Object::RegisterType(Haeufle2014Muscle());
+    Object::RegisterType(RockenfellerFirstOrderActivationDynamicModel());
 
     Object::RegisterType(Millard2012EquilibriumMuscle());
     Object::RegisterType(Millard2012AccelerationMuscle());        

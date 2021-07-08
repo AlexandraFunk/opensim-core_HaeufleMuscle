@@ -341,6 +341,7 @@ private:
     friend class Thelen2003Muscle;
     friend class Millard2012EquilibriumMuscle;
     friend class Millard2012AccelerationMuscle;
+    friend class Haeufle2014Muscle;
 };
 
 }

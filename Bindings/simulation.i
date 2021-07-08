@@ -324,6 +324,8 @@ OpenSim::ModelComponentSet<OpenSim::Controller>;
 %include <OpenSim/Actuators/MuscleFixedWidthPennationModel.h>
 %include <OpenSim/Actuators/Thelen2003Muscle.h>
 %include <OpenSim/Actuators/Millard2012EquilibriumMuscle.h>
+%include <OpenSim/Actuators/RockenfellerFirstOrderActivationDynamicModel.h>
+%include <OpenSim/Actuators/Haeufle2014Muscle.h>
 
 
 // Compensate for insufficient C++11 support in SWIG
