@@ -155,8 +155,10 @@
 #include <OpenSim/Actuators/osimActuatorsDLL.h>
 #include <OpenSim/Actuators/MuscleFixedWidthPennationModel.h>
 #include <OpenSim/Actuators/MuscleFirstOrderActivationDynamicModel.h>
+#include <OpenSim/Actuators/MuscleFirstOrderActivationDynamicModel2.h>
 #include <OpenSim/Actuators/Thelen2003Muscle.h>
 #include <OpenSim/Actuators/Millard2012EquilibriumMuscle.h>
+#include <OpenSim/Actuators/Millard2012Muscle.h>
 #include <OpenSim/Actuators/FiberCompressiveForceCosPennationCurve.h>
 #include <OpenSim/Actuators/FiberCompressiveForceLengthCurve.h>
 #include <OpenSim/Actuators/ActiveForceLengthCurve.h>

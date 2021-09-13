@@ -340,6 +340,7 @@ private:
     // These classes are friends because they call clampFiberLength().
     friend class Thelen2003Muscle;
     friend class Millard2012EquilibriumMuscle;
+    friend class Millard2012Muscle;
     friend class Millard2012AccelerationMuscle;
 };
 

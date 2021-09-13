@@ -56,6 +56,7 @@
 #include "MuscleFixedWidthPennationModel.h"
 
 #include "Millard2012EquilibriumMuscle.h"
+#include "Millard2012Muscle.h"
 #include "Millard2012AccelerationMuscle.h"
 #include "DeGrooteFregly2016Muscle.h"
 
@@ -109,6 +110,7 @@ OSIMACTUATORS_API void RegisterTypes_osimActuators()
     Object::RegisterType(MuscleFixedWidthPennationModel());
 
     Object::RegisterType(Millard2012EquilibriumMuscle());
+    Object::RegisterType(Millard2012Muscle());
     Object::RegisterType(Millard2012AccelerationMuscle());        
     Object::RegisterType(DeGrooteFregly2016Muscle());
 

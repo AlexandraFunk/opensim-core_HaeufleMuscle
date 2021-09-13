@@ -38,6 +38,7 @@
 #include "Thelen2003Muscle.h"
 #include "RigidTendonMuscle.h"
 #include "Millard2012EquilibriumMuscle.h"
+#include "Millard2012Muscle.h"
 #include "Millard2012AccelerationMuscle.h"
 #include "DeGrooteFregly2016Muscle.h"
 
