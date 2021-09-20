@@ -84,6 +84,8 @@ void Haeufle2014Muscle::constructProperties() {
     constructProperty_activation_optimal_calcium_concentration_fraction(
             5.27 * 1.37); // roh_0 * gamma_C
     constructProperty_activation_minimum(0.001); // Hatze constant
+
+    setMinControl(0.01);
 }
 
 void Haeufle2014Muscle::extendFinalizeFromProperties() 
@@ -226,7 +228,7 @@ void Haeufle2014Muscle::extendFinalizeFromProperties()
     setMaxContractionVelocity(vmax);
 
     // what shall be the minimum fiber length from penMdl??
-    m_minimumFiberLength = 0;
+    m_minimumFiberLength = penMdl.getMinimumFiberLength();
 
     const double phi = penMdl.calcPennationAngle(m_minimumFiberLength);
     m_minimumFiberLengthAlongTendon =
@@ -572,6 +574,35 @@ double Haeufle2014Muscle::computeActuation(const SimTK::State& s) const {
     return mdi.tendonForce;
 }
 
+double Haeufle2014Muscle::calcInextensibleTendonActiveFiberForce(
+    SimTK::State& s, double aActivation) const {
+    
+    double inextensibleTendonActiveFiberForce = 0.0;
+    try {
+        double lm = getLength(s);
+        double dlm = getLengtheningSpeed(s);
+        double ltslk = getTendonSlackLength();
+        double dlt = 0.0; // inextensible tendon
+        double lce = getPennationModel().calcFiberLength(lm, ltslk);
+        double phi = getPennationModel().calcPennationAngle(lce);
+        double dlce = getPennationModel().calcFiberVelocity(cos(phi), dlm, dlt);
+
+        if (!SimTK::isNaN(dlce)) {
+            double Fmax = getMaxIsometricForce();
+            double Fce = getMaxIsometricForce() *
+                         calcNormFce(dlce, lce, aActivation);
+            double Fpee = calcFpee(lce);
+            inextensibleTendonActiveFiberForce = Fce + Fpee;
+        }
+    } catch (const std::exception& x) {
+        std::string msg = "Exception caught in: " + getName() +
+                          ":calcInextensibleTendonActiveFiberForce\n" +
+                          x.what();
+        throw OpenSim::Exception(msg);
+    }
+    return inextensibleTendonActiveFiberForce;
+}
+
 void Haeufle2014Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const 
 {
     // Initial activation and fiber length from input State, s.
@@ -581,6 +612,9 @@ void Haeufle2014Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const
 
     // get initial excitation
     double excitation = getExcitation(s);
+
+    // check if excitation is Nan, if yes reset it to 0
+    if (std::isnan(excitation)) { excitation = getActivation(s); }
 
     // Tolerance, in Newtons, of the desired equilibrium
     const double tol = 1e-9;
